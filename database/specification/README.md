@@ -10,7 +10,8 @@ cluster.
   "id": "String",
   "rscid": "String",
   "created": "Date",
-  "username": "String"
+  "username": "String",
+  "password": "encrypt<String>"
 }
 ```
 
