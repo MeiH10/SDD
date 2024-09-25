@@ -57,7 +57,7 @@ cluster.
 }
 ```
 
-## Resource
+## Note
 
 ```json
 {
@@ -74,7 +74,17 @@ cluster.
   "section": "ref<Section>",
   "likes": "set<ref<Account>>",
   "dislikes": "set<ref<Account>>",
-  "flagged": "Boolean"
+}
+```
+
+## Report
+
+```json
+{
+  "id": "String",
+  "type": "'note' | 'comment'",
+  "note": "ref<Note>",
+  "comment": "ref<Comment>"
 }
 ```
 
@@ -86,7 +96,7 @@ cluster.
   "comment": "String",
   "created": "Date",
   "account": "ref<Account>",
-  "resource": "ref<Resource>",
+  "note": "ref<Note>",
   "likes": "set<ref<Account>>",
   "dislikes": "set<ref<Account>>",
   "flagged": "Boolean"
