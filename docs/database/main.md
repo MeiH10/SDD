@@ -11,7 +11,9 @@ cluster.
   "rscid": "String",
   "created": "Date",
   "username": "String",
-  "password": "encrypt<String>"
+  "password": "encrypt<String>",
+  "likes": "set<ref<Resource>>",
+  "dislike": "set<ref<Resource>>"
 }
 ```
 
