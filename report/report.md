@@ -1,4 +1,4 @@
-# API: Data and Reports
+# API: Report
 
 ---
 
