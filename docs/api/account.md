@@ -19,7 +19,8 @@
 - **Success:**
   - HTTP Status: `201 Created`
   - Response Body:
-    ```
+
+    ```json
     {
       "id": 1,
       "username": "john_doe",
@@ -47,7 +48,8 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
       "id": 1,
       "username": "john_doe",
@@ -79,7 +81,8 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
       "message": "Account deleted successfully."
     }

@@ -17,7 +17,8 @@
 - **Success:**
   - HTTP Status: `201 Created`
   - Response Body:
-    ```
+
+    ```json
     {
       "id": 1,
       "message": "Comment created successfully."
@@ -44,7 +45,8 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     [
       {
         "id": 1,
@@ -80,7 +82,8 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
       "id": 1,
       "user_id": 123,
@@ -113,7 +116,8 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
       "message": "Comment updated successfully."
     }
@@ -140,7 +144,8 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
       "message": "Comment deleted successfully."
     }
@@ -168,7 +173,8 @@
 - **Success:**
   - HTTP Status: `201 Created`
   - Response Body:
-    ```
+
+    ```json
     {
       "message": "Comment liked successfully."
     }
@@ -194,7 +200,8 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
       "message": "Comment unliked successfully."
     }
@@ -220,7 +227,8 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
       "message": "Comment reported successfully."
     }

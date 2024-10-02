@@ -16,13 +16,14 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     [
       {
-        id: 1,
-        title: "Note Title",
-        description: "Note Description",
-        created_at: "2023-01-01T00:00:00Z"
+        "id": 1,
+        "title": "Note Title",
+        "description": "Note Description",
+        "created_at": "2023-01-01T00:00:00Z"
       }
     ]
     ```
@@ -47,10 +48,11 @@
 - **Success:**
   - HTTP Status: `201 Created`
   - Response Body:
-    ```
+
+    ```json
     {
-      id: 1,
-      message: "Note created successfully."
+      "id": 1,
+      "message": "Note created successfully."
     }
     ```
 
@@ -74,13 +76,14 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
-      id: 1,
-      title: "Note Title",
-      description: "Note Description",
-      file_url: "http://example.com/note.pdf",
-      created_at: "2023-01-01T00:00:00Z"
+      "id": 1,
+      "title": "Note Title",
+      "description": "Note Description",
+      "file_url": "http://example.com/note.pdf",
+      "created_at": "2023-01-01T00:00:00Z"
     }
     ```
 
@@ -105,9 +108,10 @@
 - **Success:**
   - HTTP Status: `201 Created`
   - Response Body:
-    ```
+
+    ```json
     {
-      message: "Note liked successfully."
+      "message": "Note liked successfully."
     }
     ```
 
@@ -131,9 +135,10 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
-      message: "Note unliked successfully."
+      "message": "Note unliked successfully."
     }
     ```
 
@@ -161,9 +166,10 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
-      message: "Note updated successfully."
+      "message": "Note updated successfully."
     }
     ```
 
@@ -188,9 +194,10 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
-      message: "Note deleted successfully."
+      "message": "Note deleted successfully."
     }
     ```
 
@@ -215,9 +222,10 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     {
-      message: "Note reported successfully."
+      "message": "Note reported successfully."
     }
     ```
 

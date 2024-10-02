@@ -15,6 +15,7 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
+
     ```json
     [
       {
@@ -38,6 +39,7 @@
   - `500 Internal Server Error` - Unexpected server error
 
 ---
+
 ## 2. POST /report/{id}
 
 **Description:** Create a new report for the authenticated user.
@@ -90,6 +92,7 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
+
     ```json
     {
       "message": "Report successfully deleted."

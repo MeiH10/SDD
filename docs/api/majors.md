@@ -11,7 +11,8 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     [
       {
         "major_id": 1,
@@ -42,7 +43,8 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     [
       {
         "class_id": 101,
@@ -75,7 +77,8 @@
 - **Success:**
   - HTTP Status: `200 OK`
   - Response Body:
-    ```
+
+    ```json
     [
       {
         "section_id": 1,
