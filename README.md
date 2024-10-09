@@ -8,3 +8,5 @@ To load the Spring Boot Server, just run:
 cd PuckNotes
 ./mvnw spring-boot:run
 ```
+
+Or, if you have [`task`](https://taskfile.dev/), just run `task server` to boot up the task server.
