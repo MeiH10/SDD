@@ -1,4 +1,4 @@
-package SDD.PuckNotes.Notes;
+package SDD.Server.Notes;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
