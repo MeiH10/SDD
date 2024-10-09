@@ -40,12 +40,23 @@ public class NoteController {
   }
 
   // Endpoint to get a note by ID
+  // Endpoint to get a note by ID or download the file
   @GetMapping("/{id}")
   public ResponseEntity<?> getNoteById(
-      @PathVariable String id) {
+      @PathVariable String id,
+      @RequestParam(required = false) String download) {
     try {
       Note note = noteService.getNote(id);
-      return new ResponseEntity<>(note, HttpStatus.OK);
+      if ("true".equalsIgnoreCase(download)) {
+        // Prepare to download the file
+        byte[] fileData = note.getImage().getData();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + note.getTitle() + "\"");
+        return new ResponseEntity<>(fileData, headers, HttpStatus.OK);
+      } else {
+        // Return note information
+        return new ResponseEntity<>(note, HttpStatus.OK);
+      }
     } catch (NoteNotFoundException e) {
       return new ResponseEntity<>("Note not found with ID: " + id, HttpStatus.NOT_FOUND);
     }
@@ -65,21 +76,6 @@ public class NoteController {
       return new ResponseEntity<>("Error while uploading file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>("Invalid input: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  // Endpoint to download the file associated with a note
-  @GetMapping("/{id}/download")
-  public ResponseEntity<byte[]> downloadFile(
-      @PathVariable String id) {
-    try {
-      Note note = noteService.getNote(id);
-      byte[] fileData = note.getImage().getData();
-      HttpHeaders headers = new HttpHeaders();
-      headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + note.getTitle() + "\"");
-      return new ResponseEntity<>(fileData, headers, HttpStatus.OK);
-    } catch (NoteNotFoundException e) {
-      return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
   }
 }
