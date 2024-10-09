@@ -1,6 +1,7 @@
 package SDD.Server.Notes;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,6 +65,21 @@ public class NoteController {
       return new ResponseEntity<>("Error while uploading file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>("Invalid input: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // Endpoint to download the file associated with a note
+  @GetMapping("/{id}/download")
+  public ResponseEntity<byte[]> downloadFile(
+      @PathVariable String id) {
+    try {
+      Note note = noteService.getNote(id);
+      byte[] fileData = note.getImage().getData();
+      HttpHeaders headers = new HttpHeaders();
+      headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + note.getTitle() + "\"");
+      return new ResponseEntity<>(fileData, headers, HttpStatus.OK);
+    } catch (NoteNotFoundException e) {
+      return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
   }
 }
