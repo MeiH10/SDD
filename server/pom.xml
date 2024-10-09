@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>SDD</groupId>
-	<artifactId>PuckNotes</artifactId>
+	<artifactId>Server</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>PuckNotes</name>
-	<description>PuckNotes Project</description>
+	<name>Server</name>
+	<description>Server Project</description>
 
 	<properties>
 		<java.version>17</java.version>
