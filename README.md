@@ -5,7 +5,7 @@
 To load the Spring Boot Server, just run:
 
 ```sh
-cd PuckNotes
+cd server
 ./mvnw spring-boot:run
 ```
 

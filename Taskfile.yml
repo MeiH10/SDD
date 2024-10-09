@@ -3,5 +3,5 @@ silent: true
 
 tasks:
   server:
-    dir: PuckNotes
+    dir: server
     cmd: ./mvnw spring-boot:run
