@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 public class NoteService {
@@ -24,5 +25,21 @@ public class NoteService {
 
   public Note getNote(String id) {
     return NoteRepo.findById(id).get();
+  }
+
+  public void updateNote(String id, String title, MultipartFile file) throws IOException {
+    Optional<Note> optionalNote = NoteRepo.findById(id);
+    if (optionalNote.isPresent()) {
+      Note note = optionalNote.get();
+      if (title != null) {
+        note.setTitle(title);
+      }
+      if (file != null && !file.isEmpty()) {
+        note.setImage(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
+      }
+      NoteRepo.save(note);
+    } else {
+      throw new NoteNotFoundException(id);
+    }
   }
 }

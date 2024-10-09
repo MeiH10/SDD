@@ -17,7 +17,8 @@ public class NoteController {
 
   // Endpoint to add a new note
   @PostMapping("")
-  public ResponseEntity<String> addNote(@RequestParam("title") String title,
+  public ResponseEntity<String> addNote(
+      @RequestParam("title") String title,
       @RequestParam("file") MultipartFile file) {
     try {
       String noteId = noteService.addNote(title, file);
@@ -31,12 +32,30 @@ public class NoteController {
 
   // Endpoint to get a note by ID
   @GetMapping("/{id}")
-  public ResponseEntity<?> getNoteById(@PathVariable String id) {
+  public ResponseEntity<?> getNoteById(
+      @PathVariable String id) {
     try {
       Note note = noteService.getNote(id);
       return new ResponseEntity<>(note, HttpStatus.OK);
     } catch (NoteNotFoundException e) {
       return new ResponseEntity<>("Note not found with ID: " + id, HttpStatus.NOT_FOUND);
+    }
+  }
+
+  // Endpoint to update an existing note
+  @PutMapping("/{id}")
+  public ResponseEntity<String> updateNote(@PathVariable String id,
+      @RequestParam(required = false) String title,
+      @RequestParam(required = false) MultipartFile file) {
+    try {
+      noteService.updateNote(id, title, file);
+      return new ResponseEntity<>("Note updated successfully.", HttpStatus.OK);
+    } catch (NoteNotFoundException e) {
+      return new ResponseEntity<>("Note not found with ID: " + id, HttpStatus.NOT_FOUND);
+    } catch (IOException e) {
+      return new ResponseEntity<>("Error while uploading file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>("Invalid input: " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
   }
 }
