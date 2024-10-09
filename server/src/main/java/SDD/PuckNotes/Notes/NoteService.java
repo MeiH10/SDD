@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class NoteService {
@@ -41,5 +43,10 @@ public class NoteService {
     } else {
       throw new NoteNotFoundException(id);
     }
+  }
+
+  // Method to get all note IDs
+  public List<String> getAllNoteIds() {
+    return NoteRepo.findAll().stream().map(Note::getId).collect(Collectors.toList());
   }
 }

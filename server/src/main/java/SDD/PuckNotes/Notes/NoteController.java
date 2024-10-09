@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/note")
@@ -28,6 +29,13 @@ public class NoteController {
     } catch (IllegalArgumentException e) {
       return new ResponseEntity<>("Invalid input: " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+  }
+
+  // Endpoint to get all note IDs
+  @GetMapping("")
+  public ResponseEntity<List<String>> getAllNoteIds() {
+    List<String> noteIds = noteService.getAllNoteIds();
+    return new ResponseEntity<>(noteIds, HttpStatus.OK);
   }
 
   // Endpoint to get a note by ID
