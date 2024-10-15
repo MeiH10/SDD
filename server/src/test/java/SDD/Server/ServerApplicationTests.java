@@ -1,10 +1,10 @@
-package SDD.PuckNotes;
+package SDD.Server;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class PuckNotesApplicationTests {
+class ServerApplicationTests {
 
 	@Test
 	void contextLoads() {

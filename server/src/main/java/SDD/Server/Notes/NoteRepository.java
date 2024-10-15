@@ -1,4 +1,4 @@
-package SDD.PuckNotes.Notes;
+package SDD.Server.Notes;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
