@@ -1,0 +1,30 @@
+name: pucknotes
+services:
+  frontend:
+        container_name: pucknotes-frontend
+        build: client
+        restart: always
+        ports:
+            - 8080:8080
+        develop:
+            watch:
+                - action: sync+restart
+                  path: client
+                  target: /app
+                  ignore:
+                      - node_modules
+
+  backend:
+    container_name: pucknotes-backend
+    build: server
+    ports:
+      - "8081:8080"
+    volumes:
+      - /app/target
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    develop:
+        watch:
+              - action: sync+restart
+                path: server/src
+                target: /app
