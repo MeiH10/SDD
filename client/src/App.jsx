@@ -9,9 +9,9 @@ const App = () => {
     const [notes, setNotes] = useState([]);
     const [selectedNote, setSelectedNote] = useState(null);
 
-    useEffect(() => {
-        fetchNotes();
-    }, []);
+    // useEffect(() => {
+    //     fetchNotes();
+    // }, []);
 
     const fetchNotes = async () => {
         const response = await fetch('/api/note');
