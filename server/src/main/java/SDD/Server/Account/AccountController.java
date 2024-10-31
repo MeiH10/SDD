@@ -1,4 +1,4 @@
-package SDD.PuckNotes.Account;
+package SDD.Server.Account;
 
 import SDD.PuckNotes.Notes.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
