@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
-public class ServerApplication {
+public class ServgerApplication {
 
     @Bean
     public CommonsRequestLoggingFilter requestLoggingFilter() {
