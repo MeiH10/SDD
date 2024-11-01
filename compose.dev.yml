@@ -6,7 +6,7 @@ services:
     restart: always
     volumes:
       - ./data/:/data/db/
-
+  
   backend:
     container_name: pucknotes-backend
     build: server
@@ -23,7 +23,7 @@ services:
         - action: sync+restart
           path: server/src
           target: /app
-  
+ 
   frontend:
     container_name: pucknotes-frontend
     build: client
@@ -32,12 +32,15 @@ services:
     restart: always
     ports:
       - ${FRONTEND_PORT}:8080
+    volumes:
+      - ./client:/app
+      - /app/node_modules
     environment:
       VITE_BACKEND_URL: http://backend:${BACKEND_PORT}
     develop:
       watch:
-        - action: sync+restart
-          path: client
-          target: /app
+        - action: sync
+          path: client/src
+          target: /app/src
           ignore:
             - node_modules

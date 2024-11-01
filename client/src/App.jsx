@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import NoteForm from './NoteForm';
-import NoteList from './NoteList';
+import React from 'react';
+import Navbar from './components/Navbar';
+import SchoolMajorSelector from './components/SchoolMajorSelector';
+import NoteForm from './components/NoteForm';
+import NoteList from './components/NoteList';
+import { useEffect, useState } from 'react';
 
 const App = () => {
     const [notes, setNotes] = useState([]);
     const [selectedNote, setSelectedNote] = useState(null);
 
-    useEffect(() => {
-        fetchNotes();
-    }, []);
+    // useEffect(() => {
+    //     fetchNotes();
+    // }, []);
 
     const fetchNotes = async () => {
         const response = await fetch('/api/note');
@@ -27,10 +30,9 @@ const App = () => {
     };
 
     return (
-        <div>
-            <h1>Notes</h1>
-            <NoteForm onSubmit={addOrUpdateNote} selectedNote={selectedNote} />
-            <NoteList notes={notes} onSelect={setSelectedNote} />
+        <div className="min-h-screen bg-gray-900 text-white">
+            <Navbar />
+            <SchoolMajorSelector />
         </div>
     );
 };
