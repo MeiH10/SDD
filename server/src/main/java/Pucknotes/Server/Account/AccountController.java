@@ -1,6 +1,5 @@
 package Pucknotes.Server.Account;
 
-// import Pucknotes.Server.Notes.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,14 +7,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-// import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
-// import java.io.IOException;
-
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping("/account")
 public class AccountController {
 
     // Endpoint to add a new account
@@ -23,7 +18,7 @@ public class AccountController {
     private AccountService accountService;
 
     // Endpoint to add a new account
-    @PostMapping("/add")
+    @PostMapping("")
     public ResponseEntity<String> addAccount(
             @RequestParam("username") String username,
             @RequestParam("password") String password,
@@ -48,7 +43,7 @@ public class AccountController {
     }
 
 
-    @PutMapping("/update")
+    @PutMapping("")
     public ResponseEntity<String> updateAccount(
             @RequestParam("email") String email,  // Email as the ID
             @RequestParam(value = "username", required = false) String username,

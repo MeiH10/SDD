@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/api/note")
+@RequestMapping("/note")
 public class NoteController {
 
     @Autowired

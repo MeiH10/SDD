@@ -1,25 +1,25 @@
-package Pucknotes.Server.Login;
+package Pucknotes.Server.session;
 
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
 
 @RestController
-@RequestMapping("/auth")
-public class AuthController {
+@RequestMapping("/session")
+public class SessionController {
 
-    @PostMapping("/login")
+    @PostMapping("")
     public String login(@RequestParam String username, HttpSession session) {
         session.setAttribute("username", username);
         return "User " + username + " logged in.";
     }
 
-    @PostMapping("/logout")
+    @DeleteMapping("")
     public String logout(HttpSession session) {
         session.invalidate();
         return "Logged out successfully.";
     }
 
-    @GetMapping("/session-info")
+    @GetMapping("/")
     public String sessionInfo(HttpSession session) {
         return "Current User: " + session.getAttribute("username");
     }
