@@ -1,4 +1,4 @@
-# Pucknotes
+# PuckNotes
 
 ## Spring Boot Server
 
