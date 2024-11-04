@@ -7,10 +7,8 @@ Created on Tue Sep 24 13:22:27 2024
 
 from requests import get
 from pymongo import MongoClient
-from dotenv import load_dotenv
 from os import getenv
 
-load_dotenv("../config.env")
 mongo_server_addr = getenv("MONGO_SERVER_ADDR")
 print(mongo_server_addr)
 
