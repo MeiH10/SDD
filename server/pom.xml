@@ -9,7 +9,7 @@
         <version>3.3.4</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
-    <groupId>SDD</groupId>
+    <groupId>Pucknotes</groupId>
     <artifactId>Server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Server</name>
@@ -73,6 +73,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>  
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.4</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

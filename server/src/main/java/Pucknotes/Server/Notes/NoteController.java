@@ -1,4 +1,4 @@
-package SDD.Server.Notes;
+package Pucknotes.Server.Notes;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;

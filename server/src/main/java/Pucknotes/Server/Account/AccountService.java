@@ -1,14 +1,14 @@
-package SDD.Server.Account;
+package Pucknotes.Server.Account;
 
-import SDD.Server.Notes.Note;
-import SDD.Server.Notes.NoteRepository;
-import org.bson.BsonBinarySubType;
-import org.bson.types.Binary;
+// import Pucknotes.Server.Notes.Note;
+// import Pucknotes.Server.Notes.NoteRepository;
+// import org.bson.BsonBinarySubType;
+// import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.multipart.MultipartFile;
+// import org.springframework.web.multipart.MultipartFile;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+// import java.io.IOException;
 
 @Service
 public class AccountService {

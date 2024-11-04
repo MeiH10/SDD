@@ -1,4 +1,4 @@
-package SDD.Server;
+package Pucknotes.Server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

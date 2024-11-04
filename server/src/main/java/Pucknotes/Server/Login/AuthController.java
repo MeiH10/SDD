@@ -1,4 +1,4 @@
-package SDD.Server.Login;
+package Pucknotes.Server.Login;
 
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;

@@ -1,4 +1,4 @@
-package SDD.Server.Login;
+package Pucknotes.Server.Login;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.session.web.http.CookieSerializer;

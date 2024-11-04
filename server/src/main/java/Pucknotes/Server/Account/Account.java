@@ -1,4 +1,4 @@
-package SDD.Server.Account;
+package Pucknotes.Server.Account;
 
 
 import org.springframework.data.annotation.Id;

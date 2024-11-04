@@ -1,4 +1,4 @@
-package SDD.Server.Account;
+package Pucknotes.Server.Account;
 
 public class AccountNotFoundException extends RuntimeException {
 

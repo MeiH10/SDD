@@ -1,4 +1,4 @@
-# SDD
+# Pucknotes
 
 ## Spring Boot Server
 

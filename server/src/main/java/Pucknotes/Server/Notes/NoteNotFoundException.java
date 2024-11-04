@@ -1,4 +1,4 @@
-package SDD.Server.Notes;
+package Pucknotes.Server.Notes;
 
 public class NoteNotFoundException extends RuntimeException {
 

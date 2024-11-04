@@ -1,4 +1,4 @@
-package SDD.Server.Notes;
+package Pucknotes.Server.Notes;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

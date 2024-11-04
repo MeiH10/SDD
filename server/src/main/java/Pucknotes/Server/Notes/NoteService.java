@@ -1,4 +1,4 @@
-package SDD.Server.Notes;
+package Pucknotes.Server.Notes;
 
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
