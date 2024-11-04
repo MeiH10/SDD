@@ -1,8 +1,13 @@
-FROM node:18-alpine
+# Stage 1: Build the application
+FROM node:18.20.3-alpine3.20 AS builder
 WORKDIR /app
-COPY package.json .
+COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
-ENV HOST=0.0.0.0
-EXPOSE 8080
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+RUN npm run build
+
+# Stage 2: Serve the application
+FROM nginx:1.27.2-alpine-slim as runner
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

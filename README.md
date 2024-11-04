@@ -6,9 +6,9 @@ Before starting the server, you must:
 
 1. Clone this repository. (`git clone https://github.com/MeiH10/SDD.git`)
 2. Rename `application.example.properties` to `application.properties`.
-3. Inside of `application.properties`, replace `spring.data.mongodb.uri` with your corresponding MongoDB URI.
+3. Inside `application.properties`, replace `spring.data.mongodb.uri` with your corresponding MongoDB URI.
 
-Then, to load the SpringBoot Server, just run:
+Then, to load the Spring Boot Server, just run:
 
 ```sh
 cd server
