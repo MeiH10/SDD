@@ -20,7 +20,7 @@ services:
       SPRING_DATA_MONGODB_URI: ${BACKEND_MONGO_URI}
     develop:
       watch:
-        - action: sync+restart
+        - action: rebuild
           path: server/src
           target: /app
  
@@ -39,7 +39,7 @@ services:
       VITE_BACKEND_URL: http://backend:${BACKEND_PORT}
     develop:
       watch:
-        - action: sync
+        - action: rebuild
           path: client/src
           target: /app/src
           ignore:
