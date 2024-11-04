@@ -4,15 +4,14 @@ Created on Tue Sep 24 13:22:27 2024
 
 @author: Adam
 """
-import json
-import requests
 
+from requests import get
 from pymongo import MongoClient
 from dotenv import load_dotenv
-import os
+from os import getenv
 
 load_dotenv("../config.env")
-mongo_server_addr = os.getenv("MONGO_SERVER_ADDR")
+mongo_server_addr = getenv("MONGO_SERVER_ADDR")
 print(mongo_server_addr)
 
 # Connect to MongoDB (replace the URL with your connection string if using Atlas)
@@ -25,12 +24,12 @@ semesters_col = db["Semesters"]
 
 def get_courses_json(sem):
     url = 'https://raw.githubusercontent.com/quacs/quacs-data/refs/heads/master/semester_data/{}/courses.json'.format(sem)
-    data = requests.get(url)
+    data = get(url)
     return data.json()
 
 def get_schools_json(sem):
     url = 'https://raw.githubusercontent.com/quacs/quacs-data/refs/heads/master/semester_data/{}/schools.json'.format(sem)
-    data = requests.get(url)
+    data = get(url)
     return data.json()
 
 def map_sem_code(sem):
@@ -75,6 +74,10 @@ def update_db(sem):
     schools = get_schools_json(sem)
     
     semname = map_sem_code(sem)
+    if semname is None:
+        print(f"Semester name {semname} for {sem} does not exist.")
+        return
+    
     semid = "{}-{}".format(semname[0], semname[1])
     
     semester_object = semesters_col.find_one({"id": semid})
@@ -93,7 +96,12 @@ def update_db(sem):
             print(f"Inserted new semester {semid} with _id {sem_object_id}")
         else:
             # If no new document was inserted, find the document by semid to get its _id
-            sem_object_id = semesters_col.find_one({"id": semid})["_id"]
+            result = semesters_col.find_one({"id": semid})
+            if result is None:
+                print(f"Did not find semester {semid}")
+                return
+            
+            sem_object_id = result["_id"]
             print(f"Found existing semester {semid} with _id {sem_object_id}")
         
     else:
