@@ -3,7 +3,6 @@ services:
   database:
     image: mongo:latest
     container_name: pucknotes-database
-    restart: always
     volumes:
       - ./data/:/data/db/
   
@@ -29,7 +28,6 @@ services:
     build: client
     depends_on:
       - backend
-    restart: always
     ports:
       - ${FRONTEND_PORT}:8080
     volumes:
