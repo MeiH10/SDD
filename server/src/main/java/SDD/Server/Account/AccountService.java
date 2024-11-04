@@ -1,7 +1,7 @@
-package SDD.PuckNotes.Account;
+package SDD.Server.Account;
 
-import SDD.PuckNotes.Notes.Note;
-import SDD.PuckNotes.Notes.NoteRepository;
+import SDD.Server.Notes.Note;
+import SDD.Server.Notes.NoteRepository;
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;

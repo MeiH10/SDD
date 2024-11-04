@@ -1,4 +1,4 @@
-package SDD.PuckNotes.Account;
+package SDD.Server.Account;
 
 public class AccountNotFoundException extends RuntimeException {
 

@@ -1,6 +1,6 @@
-package SDD.PuckNotes.Account;
+package SDD.Server.Account;
 
-import SDD.PuckNotes.Notes.NoteService;
+import SDD.Server.Notes.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
