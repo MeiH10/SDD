@@ -1,4 +1,4 @@
-package Pucknotes.Server.Notes;
+package Pucknotes.Server.Note;
 
 public class NoteNotFoundException extends RuntimeException {
 

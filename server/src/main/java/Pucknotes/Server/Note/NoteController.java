@@ -1,4 +1,4 @@
-package Pucknotes.Server.Notes;
+package Pucknotes.Server.Note;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/note")
+@RequestMapping("/api/note")
 public class NoteController {
 
     @Autowired

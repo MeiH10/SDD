@@ -1,4 +1,4 @@
-package Pucknotes.Server.Notes;
+package Pucknotes.Server.Note;
 
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;

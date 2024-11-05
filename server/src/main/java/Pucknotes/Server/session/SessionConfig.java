@@ -1,4 +1,4 @@
-package Pucknotes.Server.session;
+package Pucknotes.Server.Session;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.session.web.http.CookieSerializer;

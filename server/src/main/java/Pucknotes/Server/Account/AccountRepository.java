@@ -1,7 +1,10 @@
 package Pucknotes.Server.Account;
 
+import java.util.Optional;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface AccountRepository extends MongoRepository<Account, String> {
-    // MongoRepository provides methods like existsById, findById, and save.
+    public Optional<Account> findByEmail(String email);
+    public Optional<Account> findByToken(String email);
 }

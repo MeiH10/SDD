@@ -1,24 +1,37 @@
-package Pucknotes.Server.session;
+package Pucknotes.Server.Session;
 
+import org.springframework.context.annotation.Bean;
 // import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 // import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 // import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    // @Bean
-    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    //     http
-    //             .csrf().disable()  // Disable CSRF for APIs (or configure it properly)
-    //             .authorizeRequests()
-    //             .antMatchers("/login", "/register").permitAll()
-    //             .anyRequest().authenticated()
-    //             .and()
-    //             .sessionManagement()
-    //             .sessionFixation().newSession()  // Prevent session fixation attacks
-    //             .maximumSessions(1);  // Limits the user to one active session
-    //     return http.build();
-    // }
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(c -> c
+                        .disable())
+                .authorizeHttpRequests(r -> r
+                        .requestMatchers("/api/**").permitAll()
+                        .anyRequest().authenticated())
+                .sessionManagement(s -> s
+                        .sessionFixation()
+                        .newSession()
+                        .maximumSessions(1))
+                .build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

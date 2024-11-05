@@ -1,4 +1,4 @@
-package Pucknotes.Server.Notes;
+package Pucknotes.Server.Note;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
