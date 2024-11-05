@@ -29,13 +29,13 @@ export default defineConfig(({ mode }) => {
                     ws: true,
                     configure: (proxy, _options) => {
                         proxy.on('error', (err, _req, _res) => {
-                            console.log('proxy error', err);
+                            console.log('proxy error', err, _options, _req, _res);
                         });
                         proxy.on('proxyReq', (proxyReq, req, _res) => {
-                            console.log('Sending Request to the Target:', req.method, req.url);
+                            console.log('Sending Request to the Target:', req.method, req.url, _res);
                         });
                         proxy.on('proxyRes', (proxyRes, req, _res) => {
-                            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+                            console.log('Received Response from the Target:', proxyRes.statusCode, req.url, _res);
                         });
                     },
                 }
