@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import Pucknotes.Server.Like.LikeService;
 import Pucknotes.Server.Response.Types.UnauthorizedException;
 import Pucknotes.Server.Session.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,9 @@ public class NoteController {
 
     @Autowired
     private NoteService noteService;
+
+    @Autowired
+    private LikeService likeService;
 
     @Autowired
     private SessionService sessionService;
@@ -112,6 +116,44 @@ public class NoteController {
                     HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>("Invalid input: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // Endpoint to like a note
+    @PostMapping("/{id}/like")
+    public ResponseEntity<String> likeNote(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        try {
+            String userID = getCurrentUserId(request);
+            likeService.likeNote(id, userID);
+            return new ResponseEntity<>("Note liked successfully.", HttpStatus.OK);
+        } catch (UnauthorizedException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        }
+    }
+
+    // Endpoint to check if the user has liked the note
+    @GetMapping("/{id}/liked")
+    public ResponseEntity<Boolean> hasLikedNote(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        String userID = getCurrentUserId(request);
+        boolean hasLiked = likeService.hasLiked(id, userID);
+        return new ResponseEntity<>(hasLiked, HttpStatus.OK);
+    }
+
+    // Endpoint to dislike a note (remove like)
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<String> dislikeNote(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        try {
+            String userID = getCurrentUserId(request);
+            likeService.dislikeNote(id, userID);
+            return new ResponseEntity<>("Note disliked successfully.", HttpStatus.OK);
+        } catch (UnauthorizedException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }
 }
