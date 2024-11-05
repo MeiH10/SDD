@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import Pucknotes.Server.Response.APIResponse;
 import Pucknotes.Server.Response.Types.ResourceNotFoundException;
+import Pucknotes.Server.Session.SessionService;
 import Pucknotes.Server.Verification.VerificationService;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -26,6 +28,13 @@ public class AccountController {
 
     @Autowired
     private VerificationService verify_service;
+
+    @Autowired
+    private SessionService sessionService;
+
+    private String getCurrentUserId(HttpServletRequest request) {
+        return sessionService.getSession(request);
+    }
 
     @PostMapping("")
     public ResponseEntity<APIResponse<String>> createAccount(
@@ -45,28 +54,28 @@ public class AccountController {
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateAccount(
+            HttpServletRequest request,
             @PathVariable String id,
             @RequestParam(value = "username", required = false) String username,
-            @RequestParam(value = "password", required = false) String password
-            // @RequestParam(value = "firstname", required = false) String firstName,
-            // @RequestParam(value = "lastname", required = false) String lastName
-            ) {
-
+            @RequestParam(value = "password", required = false) String password) {
+        
+        String userID = getCurrentUserId(request);
         Account account = service.getByEmail(id);
         account.setUsername(username);
         account.setPassword(password);
-        // account.setFirstname(firstName);
-        // account.setLastname(lastName);
-        service.updateAccount(account);
+        service.updateAccount(account, userID);
 
         return new ResponseEntity<>("Account updated successfully.", HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<APIResponse<Boolean>> deleteAccount(@PathVariable String id) {
+    public ResponseEntity<APIResponse<Boolean>> deleteAccount(
+        HttpServletRequest request,
+        @PathVariable String id) {
         try {
+            String userID = getCurrentUserId(request);
             Account account = service.getById(id);
-            service.deleteAccount(account);
+            service.deleteAccount(account, userID);
             return ResponseEntity.ok(APIResponse.good(true));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.ok(APIResponse.good(false));

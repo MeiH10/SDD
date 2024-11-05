@@ -1,8 +1,10 @@
 package Pucknotes.Server.Note;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import Pucknotes.Server.Account.Account;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +27,11 @@ public class Note {
     @Getter @Setter
     @NonNull
     private String title;
+
+    @Getter
+    @NonNull
+    @DBRef
+    private Account owner;
 
     @Getter @Setter
     @NonNull

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import Pucknotes.Server.Response.Types.ResourceConflictException;
 import Pucknotes.Server.Response.Types.ResourceNotFoundException;
+import Pucknotes.Server.Response.Types.UnauthorizedException;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -34,9 +35,11 @@ public class AccountService {
         );
     }
 
-    public Account updateAccount(Account next) {
+    public Account updateAccount(Account next, String userID) {
         if (next == null) {
             throw new IllegalArgumentException("Attempted to save a null account.");
+        } else if (userID.equals(next.getId())) {
+            throw new UnauthorizedException("You are not this user.");
         }
 
         Account current = getById(next.getId());
@@ -44,10 +47,6 @@ public class AccountService {
             current.setUsername(next.getUsername());
         if (next.getPassword() != null)
             current.setPassword(next.getPassword());
-        // if (next.getFirstname() != null)
-        //     current.setFirstname(next.getFirstname());
-        // if (next.getLastname() != null)
-        //     current.setLastname(next.getLastname());
 
         return repository.save(current);
     }
@@ -87,9 +86,11 @@ public class AccountService {
         return account;
     }
 
-    public void deleteAccount(Account account) {
+    public void deleteAccount(Account account, String userID) {
         if (account == null) {
             return;
+        } else if (userID.equals(account.getId())) {
+            throw new UnauthorizedException("You are not this user.");
         }
 
         repository.delete(account);

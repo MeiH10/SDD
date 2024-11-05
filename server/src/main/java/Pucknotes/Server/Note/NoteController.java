@@ -7,6 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import Pucknotes.Server.Response.Types.UnauthorizedException;
+import Pucknotes.Server.Session.SessionService;
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -18,13 +22,22 @@ public class NoteController {
     @Autowired
     private NoteService noteService;
 
+    @Autowired
+    private SessionService sessionService;
+
+    private String getCurrentUserId(HttpServletRequest request) {
+        return sessionService.getSession(request);
+    }
+
     // Endpoint to add a new note
     @PostMapping("")
     public ResponseEntity<String> addNote(
+            HttpServletRequest request,
             @RequestParam("title") String title,
             @RequestParam("file") MultipartFile file) {
         try {
-            String noteId = noteService.addNote(title, file);
+            String userID = getCurrentUserId(request);
+            String noteId = noteService.addNote(title, file, userID);
             return new ResponseEntity<>("Note created successfully with ID: " + noteId, HttpStatus.CREATED);
         } catch (IOException e) {
             return new ResponseEntity<>("Error while uploading file: " + e.getMessage(),
@@ -66,13 +79,31 @@ public class NoteController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteNote(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        try {
+            String userID = getCurrentUserId(request);
+            noteService.deleteNote(id, userID);
+            return new ResponseEntity<>("Note deleted successfully.", HttpStatus.OK);
+        } catch (NoteNotFoundException e) {
+            return new ResponseEntity<>("Note not found with ID: " + id, HttpStatus.NOT_FOUND);
+        } catch (UnauthorizedException e) {
+            return new ResponseEntity<>("Unauthorized to delete the note: " + e.getMessage(), HttpStatus.FORBIDDEN);
+        }
+    }
+
     // Endpoint to update an existing note
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateNote(@PathVariable String id,
+    public ResponseEntity<String> updateNote(
+            HttpServletRequest request,
+            @PathVariable String id,
             @RequestParam(required = false) String title,
             @RequestParam(required = false) MultipartFile file) {
         try {
-            noteService.updateNote(id, title, file);
+            String userID = getCurrentUserId(request);
+            noteService.updateNote(id, title, file, userID);
             return new ResponseEntity<>("Note updated successfully.", HttpStatus.OK);
         } catch (NoteNotFoundException e) {
             return new ResponseEntity<>("Note not found with ID: " + id, HttpStatus.NOT_FOUND);
