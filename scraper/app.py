@@ -1,193 +1,219 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Sep 24 13:22:27 2024
-
-@author: Adam
-"""
-
+from typing import Any, Tuple, Union
 from requests import get
+from requests.exceptions import RequestException
 from pymongo import MongoClient
-from os import getenv
+from os import getenv, path
+from json import dump, load
+
+QUACS_URL = (
+    "https://raw.githubusercontent.com/quacs/quacs-data/refs/heads/master/semester_data"
+)
+
+# ---------------------------------------------------------------------------- #
 
 mongo_server_addr = getenv("MONGO_SERVER_ADDR")
 print(mongo_server_addr)
 
-# Connect to MongoDB (replace the URL with your connection string if using Atlas)
-client = MongoClient(mongo_server_addr)  # Use your MongoDB URL here
-db = client["data"]  # The name of your database
-majors_col = db["Majors"]  # The collection for majors
-classes_col = db["Classes"]  # The collection for classes
-sections_col = db["Sections"]  # The collection for sections
-semesters_col = db["Semesters"]
+client = MongoClient(mongo_server_addr)
+db = client["data"]
+majors = db["majors"]
+courses = db["courses"]
+sections = db["sections"]
+semesters = db["semesters"]
 
-def get_courses_json(sem):
-    url = 'https://raw.githubusercontent.com/quacs/quacs-data/refs/heads/master/semester_data/{}/courses.json'.format(sem)
-    data = get(url)
-    return data.json()
+# ---------------------------------------------------------------------------- #
 
-def get_schools_json(sem):
-    url = 'https://raw.githubusercontent.com/quacs/quacs-data/refs/heads/master/semester_data/{}/schools.json'.format(sem)
-    data = get(url)
-    return data.json()
 
-def map_sem_code(sem):
-    year = sem[0:4]
-    season = sem[4:]
-    if season == '09':
-        return year, "fall"
-    if season == '01':
-        return year, "spring"
-    if season == '06':
-        return year, "summer"
+def download_data(url: str, filename: str) -> Union[dict, list, None]:
+    """
+    Download JSON data from the URL, save it to the given file path, and return
+    the JSON data.
+    """
 
-def update_db(sem):
-    
-    # Major table:
-    # { 
-    #   "id": "String",
-    #   "department": "String",
-    #   "code": "String",
-    #   "name": "String",
-    # }
-    
-    # Class table:
-    # {
-    #   "id": "String",
-    #   "major": "ref<Major>",
-    #   "semester": "ref<Semester>",
-    #   "code": "String",
-    # }
-    # define id as 
-    
-    # Section table:
-    # {
-    #   "id": "String",
-    #   "class": "ref<Class>",
-    #   "professors": "List<String>",
-    #   "section": "Number",
-    # }
-    # define id as classid+secnum
+    try:
+        response = get(url)
+    except RequestException as e:
+        print(f"An error occurred while downloading the JSON data: {e}.")
+        return None
 
-    courses = get_courses_json(sem)
-    schools = get_schools_json(sem)
-    
-    semname = map_sem_code(sem)
-    if semname is None:
-        print(f"Semester name {semname} for {sem} does not exist.")
+    if response.status_code != 200:
+        print(f"Failed to download file. HTTP status code: {response.status_code}.")
+        return None
+
+    data = response.json()
+
+    with open(filename, "w") as file:
+        dump(data, file, indent=4)
+
+    print(f"File downloaded and JSON data saved to {filename}.")
+    return data
+
+
+def get_data(url: str, filename: str) -> Union[dict, list, None]:
+    """
+    Check if the file exists. If it does, return the existing JSON data.
+    Otherwise, download JSON from the URL.
+    """
+
+    if not path.exists(filename):
+        print(f"File '{filename}' does not exist. Downloading JSON data...")
+        return download_data(url, filename)
+
+    print(f"File '{filename}' already exists.")
+    with open(filename, "r") as file:
+        data = load(file)
+        return data
+
+
+# ---------------------------------------------------------------------------- #
+
+
+def get_courses(semester):
+    return get_data(
+        f"{QUACS_URL}/{semester}/courses.json", f"data/courses-{semester}.json"
+    )
+
+
+def get_schools(semester):
+    return get_data(
+        f"{QUACS_URL}/{semester}/schools.json", f"data/schools-{semester}.json"
+    )
+
+
+def get_semester_from_code(semester: str) -> Union[None, Tuple[int, str]]:
+    year, season = semester[0:4], semester[4:]
+
+    match season:
+        case "01":
+            return int(year), "spring"
+        case "06":
+            return int(year), "summer"
+        case "09":
+            return int(year), "fall"
+        case _:
+            return None
+
+
+# ---------------------------------------------------------------------------- #
+
+
+def push_semester(data: dict) -> Any:
+    result = semesters.update_one(data, {"$set": data}, upsert=True)
+
+    print(f"Semester: '{data['season']}' / {data['year']}.")
+
+    if result.upserted_id:
+        return semesters.find_one({ '_id': result.upserted_id })
+
+    return semesters.find_one(data)
+
+
+def push_major(data: dict) -> Any:
+    result = majors.update_one({"code": data["code"]}, {"$set": data}, upsert=True)
+
+    print(f"Major '{data['code']}'.")
+
+    if result.upserted_id:
+        return majors.find_one({ '_id': result.upserted_id })
+
+    return majors.find_one({"code": data["code"]})
+
+
+def push_course(data: dict) -> Any:
+    result = courses.update_one({"code": data["code"]}, {"$set": data}, upsert=True)
+
+    print(f"Course '{data['code']}'.")
+
+    if result.upserted_id:
+        return courses.find_one({ '_id': result.upserted_id })
+
+    return courses.find_one({"code": data["code"]})
+
+
+def push_section(data: dict) -> Any:
+    result = sections.update_one(
+        {"number": data["number"], "course": data["course"]},
+        {"$set": data},
+        upsert=True,
+    )
+
+    print(f"Section {data['number']} for {data["course"]}.")
+
+    if result.upserted_id:
+        return sections.find_one({ '_id': result.upserted_id })
+
+    return sections.find_one({"number": data["number"], "course": data["course"]})
+
+
+# ---------------------------------------------------------------------------- #
+
+
+def push_data(semester_code):
+    semester_data = get_semester_from_code(semester_code)
+    if semester_data is None:
+        print(f"Semester name {semester_data} for {semester_code} does not exist.")
         return
-    
-    semid = "{}-{}".format(semname[0], semname[1])
-    
-    semester_object = semesters_col.find_one({"id": semid})
-    if semester_object is None:
-        # If the semid is not found, insert it
-        semester_data = {
-            "id": semid,
-            "type": semname[1],
-            "year": semname[0],
-        }
-        result = semesters_col.update_one({"id": semid}, {"$set": semester_data}, upsert=True)
-        print(f"Inserted new semester {semid}")
-        
-        if result.upserted_id:
-            sem_object_id = result.upserted_id
-            print(f"Inserted new semester {semid} with _id {sem_object_id}")
-        else:
-            # If no new document was inserted, find the document by semid to get its _id
-            result = semesters_col.find_one({"id": semid})
-            if result is None:
-                print(f"Did not find semester {semid}")
-                return
-            
-            sem_object_id = result["_id"]
-            print(f"Found existing semester {semid} with _id {sem_object_id}")
-        
-    else:
-        # If the semester is found, get the _id
-        sem_object_id = semester_object["_id"]
-        print(f"Semester {semid} already exists with _id {sem_object_id}")
-    
+
+    year, season = semester_data
+    semester = push_semester({"year": year, "season": season})
+
+    # ------------------------------------------------------------------------ #
+
+    schools = get_schools(semester_code)
+    if schools is None:
+        print(f"Couldn't get school data for {semester_code}.")
+        return
+
     for school in schools:
-        
-        schoolname = school['name']
-        schoolname = schoolname+"TEST"
-        #print(schoolname)
-        
-        for dept in school['depts']:
-    
-            deptcode = dept['code']
-            major_id = deptcode
-            deptname = dept['name']
-    
-            major_data = {
-                "id": major_id,
-                "department": schoolname,
-                "code": deptcode,
-                "name": deptname,
-            }
-            majors_col.update_one({"id": major_id}, {"$set": major_data}, upsert=True)
-    
-    for code in courses:
-        
-        deptname = code['name']
-        deptcode = code['code']
-        major_id = deptcode
-        
-        # Find the Major document and get its ObjectId
-        major_object = majors_col.find_one({"id": major_id})
-        if major_object is None:
-            print(f"Major {major_id} not found for department {deptname}")
-            continue  # Skip if no corresponding major is found
-    
-        major_object_id = major_object['_id']  # This is the ObjectId reference
-        
-        for course in code['courses']:
-            
-            courseid = course['id'] #eg "CSCI-1200"
-            coursetitle = course['title']
-            
-            class_data = {
-                "id": "{}-{}".format(courseid, sem),
-                "major": major_object_id,
-                "semester": sem_object_id,
-                "code": courseid,
-                "name": coursetitle,
-            }
-            result = classes_col.update_one({"id": courseid}, {"$set": class_data}, upsert=True)
-            
-            # Retrieve the _id of the class (for existing or newly inserted doc)
-            if result.upserted_id:
-                class_id = result.upserted_id  # This will give the new _id if inserted
-            else:
-                # If no new insert, find the existing class by its courseid
-                existing_class = classes_col.find_one({"id": "{}-{}".format(courseid, sem)})
-                if existing_class:
-                    class_id = existing_class["_id"]
-                else:
-                    print(f"Class with id {courseid}-{sem} not found in Classes collection")
-                    continue  # Skip further processing if no class is found
-            
-            #print(courseid, coursetitle)
-            
-            for section in course['sections']:
-                secnum = section['sec']
-                #print("\t"+secnum)
-                
-                profs = []
-                for slot in section['timeslots']:
-                    profs.extend(slot['instructor'].split(", "))
-                #print("\t", profs)
-                
-                section_id = f"{courseid}-{secnum}"
-                section_data = {
-                    "id": section_id,
-                    "class": class_id,
-                    "professors": profs,
-                    "section": secnum,
+        for major in school["depts"]:
+            push_major(
+                {
+                    "code": major["code"],
+                    "school": school["name"],
+                    "name": major["name"],
+                    "semester": semester["_id"],
                 }
-                sections_col.update_one({"id": section_id}, {"$set": section_data}, upsert=True)
-    
-    
-    
-data = update_db("202409")
-    
+            )
+
+    # ------------------------------------------------------------------------ #
+
+    course_data = get_courses(semester_code)
+    if course_data is None:
+        print(f"Couldn't get course data for {semester_code}.")
+        return
+
+    for major_data in course_data:
+        major = majors.find_one({"code": major_data["code"]})
+        if major is None:
+            print(f"Major {major_data["code"]} not found.")
+            continue
+
+        for course_data in major_data["courses"]:
+            course = push_course(
+                {
+                    "major": major["_id"],
+                    "semester": semester["_id"],
+                    "code": course_data["id"],
+                    "name": course_data["title"],
+                }
+            )
+
+            for section in course_data["sections"]:
+
+                profs = [
+                    slot["instructor"].split(", ") for slot in section["timeslots"]
+                ]
+
+                push_section(
+                    {
+                        "course": course["_id"],
+                        "professors": profs,
+                        "number": section["sec"],
+                    }
+                )
+
+
+# ---------------------------------------------------------------------------- #
+
+
+data = push_data("202409")

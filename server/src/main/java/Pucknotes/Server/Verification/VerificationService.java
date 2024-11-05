@@ -1,11 +1,13 @@
 package Pucknotes.Server.Verification;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import Pucknotes.Server.Account.Account;
 import Pucknotes.Server.Account.AccountService;
-import Pucknotes.Server.Account.EmailService;
 import Pucknotes.Server.Response.Types.ResourceConflictException;
 import Pucknotes.Server.Response.Types.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
@@ -14,8 +16,10 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class VerificationService {
     @Autowired
+    private JavaMailSender mailer;
+
+    @Autowired
     private VerificationRepository repository;
-    private final EmailService email_service;
     private final AccountService account_service;
 
     public Verification createVerification(Account details) {
@@ -30,9 +34,26 @@ public class VerificationService {
         return verify;
     }
 
+    public void sendVerify(String recipient, String token) {
+        String link = UriComponentsBuilder
+                .fromUriString("http://localhost:8080/api/auth/verify-email")
+                .queryParam("token", token)
+                .toUriString();
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(recipient);
+        message.setSubject("Email Verification");
+        message.setText("Verify your account by clicking on this link: " + link);
+
+        System.out.println("Sending email to: " + recipient);
+        System.out.println("Verification link: " + link);
+
+        mailer.send(message);
+    }
+
     public void sendEmail(String id) {
         Verification verify = getById(id);
-        email_service.sendVerify(verify.getDetails().getEmail(), verify.getToken());
+        sendVerify(verify.getDetails().getEmail(), verify.getToken());
     }
 
     public Account verifyToken(String id, String token) {

@@ -6,12 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import Pucknotes.Server.Response.APIResponse;
 import Pucknotes.Server.Response.Types.ResourceNotFoundException;
+import Pucknotes.Server.Verification.VerificationService;
 
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -21,6 +23,19 @@ public class AccountController {
 
     @Autowired
     private AccountService service;
+
+    @Autowired
+    private VerificationService verify_service;
+
+    @PostMapping("")
+    public ResponseEntity<APIResponse<String>> createAccount(
+            @RequestParam("token") String token,
+            @RequestParam("registration") String registration) {
+
+        Account details = verify_service.verifyToken(registration, token);
+        Account account = service.registerAccount(details);
+        return ResponseEntity.ok(APIResponse.good(account.getId()));
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<APIResponse<Account>> getAccount(@PathVariable String id) {

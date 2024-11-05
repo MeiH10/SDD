@@ -7,8 +7,10 @@ tasks:
 
   scraper:
     dir: scraper
+    env:
+      MONGO_SERVER_ADDR: "mongodb://localhost:{{.DATABASE_PORT}}/data"
     cmds:
       - source .venv/bin/activate
       - python app.py
 
-  database: mongosh "mongodb://localhost:${DATABASE_PORT}/data"
+  database: mongosh "mongodb://localhost:{{.DATABASE_PORT}}/data"
