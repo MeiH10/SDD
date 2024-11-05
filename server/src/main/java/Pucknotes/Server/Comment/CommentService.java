@@ -1,6 +1,7 @@
 package Pucknotes.Server.Comment;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Service;
 
 import Pucknotes.Server.Account.Account;
@@ -9,13 +10,16 @@ import Pucknotes.Server.Note.Note;
 import Pucknotes.Server.Note.NoteService;
 import Pucknotes.Server.Response.Types.ResourceNotFoundException;
 import Pucknotes.Server.Response.Types.UnauthorizedException;
+import lombok.AllArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
+@Document(collection = "comments")
 public class CommentService {
-@Autowired
+    @Autowired
     private CommentRepository commentRepository;
 
     @Autowired
