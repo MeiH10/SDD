@@ -5,12 +5,17 @@ import Pucknotes.Server.Account.AccountService;
 import Pucknotes.Server.Note.Note;
 import Pucknotes.Server.Note.NoteService;
 import Pucknotes.Server.Response.Types.UnauthorizedException;
+import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
+@Document(collection = "likes")
 public class LikeService {
 
     @Autowired

@@ -3,12 +3,14 @@ package Pucknotes.Server.Note;
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import Pucknotes.Server.Account.Account;
 import Pucknotes.Server.Account.AccountService;
 import Pucknotes.Server.Response.Types.UnauthorizedException;
+import lombok.AllArgsConstructor;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
+@Document(collection = "notes")
 public class NoteService {
 
     @Autowired

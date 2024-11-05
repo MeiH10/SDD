@@ -1,6 +1,7 @@
 package Pucknotes.Server.Account;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
+@Document(collection = "accounts")
 public class AccountService {
     @Autowired
     private AccountRepository repository;

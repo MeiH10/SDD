@@ -2,11 +2,15 @@ package Pucknotes.Server.Session;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import Pucknotes.Server.Account.Account;
 import Pucknotes.Server.Account.AccountService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 
+@Service
+@AllArgsConstructor
 public class SessionService {
     @Autowired
     private AccountService accountService;
