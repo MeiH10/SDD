@@ -15,6 +15,6 @@ public class Semester {
     @Id
     private String id;
 
-    private String type;
+    private String season;
     private Number year; 
 }

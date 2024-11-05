@@ -103,7 +103,7 @@ def push_semester(data: dict) -> Any:
     print(f"Semester: '{data['season']}' / {data['year']}.")
 
     if result.upserted_id:
-        return semesters.find_one({ '_id': result.upserted_id })
+        return semesters.find_one({"_id": result.upserted_id})
 
     return semesters.find_one(data)
 
@@ -114,7 +114,7 @@ def push_major(data: dict) -> Any:
     print(f"Major '{data['code']}'.")
 
     if result.upserted_id:
-        return majors.find_one({ '_id': result.upserted_id })
+        return majors.find_one({"_id": result.upserted_id})
 
     return majors.find_one({"code": data["code"]})
 
@@ -125,7 +125,7 @@ def push_course(data: dict) -> Any:
     print(f"Course '{data['code']}'.")
 
     if result.upserted_id:
-        return courses.find_one({ '_id': result.upserted_id })
+        return courses.find_one({"_id": result.upserted_id})
 
     return courses.find_one({"code": data["code"]})
 
@@ -140,7 +140,7 @@ def push_section(data: dict) -> Any:
     print(f"Section {data['number']} for {data["course"]}.")
 
     if result.upserted_id:
-        return sections.find_one({ '_id': result.upserted_id })
+        return sections.find_one({"_id": result.upserted_id})
 
     return sections.find_one({"number": data["number"], "course": data["course"]})
 
@@ -192,7 +192,6 @@ def push_data(semester_code):
             course = push_course(
                 {
                     "major": major["_id"],
-                    "semester": semester["_id"],
                     "code": course_data["id"],
                     "name": course_data["title"],
                 }

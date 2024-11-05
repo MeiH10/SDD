@@ -6,7 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import Pucknotes.Server.Class.Course;
+import Pucknotes.Server.Course.Course;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,8 +20,8 @@ public class Section {
     private String id;
 
     @DBRef
-    private Course  course;
+    private Course course;
 
     private List<String> professors;
-    private Number section;
+    private String number;
 }
