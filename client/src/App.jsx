@@ -21,7 +21,7 @@ const App = () => {
       <div>
         <nav>
           <ul>
-            <li><Link to="/uc1">Use Case 1</Link></li>
+            <li><Link to="/uc1">UC1: Manage Session</Link></li>
             <li><Link to="/uc2">Use Case 2</Link></li>
             <li><Link to="/uc3">Use Case 3</Link></li>
             <li><Link to="/uc4">Use Case 4</Link></li>
@@ -34,6 +34,8 @@ const App = () => {
             <li><Link to="/uc11">Use Case 11</Link></li>
           </ul>
         </nav>
+
+        <hr/>
 
         <Routes>
           <Route path="/uc1" element={<UseCase1 />} />
