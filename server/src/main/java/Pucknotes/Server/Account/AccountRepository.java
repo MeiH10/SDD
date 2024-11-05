@@ -6,5 +6,4 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface AccountRepository extends MongoRepository<Account, String> {
     public Optional<Account> findByEmail(String email);
-    public Optional<Account> findByToken(String email);
 }

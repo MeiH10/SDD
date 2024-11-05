@@ -13,39 +13,25 @@ import lombok.AllArgsConstructor;
 public class AccountService {
     @Autowired
     private AccountRepository repository;
-    private final EmailService email_service;
     private final PasswordEncoder encoder;
 
     public Account registerAccount(String email, String username, String password) {
         if (email == null || username == null || password == null) {
             throw new IllegalArgumentException(
                     "Must specify non-null email, username, and password to create an account.");
-        } else if (getByEmail(email) != null) {
-            throw new ResourceConflictException("Account with " + email + " already exists.");
+        } else if (existsEmail(email)) {
+            throw new ResourceConflictException("Account with email '" + email + "' already exists.");
         }
-
+        
         Account account = new Account(email, username, encoder.encode(password));
-        account.setEnabled(false);
         account = repository.save(account);
-
-        email_service.sendVerify(account.getEmail(), account.getToken());
         return account;
     }
 
-    public Account verifyEmail(String token) {
-        if (token == null) {
-            throw new IllegalArgumentException("Invalid verification token.");
-        }
-
-        Account account = repository.findByToken(token).orElse(null);
-        if (account == null) {
-            throw new IllegalArgumentException("Invalid verification token.");
-        }
-
-        account.setEnabled(true);
-        account.setToken(null);
-        repository.save(account);
-        return account;
+    public Account registerAccount(Account account) {
+        return registerAccount(
+            account.getEmail(), account.getUsername(), account.getPassword()
+        );
     }
 
     public Account updateAccount(Account next) {
@@ -58,10 +44,10 @@ public class AccountService {
             current.setUsername(next.getUsername());
         if (next.getPassword() != null)
             current.setPassword(next.getPassword());
-        if (next.getFirstname() != null)
-            current.setFirstname(next.getFirstname());
-        if (next.getLastname() != null)
-            current.setLastname(next.getLastname());
+        // if (next.getFirstname() != null)
+        //     current.setFirstname(next.getFirstname());
+        // if (next.getLastname() != null)
+        //     current.setLastname(next.getLastname());
 
         return repository.save(current);
     }
@@ -77,6 +63,15 @@ public class AccountService {
         }
 
         return account;
+    }
+
+    public boolean existsEmail(String email) {
+        if (email == null) {
+            return false;
+        }
+
+        Account account = repository.findByEmail(email).orElse(null);
+        return account != null;
     }
 
     public Account getById(String id) {

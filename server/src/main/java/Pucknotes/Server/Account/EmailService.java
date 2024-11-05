@@ -24,6 +24,10 @@ public class EmailService {
         message.setSubject("Email Verification");
         message.setText("Verify your account by clicking on this link: " + link);
 
+        // Optional debug log
+        System.out.println("Sending email to: " + toEmail);
+        System.out.println("Verification link: " + link);
+
         mailer.send(message);
     }
 }

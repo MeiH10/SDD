@@ -1,7 +1,5 @@
 package Pucknotes.Server.Account;
 
-import java.util.UUID;
-
 import org.springframework.data.annotation.Id;
 
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -33,23 +31,17 @@ public class Account {
     @NonNull
     private String password;
 
-    @Setter
-    private String firstname;
+    // @Setter
+    // private String firstname;
     
-    @Setter
-    private String lastname;
-
-    @Setter
-    private boolean enabled = false;
-
-    @Setter
-    private String token = UUID.randomUUID().toString();
+    // @Setter
+    // private String lastname;
 
     public Account(String email, String username, String password, String firstname, String lastname) {
         this.email = email;
         this.username = username;
         this.password = password;
-        this.firstname = firstname;
-        this.lastname = lastname;
+        // this.firstname = firstname;
+        // this.lastname = lastname;
     }
 }

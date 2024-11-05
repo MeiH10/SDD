@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceConflictException.class)
-    public ResponseEntity<APIResponse<Object>> handleResourceConflictException(IllegalArgumentException ex) {
+    public ResponseEntity<APIResponse<Object>> handleResourceConflictException(ResourceConflictException ex) {
         APIResponse<Object> response = APIResponse.bad(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }

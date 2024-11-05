@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,25 +22,9 @@ public class AccountController {
     @Autowired
     private AccountService service;
 
-    @PostMapping("")
-    public ResponseEntity<APIResponse<String>> createAccount(
-            @RequestParam("username") String username,
-            @RequestParam("password") String password,
-            @RequestParam("email") String email,
-            @RequestParam(value = "firstName", required = false) String firstName,
-            @RequestParam(value = "lastName", required = false) String lastName) {
-
-        Account account = service.registerAccount(email, username, password);
-        account.setFirstname(firstName);
-        account.setLastname(lastName);
-        account = service.updateAccount(account);
-
-        return ResponseEntity.ok(APIResponse.good(account.getId()));
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<APIResponse<Account>> getAccount(@PathVariable String id) {
-        Account account = service.getByEmail(id);
+        Account account = service.getById(id);
         return ResponseEntity.ok(APIResponse.good(account));
     }
 
@@ -49,15 +32,16 @@ public class AccountController {
     public ResponseEntity<String> updateAccount(
             @PathVariable String id,
             @RequestParam(value = "username", required = false) String username,
-            @RequestParam(value = "password", required = false) String password,
-            @RequestParam(value = "firstname", required = false) String firstName,
-            @RequestParam(value = "lastname", required = false) String lastName) {
+            @RequestParam(value = "password", required = false) String password
+            // @RequestParam(value = "firstname", required = false) String firstName,
+            // @RequestParam(value = "lastname", required = false) String lastName
+            ) {
 
         Account account = service.getByEmail(id);
         account.setUsername(username);
         account.setPassword(password);
-        account.setFirstname(firstName);
-        account.setLastname(lastName);
+        // account.setFirstname(firstName);
+        // account.setLastname(lastName);
         service.updateAccount(account);
 
         return new ResponseEntity<>("Account updated successfully.", HttpStatus.OK);
