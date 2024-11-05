@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Service;
 
+import Pucknotes.Server.Response.Types.ResourceNotFoundException;
 import Pucknotes.Server.Semester.Semester;
 import lombok.AllArgsConstructor;
 
@@ -43,5 +44,18 @@ public class MajorService {
         } else {
             return repository.findAll(sortOrder);
         }
+    }
+
+    public Major getById(String id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Invalid major ID.");
+        }
+
+        Major major = repository.findById(id).orElse(null);
+        if (major == null) {
+            throw new ResourceNotFoundException("No major with this ID.");
+        }
+
+        return major;
     }
 }

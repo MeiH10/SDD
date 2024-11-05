@@ -30,7 +30,10 @@ public class MajorController {
             @RequestParam(value = "sort", defaultValue = "name") String sort,
             @RequestParam(value = "order", defaultValue = "asc") String order) {
 
-        Semester semester = semesterId.isEmpty() ? null : semesters.getById(semesterId);
+        Semester semester = semesterId.isEmpty()
+            ? null
+            : semesters.getById(semesterId);
+
         List<Major> majors = service.getMajors(school, name, semester, sort, order);
         List<String> results = majors.stream().map(Major::getId).toList();
         return ResponseEntity.ok(APIResponse.good(results));
