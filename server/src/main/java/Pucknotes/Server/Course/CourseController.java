@@ -2,6 +2,7 @@ package Pucknotes.Server.Course;
 
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class CourseController {
     @Autowired
     private MajorService majors;
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<APIResponse<List<String>>> getCourses(
             @RequestParam(value = "major", defaultValue = "") String majorID,
             @RequestParam(value = "code", defaultValue = "") String code,
@@ -33,12 +34,18 @@ public class CourseController {
             @RequestParam(value = "sort", defaultValue = "name") String sort,
             @RequestParam(value = "order", defaultValue = "asc") String order) {
 
+        System.out.println(List.of(majorID, code, majorCode, name, sort, order));
         Major major = majorID.isEmpty()
             ? null
             : majors.getById(majorID);
 
+        System.out.println(1);
         List<Course> courses = service.getCourses(major, majorCode, code, name, sort, order);
-        List<String> results = courses.stream().map(Course::getId).toList();
+        System.out.println(2);
+        Stream<Course> stream = courses.stream();
+        System.out.println(3);
+        List<String> results = stream.map(Course::getId).toList();
+        System.out.println(4);
         return ResponseEntity.ok(APIResponse.good(results));
     }
 

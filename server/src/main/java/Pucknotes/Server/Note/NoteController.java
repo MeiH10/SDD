@@ -38,10 +38,11 @@ public class NoteController {
     public ResponseEntity<String> addNote(
             HttpServletRequest request,
             @RequestParam("title") String title,
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("course") String courseID) {
         try {
             String userID = getCurrentUserId(request);
-            String noteId = noteService.addNote(title, file, userID);
+            String noteId = noteService.addNote(title, file, userID, courseID);
             return new ResponseEntity<>("Note created successfully with ID: " + noteId, HttpStatus.CREATED);
         } catch (IOException e) {
             return new ResponseEntity<>("Error while uploading file: " + e.getMessage(),

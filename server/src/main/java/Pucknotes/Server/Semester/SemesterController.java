@@ -17,7 +17,7 @@ public class SemesterController {
     @Autowired
     private SemesterService service;
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<APIResponse<List<String>>> getAllSemesters(
             @RequestParam(value = "year", defaultValue = "-1") Integer year,
             @RequestParam(value = "season", defaultValue = "any") String season,

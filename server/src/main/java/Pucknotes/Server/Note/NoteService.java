@@ -9,6 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import Pucknotes.Server.Account.Account;
 import Pucknotes.Server.Account.AccountService;
+import Pucknotes.Server.Course.Course;
+import Pucknotes.Server.Course.CourseService;
 import Pucknotes.Server.Response.Types.UnauthorizedException;
 import lombok.AllArgsConstructor;
 
@@ -28,9 +30,13 @@ public class NoteService {
     @Autowired
     private AccountService accounts;
 
-    public String addNote(String title, MultipartFile file, String userID) throws IOException {
+    @Autowired
+    private CourseService courses;
+
+    public String addNote(String title, MultipartFile file, String userID, String courseID) throws IOException {
         Account account = accounts.getById(userID);
-        Note note = new Note(title, account, new Binary(BsonBinarySubType.BINARY, file.getBytes()));
+        Course course = courses.getById(courseID);
+        Note note = new Note(title, course, account, new Binary(BsonBinarySubType.BINARY, file.getBytes()));
         note = NoteRepo.insert(note);
         return note.getId();
     }

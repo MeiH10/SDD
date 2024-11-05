@@ -30,20 +30,28 @@ public class CourseService {
         }
 
         if (majorCode != null && !majorCode.isEmpty()) {
+            System.out.println(1);
             return repository.findByMajorCode(majorCode, sortOrder);
-        } else if (major != null && code != null && name != null) {
-            return repository.findByMajorAndCodeAndNameContaining(major, code, name, sortOrder);
-        } else if (major != null && code != null) {
-            return repository.findByMajorAndCode(major, code, sortOrder);
-        } else if (major != null && name != null) {
-            return repository.findByMajorAndNameContaining(major, name, sortOrder);
-        } else if (code != null) {
+        } else if (major != null && code != null && !name.isEmpty()) {
+            System.out.println(2);
+            return repository.findByMajorAndCodeAndNameContaining(major.getId(), code, name, sortOrder);
+        } else if (major != null && !code.isEmpty()) {
+            System.out.println(3);
+            return repository.findByMajorAndCode(major.getId(), code, sortOrder);
+        } else if (major != null && !name.isEmpty()) {
+            System.out.println(4);
+            return repository.findByMajorAndNameContaining(major.getId(), name, sortOrder);
+        } else if (!code.isEmpty()) {
+            System.out.println(5);
             return repository.findByCode(code, sortOrder);
         } else if (major != null) {
-            return repository.findByMajor(major, sortOrder);
-        } else if (name != null) {
+            System.out.println(6);
+            return repository.findByMajor(major.getId(), sortOrder);
+        } else if (!name.isEmpty()) {
+            System.out.println(7);
             return repository.findByNameContaining(name, sortOrder);
         } else {
+            System.out.println(8);
             return repository.findAll(sortOrder);
         }
     }

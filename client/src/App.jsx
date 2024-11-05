@@ -22,14 +22,14 @@ const App = () => {
         <nav>
           <ul>
             <li><Link to="/uc1">UC1: Manage Session</Link></li>
-            <li><Link to="/uc2">Use Case 2</Link></li>
+            <li><Link to="/uc2">UC2: Manage Note</Link></li>
             <li><Link to="/uc3">Use Case 3</Link></li>
             <li><Link to="/uc4">Use Case 4</Link></li>
             <li><Link to="/uc5">Use Case 5</Link></li>
             <li><Link to="/uc6">Use Case 6</Link></li>
             <li><Link to="/uc7">Use Case 7</Link></li>
             <li><Link to="/uc8">Use Case 8</Link></li>
-            <li><Link to="/uc9">Use Case 9</Link></li>
+            <li><Link to="/uc9">UC9: Upload Note</Link></li>
             <li><Link to="/uc10">Use Case 10</Link></li>
             <li><Link to="/uc11">Use Case 11</Link></li>
           </ul>

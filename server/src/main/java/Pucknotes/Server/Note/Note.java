@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import Pucknotes.Server.Account.Account;
+import Pucknotes.Server.Course.Course;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,11 @@ public class Note {
     @Getter @Setter
     @NonNull
     private String title;
+
+    @Getter @Setter
+    @NonNull
+    @DBRef
+    private Course course;
 
     @Getter
     @NonNull

@@ -68,7 +68,6 @@ const UseCase1 = () => {
     const logoutButton = <button onClick={handleLogout}>Logout</button>;
 
     const loginModal = <form method='POST' action='#' onSubmit={handleLogin}>
-        <iframe hidden name="yourmom"></iframe>
         <label>
             Email:
             <input type="email" name="email"></input>
