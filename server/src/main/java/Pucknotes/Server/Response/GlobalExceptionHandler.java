@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import Pucknotes.Server.Response.Types.ResourceConflictException;
 import Pucknotes.Server.Response.Types.ResourceNotFoundException;
+import Pucknotes.Server.Response.Types.UnauthorizedException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -33,5 +34,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<APIResponse<Object>> handleResourceConflictException(ResourceConflictException ex) {
         APIResponse<Object> response = APIResponse.bad(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<APIResponse<Object>> handleUnauthorizedException(UnauthorizedException ex) {
+        APIResponse<Object> response = APIResponse.bad(ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 }

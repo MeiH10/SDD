@@ -31,17 +31,9 @@ public class Account {
     @NonNull
     private String password;
 
-    // @Setter
-    // private String firstname;
-    
-    // @Setter
-    // private String lastname;
-
     public Account(String email, String username, String password, String firstname, String lastname) {
         this.email = email;
         this.username = username;
         this.password = password;
-        // this.firstname = firstname;
-        // this.lastname = lastname;
     }
 }
