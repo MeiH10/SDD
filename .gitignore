@@ -132,3 +132,5 @@ dist
 .vscode
 
 data
+
+server/src/mainjava/Pucknotes/Server/resources/ServerApplication.java
