@@ -46,6 +46,18 @@ public class AccountController {
         return ResponseEntity.ok(APIResponse.good(account.getId()));
     }
 
+    @PostMapping("/force")
+    public ResponseEntity<APIResponse<String>> forceAccount(
+        @RequestParam(value = "email") String email,
+        @RequestParam(value = "username") String username,
+        @RequestParam(value = "password") String password) {
+
+        Account account = new Account(email, username, password);
+        service.registerAccount(account);
+        
+        return ResponseEntity.ok(APIResponse.good(account.getId()));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<APIResponse<Account>> getAccount(@PathVariable String id) {
         Account account = service.getById(id);
