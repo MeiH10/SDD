@@ -3,16 +3,16 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ mode }) => {
     // eslint-disable-next-line no-undef
-    const env = loadEnv(mode, process.cwd());
+    const env = loadEnv(mode, process.cwd() + "/..");
     return {
         base: "/",
         plugins: [react()],
         preview: {
-            port: 8080,
+            port: env.VITE_FRONTEND_PORT,
             strictPort: true,
         },
         server: {
-            port: 8080,
+            port: env.VITE_FRONTEND_PORT,
             strictPort: true,
             host: true,
             watch: {
