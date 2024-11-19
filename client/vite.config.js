@@ -2,16 +2,17 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, process.cwd());
+    // eslint-disable-next-line no-undef
+    const env = loadEnv(mode, process.cwd() + "/..");
     return {
         base: "/",
         plugins: [react()],
         preview: {
-            port: 8080,
+            port: env.VITE_FRONTEND_PORT,
             strictPort: true,
         },
         server: {
-            port: 8080,
+            port: env.VITE_FRONTEND_PORT,
             strictPort: true,
             host: true,
             watch: {
@@ -23,18 +24,18 @@ export default defineConfig(({ mode }) => {
             },
             proxy: {
                 '/api': {
-                    target: env.VITE_BACKEND_URL,
+                    target: env.VITE_FRONTEND_PROXY,
                     changeOrigin: true,
                     secure: false,      
                     ws: true,
-                    configure: (proxy, _options) => {
-                        proxy.on('error', (err, _req, _res) => {
+                    configure: (proxy) => {
+                        proxy.on('error', (err) => {
                             console.log('proxy error', err);
                         });
-                        proxy.on('proxyReq', (proxyReq, req, _res) => {
+                        proxy.on('proxyReq', (_, req) => {
                             console.log('Sending Request to the Target:', req.method, req.url);
                         });
-                        proxy.on('proxyRes', (proxyRes, req, _res) => {
+                        proxy.on('proxyRes', (proxyRes, req) => {
                             console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
                         });
                     },

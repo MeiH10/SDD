@@ -3,14 +3,20 @@ silent: true
 dotenv: ['.env']
 
 tasks:
-  dev: docker compose -f compose.dev.yml up --watch --build --remove-orphans
+  backend:
+    dir: server
+    cmd: ./mvnw spring-boot:run
+
+  frontend:
+    dir: client
+    cmd: npm run dev
 
   scraper:
     dir: scraper
     env:
-      MONGO_SERVER_ADDR: "mongodb://localhost:{{.DATABASE_PORT}}/data"
+      MONGO_SERVER_ADDR: "{{.BACKEND_MONGO_URI}}"
     cmds:
       - source .venv/bin/activate
       - python app.py
 
-  database: mongosh "mongodb://localhost:{{.DATABASE_PORT}}/data"
+  database: mongosh "{{.BACKEND_MONGO_URI}}"
