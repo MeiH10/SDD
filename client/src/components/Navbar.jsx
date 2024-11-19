@@ -31,12 +31,13 @@ const Navbar = () => {
       </div>
 
       <div className="flex items-center space-x-4">
+      <UploadModal />
         {isLoggedIn ? (
           <>
-            <UploadModal />
             <button
               onClick={handleLogout}
-              className="hidden sm:block text-white hover:text-red-400 transition-colors"
+              className="hidden sm:block bg-red-500 px-4 py-2 rounded-lg text-white hover:bg-red-400 transition-colors"
+
             >
               Log out
             </button>
