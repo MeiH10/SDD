@@ -4,8 +4,15 @@ import pucknotesLogo from '../assets/pucknotesLogo.svg';
 import LoginModal from './LoginModal';
 import SignUpModal from './SignUpModal';
 import UploadModal from './UploadModal';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
+  const { isLoggedIn, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
     <div className="flex justify-between items-center p-4 px-4 sm:px-24 bg-gray-800 w-full">
       <div className="flex items-center space-x-4">
@@ -23,10 +30,23 @@ const Navbar = () => {
         <SearchBar />
       </div>
 
-      <div className="flex space-x-4">
-        <LoginModal />
-        <SignUpModal />
-        <UploadModal />
+      <div className="flex items-center space-x-4">
+        {isLoggedIn ? (
+          <>
+            <UploadModal />
+            <button
+              onClick={handleLogout}
+              className="hidden sm:block text-white hover:text-red-400 transition-colors"
+            >
+              Log out
+            </button>
+          </>
+        ) : (
+          <>
+            <LoginModal />
+            <SignUpModal />
+          </>
+        )}
         
         {/* burger menu for smaller screen(not completed)*/}
         <button className="block sm:hidden text-white hover:text-teal-300 transition-colors">

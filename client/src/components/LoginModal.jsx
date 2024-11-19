@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Modal from './Modal';
+import { useAuth } from '../context/AuthContext';
 
 const LoginModal = () => {
+  const { login } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [values, setValues] = useState({ email: '', password: '' });
@@ -10,10 +12,9 @@ const LoginModal = () => {
   const validateForm = () => {
     const newErrors = {};
     if (!values.email) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(values.email)) newErrors.email = 'Email is invalid';
     if (!values.password) newErrors.password = 'Password is required';
     return newErrors;
-};
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,7 +23,6 @@ const LoginModal = () => {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,29 +31,44 @@ const LoginModal = () => {
     if (Object.keys(formErrors).length === 0) {
       setIsLoading(true);
       try {
-        const response = await fetch('/api/auth/login', {
+        const formData = new URLSearchParams();
+        formData.append('email', values.email);
+        formData.append('password', values.password);
+
+        const response = await fetch('/api/session', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
-          body: JSON.stringify(values)
+          body: formData.toString()
         });
-  
-        if (!response.ok) {
-          throw new Error('Login failed');
-        }
-  
+
         const data = await response.json();
-        console.log('Login successful:', data);
+        if (!data.good) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        login(data.data);
+        
         setIsOpen(false);
+        setValues({ email: '', password: '' });
+        setErrors({});
+        
       } catch (error) {
-        console.error('Login error:', error);
-        setErrors({ submit: 'Failed to login. Please try again.' });
+        setErrors({ submit: 'Invalid email or password' });
       } finally {
         setIsLoading(false);
       }
     } else {
       setErrors(formErrors);
+    }
+  };
+
+  const handleClose = () => {
+    if (!isLoading) {
+      setIsOpen(false);
+      setValues({ email: '', password: '' });
+      setErrors({});
     }
   };
 
@@ -68,7 +83,7 @@ const LoginModal = () => {
 
       <Modal 
         isOpen={isOpen} 
-        onClose={() => !isLoading && setIsOpen(false)} 
+        onClose={handleClose} 
         title="Login to your account"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -89,6 +104,7 @@ const LoginModal = () => {
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
+
           <div>
             <label htmlFor="password" className="block text-white mb-2">Password</label>
             <input
@@ -106,9 +122,11 @@ const LoginModal = () => {
               <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
           </div>
+
           {errors.submit && (
             <p className="text-red-500 text-sm">{errors.submit}</p>
           )}
+
           <button
             type="submit"
             disabled={isLoading}

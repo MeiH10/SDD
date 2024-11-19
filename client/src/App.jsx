@@ -4,6 +4,8 @@ import SchoolMajorSelector from './components/SchoolMajorSelector';
 import NoteForm from './components/NoteForm';
 import NoteList from './components/NoteList';
 import { useEffect, useState } from 'react';
+import ApiTest from './components/ApiTest'
+import { AuthProvider } from './context/AuthContext';
 
 const App = () => {
     const [notes, setNotes] = useState([]);
@@ -30,10 +32,13 @@ const App = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white">
-            <Navbar />
-            <SchoolMajorSelector />
-        </div>
+        <AuthProvider>
+            <div className="min-h-screen bg-gray-900 text-white">
+                <Navbar />
+                <SchoolMajorSelector />
+                <ApiTest />
+            </div>
+        </AuthProvider>
     );
 };
 
