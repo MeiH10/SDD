@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import Pucknotes.Server.Response.APIResponse;
-import Pucknotes.Server.Semester.Semester;
-import Pucknotes.Server.Semester.SemesterService;
 
 @RestController
 @RequestMapping("/api/major")
@@ -19,23 +17,22 @@ public class MajorController {
     @Autowired
     private MajorService service;
 
-    @Autowired
-    private SemesterService semesters;
-
     @GetMapping("")
-    public ResponseEntity<APIResponse<List<String>>> getMajors(
-            @RequestParam(value = "school", defaultValue = "") String school,
-            @RequestParam(value = "name", defaultValue = "") String name,
-            @RequestParam(value = "semester", defaultValue = "") String semesterId,
+    public ResponseEntity<APIResponse<Object>> getMajorsFull(
+            @RequestParam(value = "school", required = false) String school,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "semester", required = false) String semester,
             @RequestParam(value = "sort", defaultValue = "name") String sort,
-            @RequestParam(value = "order", defaultValue = "asc") String order) {
-
-        Semester semester = semesterId.isEmpty()
-            ? null
-            : semesters.getById(semesterId);
+            @RequestParam(value = "order", defaultValue = "asc") String order,
+            @RequestParam(value = "full", defaultValue = "false") boolean full) {
 
         List<Major> majors = service.getMajors(school, name, semester, sort, order);
-        List<String> results = majors.stream().map(Major::getId).toList();
-        return ResponseEntity.ok(APIResponse.good(results));
+
+        if (full) {
+            return ResponseEntity.ok(APIResponse.good(majors));
+        } else {
+            List<String> ids = majors.stream().map(Major::getId).toList();
+            return ResponseEntity.ok(APIResponse.good(ids));
+        }
     }
 }

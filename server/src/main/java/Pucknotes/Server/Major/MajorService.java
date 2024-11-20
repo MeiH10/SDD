@@ -4,11 +4,13 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import Pucknotes.Server.Response.Types.ResourceNotFoundException;
-import Pucknotes.Server.Semester.Semester;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -18,32 +20,44 @@ public class MajorService {
     @Autowired
     private MajorRepository repository;
 
-    public List<Major> getMajors(String school, String name, Semester semester, String sort, String order) {
-        Sort sortOrder = Sort.unsorted();
+    @Autowired
+    private MongoTemplate template;
 
-        if ("name".equalsIgnoreCase(sort)) {
-            sortOrder = "asc".equalsIgnoreCase(order)
-                    ? Sort.by(Sort.Order.asc("name"))
-                    : Sort.by(Sort.Order.desc("name"));
-        } else if ("semester".equalsIgnoreCase(sort)) {
-            sortOrder = "asc".equalsIgnoreCase(order)
-                    ? Sort.by(Sort.Order.asc("semester.year"))
-                    : Sort.by(Sort.Order.desc("semester.year"));
+    public List<Major> getMajors(
+            String semesterID,
+            String schoolID,
+            String name,
+            String sortType,
+            String orderType) {
+
+        Query query = new Query();
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(orderType)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        switch (sortType.toLowerCase()) {
+            case "name":
+                query.with(Sort.by(direction, "name"));
+                break;
+            case "semester":
+                query.with(Sort.by(direction, "semester.year"));
+                break;
         }
 
-        if (school != null && semester != null && name != null) {
-            return repository.findBySchoolAndNameContaining(school, name, sortOrder);
-        } else if (school != null && semester != null) {
-            return repository.findBySemester(semester, sortOrder);
-        } else if (school != null && name != null) {
-            return repository.findBySchoolAndNameContaining(school, name, sortOrder);
-        } else if (name != null) {
-            return repository.findByNameContaining(name, sortOrder);
-        } else if (school != null) {
-            return repository.findBySchool(school, sortOrder);
-        } else {
-            return repository.findAll(sortOrder);
+        if (semesterID != null) {
+            query.addCriteria(Criteria.where("semester").is(semesterID));
         }
+
+        if (schoolID != null) {
+            query.addCriteria(Criteria.where("school").is(schoolID));
+        }
+
+        if (name != null) {
+            query.addCriteria(Criteria.where("name").regex(name, "i"));
+        }
+
+        return template.find(query, Major.class);
     }
 
     public Major getById(String id) {

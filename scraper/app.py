@@ -132,7 +132,7 @@ def replace_semester(semester_code):
         schools.append(school := {
             "_id": ObjectId(),
             "name": school_data["name"],
-            "semester": DBRef("semesters", semester["_id"]),
+            "semester": semester["_id"],
         })
         
         for major in school_data["depts"]:
@@ -140,8 +140,8 @@ def replace_semester(semester_code):
                 "_id": ObjectId(),
                 "code": major["code"],
                 "name": major["name"],
-                "school": DBRef("schools", school["_id"]),
-                "semester": DBRef("semesters", semester["_id"]),
+                "school": school["_id"],
+                "semester": semester["_id"],
             })
 
     # ------------------------------------------------------------------------ #
@@ -166,9 +166,9 @@ def replace_semester(semester_code):
                     "_id": ObjectId(),
                     "code": course_data["id"],
                     "name": course_data["title"],
-                    "semester": DBRef("semesters", semester["_id"]),
-                    "school": DBRef("schools", major['school'].id),
-                    "major": DBRef("majors", major["_id"]),
+                    "semester": semester["_id"],
+                    "school": major['school'],
+                    "major": major["_id"],
                 }
             )
 
@@ -182,10 +182,10 @@ def replace_semester(semester_code):
                         "_id": ObjectId(),
                         "professors": profs,
                         "number": section["sec"],
-                        "semester": DBRef("semesters", semester["_id"]),
-                        "school": DBRef("schools", major['school'].id),
-                        "major": DBRef("majors", major["_id"]),
-                        "course": DBRef("courses", course["_id"]),
+                        "semester": semester["_id"],
+                        "school": major['school'],
+                        "major": major["_id"],
+                        "course": course["_id"],
                     }
                 )
     
