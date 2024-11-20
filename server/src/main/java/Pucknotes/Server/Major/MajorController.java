@@ -37,14 +37,17 @@ public class MajorController {
             @RequestParam(value = "order", defaultValue = "asc") String order,
             @RequestParam(value = "full", defaultValue = "false") boolean full) {
 
+        System.out.println(schoolID);
+        System.out.println(schoolName);
+
         if (schoolID != null && !schools.existsById(schoolID)) {
             throw new IllegalArgumentException("A school with 'schoolID' does not exist.");
-        } else if (schoolName != null && !schools.existsById(schoolName)) {
+        } else if (schoolName != null && !schools.existsByName(schoolName)) {
             throw new IllegalArgumentException("A school with 'schoolName' does not exist.");
         } else if (semesterID != null && !semesters.existsById(semesterID)) {
-            throw new IllegalArgumentException("A school with 'semesterID' does not exist.");
-        } else if (semesterName != null && !semesters.existsById(semesterName)) {
-            throw new IllegalArgumentException("A school with 'semesterName' does not exist.");
+            throw new IllegalArgumentException("A semester with 'semesterID' does not exist.");
+        } else if (semesterName != null && !semesters.existsByName(semesterName)) {
+            throw new IllegalArgumentException("A semester with 'semesterName' does not exist.");
         }
 
         if (semesterID == null && semesterName != null) {
@@ -52,10 +55,12 @@ public class MajorController {
         }
 
         if (schoolID == null && schoolName != null) {
-            schoolID = semesters.getByName(schoolName).getId();
+            schoolID = schools.getByName(schoolName).getId();
         }
 
-        List<Major> result = majors.getMajors(schoolID, name, semesterID, sort, order);
+        System.out.println(schoolID);
+
+        List<Major> result = majors.getMajors(semesterID, schoolID, name, sort, order);
 
         if (full) {
             return ResponseEntity.ok(APIResponse.good(result));

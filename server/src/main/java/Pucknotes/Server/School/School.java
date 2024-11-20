@@ -1,10 +1,10 @@
 package Pucknotes.Server.School;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
-import Pucknotes.Server.Semester.Semester;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +19,6 @@ public class School {
 
     private String name;
 
-    @DBRef
-    private Semester semester;
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String semester;
 }
