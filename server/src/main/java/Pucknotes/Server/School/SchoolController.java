@@ -1,4 +1,4 @@
-package Pucknotes.Server.Major;
+package Pucknotes.Server.School;
 
 import java.util.List;
 
@@ -11,15 +11,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import Pucknotes.Server.Response.APIResponse;
-import Pucknotes.Server.School.SchoolService;
 import Pucknotes.Server.Semester.SemesterService;
 
 @RestController
-@RequestMapping("/api/major")
-public class MajorController {
-    @Autowired
-    private MajorService majors;
-
+@RequestMapping("/api/school")
+public class SchoolController {
     @Autowired
     private SchoolService schools;
 
@@ -27,24 +23,16 @@ public class MajorController {
     private SemesterService semesters;
 
     @GetMapping("")
-    public ResponseEntity<APIResponse<Object>> getMajorsFull(
-            @RequestParam(value = "schoolName", required = false) String schoolName,
-            @RequestParam(value = "schoolID", required = false) String schoolID,
+    public ResponseEntity<APIResponse<Object>> getSchoolsFull(
             @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "semesterName", required = false) String semesterName,
             @RequestParam(value = "semesterID", required = false) String semesterID,
             @RequestParam(value = "sort", defaultValue = "name") String sort,
             @RequestParam(value = "order", defaultValue = "asc") String order,
             @RequestParam(value = "full", defaultValue = "false") boolean full) {
 
-        System.out.println(schoolID);
-        System.out.println(schoolName);
-
-        if (schoolID != null && !schools.existsById(schoolID)) {
-            throw new IllegalArgumentException("A school with 'schoolID' does not exist.");
-        } else if (schoolName != null && !schools.existsByName(schoolName)) {
-            throw new IllegalArgumentException("A school with 'schoolName' does not exist.");
-        } else if (semesterID != null && !semesters.existsById(semesterID)) {
+        if (semesterID != null && !semesters.existsById(semesterID)) {
             throw new IllegalArgumentException("A semester with 'semesterID' does not exist.");
         } else if (semesterName != null && !semesters.existsByName(semesterName)) {
             throw new IllegalArgumentException("A semester with 'semesterName' does not exist.");
@@ -54,26 +42,20 @@ public class MajorController {
             semesterID = semesters.getByName(semesterName).getId();
         }
 
-        if (schoolID == null && schoolName != null) {
-            schoolID = schools.getByName(schoolName).getId();
-        }
-
-        System.out.println(schoolID);
-
-        List<Major> result = majors.getMajors(semesterID, schoolID, name, sort, order);
+        List<School> result = schools.getSchool(name, semesterID, sort, order);
 
         if (full) {
             return ResponseEntity.ok(APIResponse.good(result));
         } else {
-            List<String> ids = result.stream().map(Major::getId).toList();
+            List<String> ids = result.stream().map(School::getId).toList();
             return ResponseEntity.ok(APIResponse.good(ids));
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<APIResponse<Object>> getSpecificMajor(
+    public ResponseEntity<APIResponse<Object>> getSpecificSchool(
             @PathVariable(value = "id") String id) {
 
-        return ResponseEntity.ok(APIResponse.good(majors.getById(id)));
+        return ResponseEntity.ok(APIResponse.good(schools.getById(id)));
     }
 }

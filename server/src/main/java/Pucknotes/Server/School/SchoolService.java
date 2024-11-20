@@ -1,4 +1,4 @@
-package Pucknotes.Server.Major;
+package Pucknotes.Server.School;
 
 import java.util.List;
 
@@ -10,23 +10,37 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import Pucknotes.Server.Response.Types.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
-@Document(collection = "majors")
-public class MajorService {
+@Document(collection = "schools")
+public class SchoolService {
     @Autowired
-    private MajorRepository repository;
+    private final SchoolRepository repository;
 
     @Autowired
     private MongoTemplate template;
 
-    public List<Major> getMajors(
-            String semesterID,
-            String schoolID,
+    public School getById(String id) {
+        return repository.findById(id).orElse(null);
+    }
+
+    public School getByName(String name) {
+        return repository.findByName(name).orElse(null);
+    }
+
+    public boolean existsById(String id) {
+        return repository.existsById(id);
+    }
+
+    public boolean existsByName(String name) {
+        return repository.existsByName(name);
+    }
+
+    public List<School> getSchool(
             String name,
+            String semesterID,
             String sortType,
             String orderType) {
 
@@ -49,27 +63,10 @@ public class MajorService {
             query.addCriteria(Criteria.where("semester").is(semesterID));
         }
 
-        if (schoolID != null) {
-            query.addCriteria(Criteria.where("school").is(schoolID));
-        }
-
         if (name != null) {
             query.addCriteria(Criteria.where("name").regex(name, "i"));
         }
 
-        return template.find(query, Major.class);
-    }
-
-    public Major getById(String id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Invalid major ID.");
-        }
-
-        Major major = repository.findById(id).orElse(null);
-        if (major == null) {
-            throw new ResourceNotFoundException("No major with this ID.");
-        }
-
-        return major;
+        return template.find(query, School.class);
     }
 }

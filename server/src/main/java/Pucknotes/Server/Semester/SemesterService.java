@@ -45,4 +45,16 @@ public class SemesterService {
 
         return account;
     }
+
+    public Semester getByName(String name) {
+        return repository.findByName(name).orElse(null);
+    }
+
+    public boolean existsById(String id) {
+        return repository.existsById(id);
+    }
+
+    public boolean existsByName(String name) {
+        return repository.existsByName(name);
+    }
 }
