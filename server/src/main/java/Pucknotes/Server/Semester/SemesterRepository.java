@@ -13,4 +13,7 @@ public interface SemesterRepository extends MongoRepository<Semester, String> {
     List<Semester> findAll(Sort sort);
     
     Optional<Semester> findById(String id);
+
+    Optional<Semester> findByName(String name);
+    boolean existsByName(String name);
 }

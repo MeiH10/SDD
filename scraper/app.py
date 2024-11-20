@@ -5,7 +5,7 @@ Scrapes all data from QuACS, and puts it into our database.
 from typing import Tuple, Union
 from os import getenv, path
 from json import dump, load
-from bson import DBRef, ObjectId
+from bson import ObjectId
 from requests import get
 from requests.exceptions import RequestException
 from pymongo import DeleteMany, MongoClient, InsertOne
@@ -115,7 +115,8 @@ def replace_semester(semester_code):
     semester = {
         "_id": ObjectId(),
         "year": year,
-        "season": season
+        "season": season,
+        "name": f"{season}-{year}"
     }
 
     # ------------------------------------------------------------------------ #

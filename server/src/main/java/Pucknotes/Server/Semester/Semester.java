@@ -17,4 +17,6 @@ public class Semester {
 
     private String season;
     private Number year; 
+
+    private String name;
 }
