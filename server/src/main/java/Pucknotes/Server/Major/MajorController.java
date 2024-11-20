@@ -65,7 +65,7 @@ public class MajorController {
         }
     }
 
-    @GetMapping("/:id")
+    @GetMapping("/{id}")
     public ResponseEntity<APIResponse<Object>> getSpecificMajor(
             @PathVariable(value = "id") String id) {
 
