@@ -22,7 +22,7 @@ public class MajorController {
     @Autowired
     private SemesterService semesters;
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<APIResponse<List<String>>> getMajors(
             @RequestParam(value = "school", defaultValue = "") String school,
             @RequestParam(value = "name", defaultValue = "") String name,

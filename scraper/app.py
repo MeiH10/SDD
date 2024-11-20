@@ -1,9 +1,14 @@
-from typing import Any, Tuple, Union
-from requests import get
-from requests.exceptions import RequestException
-from pymongo import MongoClient
+"""
+Scrapes all data from QuACS, and puts it into our database.
+"""
+
+from typing import Tuple, Union
 from os import getenv, path
 from json import dump, load
+from bson import DBRef, ObjectId
+from requests import get
+from requests.exceptions import RequestException
+from pymongo import DeleteMany, MongoClient, InsertOne
 
 QUACS_URL = (
     "https://raw.githubusercontent.com/quacs/quacs-data/refs/heads/master/semester_data"
@@ -16,10 +21,6 @@ print(mongo_server_addr)
 
 client = MongoClient(mongo_server_addr)
 db = client["data"]
-majors = db["majors"]
-courses = db["courses"]
-sections = db["sections"]
-semesters = db["semesters"]
 
 # ---------------------------------------------------------------------------- #
 
@@ -31,7 +32,7 @@ def download_data(url: str, filename: str) -> Union[dict, list, None]:
     """
 
     try:
-        response = get(url)
+        response = get(url, timeout=10)
     except RequestException as e:
         print(f"An error occurred while downloading the JSON data: {e}.")
         return None
@@ -42,7 +43,7 @@ def download_data(url: str, filename: str) -> Union[dict, list, None]:
 
     data = response.json()
 
-    with open(filename, "w") as file:
+    with open(filename, "w", encoding="utf-8") as file:
         dump(data, file, indent=4)
 
     print(f"File downloaded and JSON data saved to {filename}.")
@@ -60,7 +61,7 @@ def get_data(url: str, filename: str) -> Union[dict, list, None]:
         return download_data(url, filename)
 
     print(f"File '{filename}' already exists.")
-    with open(filename, "r") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         data = load(file)
         return data
 
@@ -69,12 +70,18 @@ def get_data(url: str, filename: str) -> Union[dict, list, None]:
 
 
 def get_courses(semester):
+    """
+    Get the quacs data for courses.
+    """
     return get_data(
         f"{QUACS_URL}/{semester}/courses.json", f"data/courses-{semester}.json"
     )
 
 
 def get_schools(semester):
+    """
+    Get the quacs data for schools.
+    """
     return get_data(
         f"{QUACS_URL}/{semester}/schools.json", f"data/schools-{semester}.json"
     )
@@ -97,122 +104,113 @@ def get_semester_from_code(semester: str) -> Union[None, Tuple[int, str]]:
 # ---------------------------------------------------------------------------- #
 
 
-def push_semester(data: dict) -> Any:
-    result = semesters.update_one(data, {"$set": data}, upsert=True)
-
-    print(f"Semester: '{data['season']}' / {data['year']}.")
-
-    if result.upserted_id:
-        return semesters.find_one({"_id": result.upserted_id})
-
-    return semesters.find_one(data)
-
-
-def push_major(data: dict) -> Any:
-    result = majors.update_one({"code": data["code"]}, {"$set": data}, upsert=True)
-
-    print(f"Major '{data['code']}'.")
-
-    if result.upserted_id:
-        return majors.find_one({"_id": result.upserted_id})
-
-    return majors.find_one({"code": data["code"]})
-
-
-def push_course(data: dict) -> Any:
-    result = courses.update_one({"code": data["code"]}, {"$set": data}, upsert=True)
-
-    print(f"Course '{data['code']}'.")
-
-    if result.upserted_id:
-        return courses.find_one({"_id": result.upserted_id})
-
-    return courses.find_one({"code": data["code"]})
-
-
-def push_section(data: dict) -> Any:
-    result = sections.update_one(
-        {"number": data["number"], "course": data["course"]},
-        {"$set": data},
-        upsert=True,
-    )
-
-    print(f"Section {data['number']} for {data["course"]}.")
-
-    if result.upserted_id:
-        return sections.find_one({"_id": result.upserted_id})
-
-    return sections.find_one({"number": data["number"], "course": data["course"]})
-
-
-# ---------------------------------------------------------------------------- #
-
-
-def push_data(semester_code):
+def replace_semester(semester_code):
     semester_data = get_semester_from_code(semester_code)
     if semester_data is None:
         print(f"Semester name {semester_data} for {semester_code} does not exist.")
         return
 
     year, season = semester_data
-    semester = push_semester({"year": year, "season": season})
+
+    semester = {
+        "_id": ObjectId(),
+        "year": year,
+        "season": season
+    }
 
     # ------------------------------------------------------------------------ #
 
-    schools = get_schools(semester_code)
-    if schools is None:
+    quacs_school_data = get_schools(semester_code)
+    if quacs_school_data is None:
         print(f"Couldn't get school data for {semester_code}.")
         return
-
-    for school in schools:
-        for major in school["depts"]:
-            push_major(
-                {
-                    "code": major["code"],
-                    "school": school["name"],
-                    "name": major["name"],
-                    "semester": semester["_id"],
-                }
-            )
+    
+    schools = []
+    majors = []
+    
+    for school_data in quacs_school_data:
+        schools.append(school := {
+            "_id": ObjectId(),
+            "name": school_data["name"],
+            "semester": DBRef("semesters", semester["_id"]),
+        })
+        
+        for major in school_data["depts"]:
+            majors.append({
+                "_id": ObjectId(),
+                "code": major["code"],
+                "name": major["name"],
+                "school": DBRef("schools", school["_id"]),
+                "semester": DBRef("semesters", semester["_id"]),
+            })
 
     # ------------------------------------------------------------------------ #
 
-    course_data = get_courses(semester_code)
-    if course_data is None:
+    quacs_course_data = get_courses(semester_code)
+    if quacs_course_data is None:
         print(f"Couldn't get course data for {semester_code}.")
         return
 
-    for major_data in course_data:
-        major = majors.find_one({"code": major_data["code"]})
-        if major is None:
-            print(f"Major {major_data["code"]} not found.")
+    courses = []
+    sections = []
+
+    for major in majors:
+        major_data = next((m for m in quacs_course_data if m["code"] == major["code"]), None)
+        if major_data is None:
+            print(f"Major {major["code"]} not found.")
             continue
 
         for course_data in major_data["courses"]:
-            course = push_course(
-                {
-                    "major": major["_id"],
+            courses.append(
+                course := {
+                    "_id": ObjectId(),
                     "code": course_data["id"],
                     "name": course_data["title"],
+                    "semester": DBRef("semesters", semester["_id"]),
+                    "school": DBRef("schools", major['school'].id),
+                    "major": DBRef("majors", major["_id"]),
                 }
             )
 
             for section in course_data["sections"]:
-
                 profs = [
                     slot["instructor"].split(", ") for slot in section["timeslots"]
                 ]
 
-                push_section(
-                    {
-                        "course": course["_id"],
+                sections.append(
+                    section := {
+                        "_id": ObjectId(),
                         "professors": profs,
                         "number": section["sec"],
+                        "semester": DBRef("semesters", semester["_id"]),
+                        "school": DBRef("schools", major['school'].id),
+                        "major": DBRef("majors", major["_id"]),
+                        "course": DBRef("courses", course["_id"]),
                     }
                 )
+    
+    print(f"Writing semesters: {semester}")
+    db["semesters"].bulk_write([DeleteMany({}), InsertOne(semester)])
+    print("Semesters written!")
+
+    print(f"Writing schools: {schools}")
+    db["schools"].bulk_write([DeleteMany({})] + [InsertOne(s) for s in schools])
+    print("Schools written!")
+
+    print(f"Writing majors: {[m['code'] for m in majors]}")
+    db["majors"].bulk_write([DeleteMany({})] + [InsertOne(m) for m in majors])
+    print("Majors written!")
+
+    print(f"Writing courses: {[c['code'] for c in courses]}")
+    db["courses"].bulk_write([DeleteMany({})] + [InsertOne(c) for c in courses])
+    print("Courses written!")
+
+    print(f"Writing sections: {[s['number'] for s in sections]}")
+    db["sections"].bulk_write([DeleteMany({})] + [InsertOne(s) for s in sections])
+    print("Sections written!")
 
 
 # ---------------------------------------------------------------------------- #
 
 
-data = push_data("202409")
+replace_semester("202409")
