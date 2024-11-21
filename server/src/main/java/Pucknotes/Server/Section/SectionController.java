@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import Pucknotes.Server.Course.CourseService;
 import Pucknotes.Server.Response.APIResponse;
 
 @RestController
@@ -18,6 +19,9 @@ public class SectionController {
     @Autowired
     private SectionService sections;
 
+    @Autowired
+    private CourseService courses;
+
     @GetMapping("")
     public ResponseEntity<APIResponse<Object>> getSections(
             @RequestParam(value = "courseCode", required = false) String courseCode,
@@ -25,6 +29,16 @@ public class SectionController {
             @RequestParam(value = "sort", defaultValue = "name") String sort,
             @RequestParam(value = "order", defaultValue = "asc") String order,
             @RequestParam(value = "full", defaultValue = "false") boolean full) {
+        
+        if (courseID != null && !courses.existsById(courseID)) {
+            throw new IllegalArgumentException("A course with 'courseID' does not exist.");
+        } else if (courseCode != null && !courses.existsByCode(courseCode)) {
+            throw new IllegalArgumentException("A course with 'courseCode' does not exist.");
+        }
+
+        if (courseID == null && courseCode != null) {
+            courseID = courses.getByCode(courseCode).getId();
+        }
 
         List<Section> result = sections.getSections(courseID, sort, order);
 
