@@ -1,6 +1,5 @@
 package Pucknotes.Server.Course;
 
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,40 +10,79 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import Pucknotes.Server.Major.Major;
 import Pucknotes.Server.Major.MajorService;
 import Pucknotes.Server.Response.APIResponse;
+import Pucknotes.Server.School.SchoolService;
+import Pucknotes.Server.Semester.SemesterService;
 
 @RestController
 @RequestMapping("/api/course")
 public class CourseController {
     @Autowired
-    private CourseService service;
+    private CourseService courses;
 
     @Autowired
     private MajorService majors;
 
-    @GetMapping("/")
-    public ResponseEntity<APIResponse<List<String>>> getCourses(
-            @RequestParam(value = "major", defaultValue = "") String majorID,
-            @RequestParam(value = "code", defaultValue = "") String code,
-            @RequestParam(value = "majorCode", defaultValue = "") String majorCode,
-            @RequestParam(value = "name", defaultValue = "") String name,
+    @Autowired
+    private SchoolService schools;
+
+    @Autowired
+    private SemesterService semesters;
+
+    @GetMapping("")
+    public ResponseEntity<APIResponse<Object>> getMajorsFull(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "majorCode", required = false) String majorCode,
+            @RequestParam(value = "majorID", required = false) String majorID,
+            @RequestParam(value = "schoolName", required = false) String schoolName,
+            @RequestParam(value = "schoolID", required = false) String schoolID,
+            @RequestParam(value = "semesterName", required = false) String semesterName,
+            @RequestParam(value = "semesterID", required = false) String semesterID,
             @RequestParam(value = "sort", defaultValue = "name") String sort,
-            @RequestParam(value = "order", defaultValue = "asc") String order) {
+            @RequestParam(value = "order", defaultValue = "asc") String order,
+            @RequestParam(value = "full", defaultValue = "false") boolean full) {
 
-        Major major = majorID.isEmpty()
-            ? null
-            : majors.getById(majorID);
+        if (majorID != null && !majors.existsById(majorID)) {
+            throw new IllegalArgumentException("A major with 'majorID' does not exist.");
+        } else if (majorCode != null && !majors.existsByCode(majorCode)) {
+            throw new IllegalArgumentException("A major with 'majorName' does not exist.");
+        } else if (schoolID != null && !schools.existsById(schoolID)) {
+            throw new IllegalArgumentException("A school with 'schoolID' does not exist.");
+        } else if (schoolName != null && !schools.existsByName(schoolName)) {
+            throw new IllegalArgumentException("A school with 'schoolName' does not exist.");
+        } else if (semesterID != null && !semesters.existsById(semesterID)) {
+            throw new IllegalArgumentException("A semester with 'semesterID' does not exist.");
+        } else if (semesterName != null && !semesters.existsByName(semesterName)) {
+            throw new IllegalArgumentException("A semester with 'semesterName' does not exist.");
+        }
 
-        List<Course> courses = service.getCourses(major, majorCode, code, name, sort, order);
-        List<String> results = courses.stream().map(Course::getId).toList();
-        return ResponseEntity.ok(APIResponse.good(results));
+        if (semesterID == null && semesterName != null) {
+            semesterID = semesters.getByName(semesterName).getId();
+        }
+
+        if (schoolID == null && schoolName != null) {
+            schoolID = schools.getByName(schoolName).getId();
+        }
+
+        if (majorID == null && majorCode != null) {
+            majorID = majors.getByCode(majorCode).getId();
+        }
+
+        List<Course> result = courses.getCourses(majorID, semesterID, schoolID, name, sort, order);
+
+        if (full) {
+            return ResponseEntity.ok(APIResponse.good(result));
+        } else {
+            List<String> ids = result.stream().map(Course::getId).toList();
+            return ResponseEntity.ok(APIResponse.good(ids));
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<APIResponse<Course>> getCourseById(@PathVariable("id") String id) {
-        Course semester = service.getById(id);
-        return ResponseEntity.ok(APIResponse.good(semester));
+    public ResponseEntity<APIResponse<Object>> getSpecificMajor(
+            @PathVariable(value = "id") String id) {
+
+        return ResponseEntity.ok(APIResponse.good(courses.getById(id)));
     }
 }
