@@ -70,4 +70,16 @@ public class CourseService {
 
         return section;
     }
+
+    public Course getByCode(String code) {
+        return repository.findByCode(code).orElse(null);
+    }
+
+    public boolean existsById(String id) {
+        return repository.existsById(id);
+    }
+
+    public boolean existsByCode(String code) {
+        return repository.existsByCode(code);
+    }
 }

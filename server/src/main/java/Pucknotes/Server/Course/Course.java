@@ -18,13 +18,7 @@ public class Course {
     private String id;
 
     @Field(targetType = FieldType.OBJECT_ID)
-    private String major;
-
-    @Field(targetType = FieldType.OBJECT_ID)
-    private String school;
-
-    @Field(targetType = FieldType.OBJECT_ID)
-    private String semester;
+    private String major, school, semester;
     
     private String code;
     private String name;

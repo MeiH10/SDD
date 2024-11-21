@@ -1,6 +1,5 @@
 package Pucknotes.Server.Section;
 
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,19 +16,31 @@ import Pucknotes.Server.Response.APIResponse;
 @RequestMapping("/api/section")
 public class SectionController {
     @Autowired
-    private SectionService service;
+    private SectionService sections;
 
-    @GetMapping("/")
-    public List<Section> getSections(
-        @RequestParam(value = "course", required = false) String courseId,
-        @RequestParam(value = "number", required = false) String number
-    ) {
-        return service.getSections(courseId, number);
+    @GetMapping("")
+    public ResponseEntity<APIResponse<Object>> getSections(
+            @RequestParam(value = "courseCode", required = false) String courseCode,
+            @RequestParam(value = "courseID", required = false) String courseID,
+            @RequestParam(value = "sort", defaultValue = "name") String sort,
+            @RequestParam(value = "order", defaultValue = "asc") String order,
+            @RequestParam(value = "full", defaultValue = "false") boolean full) {
+
+        List<Section> result = sections.getSections(courseID, sort, order);
+
+        if (full) {
+            return ResponseEntity.ok(APIResponse.good(result));
+        } else {
+            List<String> ids = result.stream().map(Section::getId).toList();
+            return ResponseEntity.ok(APIResponse.good(ids));
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<APIResponse<Section>> getSectionById(@PathVariable("id") String id) {
-        Section semester = service.getById(id);
+    public ResponseEntity<APIResponse<Section>> getSectionById(
+            @PathVariable("id") String id) {
+
+        Section semester = sections.getById(id);
         return ResponseEntity.ok(APIResponse.good(semester));
     }
 }
