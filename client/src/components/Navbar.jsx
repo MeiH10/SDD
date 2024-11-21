@@ -5,18 +5,28 @@ import LoginModal from './LoginModal';
 import SignUpModal from './SignUpModal';
 import UploadModal from './UploadModal';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 
 const Navbar = () => {
   const { isLoggedIn, logout } = useAuth();
+  const navigate = useNavigate();
+
 
   const handleLogout = async () => {
     await logout();
   };
+  const handleLogoClick = () => {
+    navigate('/');
+  };
+
 
   return (
     <div className="flex justify-between items-center p-4 px-4 sm:px-24 bg-gray-800 w-full">
       <div className="flex items-center space-x-4">
-        <button className="flex items-center justify-center group">
+        <button 
+          onClick={handleLogoClick}
+          className="flex items-center justify-center group">
           <img 
             src={pucknotesLogo} 
             alt="Pucknotes Logo" 

@@ -8,11 +8,11 @@ export default defineConfig(({ mode }) => {
         base: "/",
         plugins: [react()],
         preview: {
-            port: env.VITE_FRONTEND_PORT,
+            port: env.FRONTEND_PORT,
             strictPort: true,
         },
         server: {
-            port: env.VITE_FRONTEND_PORT,
+            port: env.FRONTEND_PORT,
             strictPort: true,
             host: true,
             watch: {
