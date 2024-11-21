@@ -1,10 +1,10 @@
 package Pucknotes.Server.Course;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
-import Pucknotes.Server.Major.Major;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,8 +17,14 @@ public class Course {
     @Id
     private String id;
 
-    @DBRef
-    private Major major;
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String major;
+
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String school;
+
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String semester;
     
     private String code;
     private String name;
