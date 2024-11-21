@@ -2,6 +2,10 @@ package Pucknotes.Server.Note;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,7 +14,6 @@ import Pucknotes.Server.File.FileService;
 import Pucknotes.Server.Response.Types.ResourceNotFoundException;
 import Pucknotes.Server.Response.Types.UnauthorizedException;
 import Pucknotes.Server.Section.Section;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -23,7 +26,11 @@ public class NoteService {
     @Autowired
     private FileService files;
 
-    public Note createNote(Account user, Section section, String title, String description, MultipartFile upload, String link, List<String> tags) throws IOException {
+    @Autowired
+    private MongoTemplate template;
+
+    public Note createNote(Account user, Section section, String title, String description, MultipartFile upload,
+            String link, List<String> tags) throws IOException {
         if (user == null) {
             throw new UnauthorizedException("You must log in to create a note.");
         } else if (section == null) {
@@ -33,7 +40,13 @@ public class NoteService {
         ObjectId fileID = files.addFile(upload);
 
         Note note = new Note();
-        note.setCourse(section.getId());
+
+        note.setSection(section.getId());
+        note.setCourse(section.getCourse());
+        note.setMajor(section.getMajor());
+        note.setSchool(section.getSchool());
+        note.setSemester(section.getSemester());
+
         note.setOwner(user.getId());
         note.setTitle(title);
         note.setDescription(description);
@@ -58,46 +71,52 @@ public class NoteService {
         return note;
     }
 
-    // public void updateNote(String id, String title, MultipartFile file, String userID) throws IOException {
-    //     Account account = accounts.getById(userID);
-    //     Optional<Note> optionalNote = NoteRepo.findById(id);
-    //     if (optionalNote.isPresent()) {
-    //         Note note = optionalNote.get();
-    //         if (!account.getId().equals(note.getOwner().getId())) {
-    //             throw new UnauthorizedException("You are not the note's owner.");
-    //         }
-    //         if (title != null) {
-    //             note.setTitle(title);
-    //         }
-    //         if (file != null && !file.isEmpty()) {
-    //             note.setImage(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
-    //         }
-    //         NoteRepo.save(note);
-    //     } else {
-    //         throw new ResourceNotFoundException(id);
-    //     }
-    // }
+    public List<Note> getNotes(
+            String sectionID, String courseID, String majorID,
+            String semesterID, String schoolID, List<String> tags,
+            String search, String sortType, String orderType) {
 
-    // // Method to get all note IDs
-    // public List<String> getAllNoteIds() {
-    //     return NoteRepo.findAll().stream().map(Note::getId).collect(Collectors.toList());
-    // }
+        Query query = new Query();
 
-    // public void deleteNote(String id, String userID) {
-    //     Optional<Note> optionalNote = NoteRepo.findById(id);
-    //     if (optionalNote.isPresent()) {
-    //         Note note = optionalNote.get();
-    //         Account account = accounts.getById(userID);
+        Sort.Direction direction = "asc".equalsIgnoreCase(orderType)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
 
-    //         // Check if the user is the owner of the note
-    //         if (!account.getId().equals(note.getOwner().getId())) {
-    //             throw new UnauthorizedException("You are not the note's owner.");
-    //         }
+        switch (sortType.toLowerCase()) {
+            case "title":
+                query.with(Sort.by(direction, "title"));
+                break;
+            case "semester":
+                query.with(Sort.by(direction, "semester.year"));
+                break;
+        }
 
-    //         // Perform the deletion
-    //         NoteRepo.delete(note);
-    //     } else {
-    //         throw new ResourceNotFoundException(id);
-    //     }
-    // }
+        query.addCriteria(Criteria.where("tags").all(tags));
+
+        query.addCriteria(Criteria.where("title").regex(search, "i")
+                .orOperator(Criteria.where("description").regex(search, "i")));
+
+        if (majorID != null) {
+            query.addCriteria(Criteria.where("major").is(majorID));
+        }
+
+        if (semesterID != null) {
+            query.addCriteria(Criteria.where("semester").is(semesterID));
+        }
+
+        if (schoolID != null) {
+            query.addCriteria(Criteria.where("school").is(schoolID));
+        }
+
+        return template.find(query, Note.class);
+    }
+
+    public void updateNote(Note note) {
+        repository.save(note);
+    }
+
+    public void deleteNote(Note note) {
+        repository.delete(note);
+        files.deleteFile(note.getFile());
+    }
 }

@@ -1,6 +1,7 @@
 package Pucknotes.Server.Note;
 
 import org.apache.logging.log4j.util.InternalException;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -9,11 +10,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import Pucknotes.Server.Account.Account;
+import Pucknotes.Server.Course.CourseService;
 import Pucknotes.Server.File.File;
 import Pucknotes.Server.File.FileService;
+import Pucknotes.Server.Like.LikeService;
+import Pucknotes.Server.Major.MajorService;
 import Pucknotes.Server.Response.APIResponse;
+import Pucknotes.Server.Response.Types.UnauthorizedException;
+import Pucknotes.Server.School.SchoolService;
 import Pucknotes.Server.Section.Section;
 import Pucknotes.Server.Section.SectionService;
+import Pucknotes.Server.Semester.SemesterService;
 import Pucknotes.Server.Session.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -31,7 +38,22 @@ public class NoteController {
     private SectionService sections;
 
     @Autowired
+    private CourseService courses;
+
+    @Autowired
+    private MajorService majors;
+
+    @Autowired
+    private SchoolService schools;
+
+    @Autowired
+    private SemesterService semesters;
+
+    @Autowired
     private SessionService sessions;
+
+    @Autowired
+    private LikeService likes;
 
     @Autowired
     private FileService files;
@@ -62,20 +84,84 @@ public class NoteController {
         }    
     }
 
-    // // Endpoint to get all note IDs
-    // @GetMapping("")
-    // public ResponseEntity<List<String>> getAllNoteIds() {
-    //     List<String> noteIds = notes.getAllNoteIds();
-    // }
+    @GetMapping("")
+    public ResponseEntity<APIResponse<Object>> getMajorsFull(
+            @RequestParam(value = "query", defaultValue = "") String query,
+            @RequestParam(value = "tags", defaultValue = "") List<String> tags,
+            @RequestParam(value = "sectionNumber", required = false) String sectionNumber,
+            @RequestParam(value = "sectionID", required = false) String sectionID,
+            @RequestParam(value = "courseCode", required = false) String courseCode,
+            @RequestParam(value = "courseID", required = false) String courseID,
+            @RequestParam(value = "majorCode", required = false) String majorCode,
+            @RequestParam(value = "majorID", required = false) String majorID,
+            @RequestParam(value = "schoolName", required = false) String schoolName,
+            @RequestParam(value = "schoolID", required = false) String schoolID,
+            @RequestParam(value = "semesterName", required = false) String semesterName,
+            @RequestParam(value = "semesterID", required = false) String semesterID,
+            @RequestParam(value = "sort", defaultValue = "title") String sort,
+            @RequestParam(value = "order", defaultValue = "asc") String order,
+            @RequestParam(value = "full", defaultValue = "false") boolean full) {
+
+        if (sectionID != null && !sections.existsById(sectionID)) {
+            throw new IllegalArgumentException("A section with 'sectionID' does not exist.");
+        } else if (sectionNumber != null && !sections.existsByCode(sectionNumber)) {
+            throw new IllegalArgumentException("A section with 'sectionNumber' does not exist.");
+        } else if (courseID != null && !courses.existsById(courseID)) {
+            throw new IllegalArgumentException("A course with 'courseID' does not exist.");
+        } else if (courseCode != null && !courses.existsByCode(courseCode)) {
+            throw new IllegalArgumentException("A course with 'courseCode' does not exist.");
+        } else if (majorID != null && !majors.existsById(majorID)) {
+            throw new IllegalArgumentException("A major with 'majorID' does not exist.");
+        } else if (majorCode != null && !majors.existsByCode(majorCode)) {
+            throw new IllegalArgumentException("A major with 'majorName' does not exist.");
+        } else if (schoolID != null && !schools.existsById(schoolID)) {
+            throw new IllegalArgumentException("A school with 'schoolID' does not exist.");
+        } else if (schoolName != null && !schools.existsByName(schoolName)) {
+            throw new IllegalArgumentException("A school with 'schoolName' does not exist.");
+        } else if (semesterID != null && !semesters.existsById(semesterID)) {
+            throw new IllegalArgumentException("A semester with 'semesterID' does not exist.");
+        } else if (semesterName != null && !semesters.existsByName(semesterName)) {
+            throw new IllegalArgumentException("A semester with 'semesterName' does not exist.");
+        }
+        
+        if (semesterID == null && semesterName != null) {
+            semesterID = semesters.getByName(semesterName).getId();
+        }
+
+        if (schoolID == null && schoolName != null) {
+            schoolID = schools.getByName(schoolName).getId();
+        }
+
+        if (majorID == null && majorCode != null) {
+            majorID = majors.getByCode(majorCode).getId();
+        }
+
+        if (courseID == null && courseCode != null) {
+            courseID = courses.getByCode(courseCode).getId();
+        }
+
+        if (sectionID == null && sectionNumber != null) {
+            sectionID = sections.getByNumber(sectionNumber).getId();
+        }
+
+        List<Note> result = notes.getNotes(sectionID, courseID, majorID, semesterID, schoolID, tags, query, sort, order);
+
+        if (full) {
+            return ResponseEntity.ok(APIResponse.good(result));
+        } else {
+            List<String> ids = result.stream().map(Note::getId).toList();
+            return ResponseEntity.ok(APIResponse.good(ids));
+        }
+    }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getNoteById(@PathVariable String id) {
+    public ResponseEntity<APIResponse<Note>> getNoteById(@PathVariable String id) {
         Note note = notes.getById(id);
         return ResponseEntity.ok(APIResponse.good(note));
     }
 
     @GetMapping("/{id}/file")
-    public ResponseEntity<?> getNoteFileById(@PathVariable String id) throws IOException {
+    public ResponseEntity<byte[]> getNoteFileById(@PathVariable String id) throws IOException {
 
         Note note = notes.getById(id);
         File file = files.downloadFile(note.getFile());
@@ -87,40 +173,104 @@ public class NoteController {
         return new ResponseEntity<byte[]>(file.getFile(), headers, HttpStatus.OK);
     }
 
-    // @DeleteMapping("/{id}")
-    // public ResponseEntity<String> deleteNote(
-    //         HttpServletRequest request,
-    //         @PathVariable String id) {
-    // }
+    @PutMapping("/{id}")
+    public ResponseEntity<APIResponse<String>> updateNote(
+            HttpServletRequest request,
+            @PathVariable String id,
+            @RequestParam(required = false) MultipartFile file,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) List<String> tags,
+            @RequestParam(required = false) String sectionID) {
+        
+        Account user = sessions.getCurrentUser(request);
+        Note note = notes.getById(id);
 
-    // // Endpoint to update an existing note
-    // @PutMapping("/{id}")
-    // public ResponseEntity<String> updateNote(
-    //         HttpServletRequest request,
-    //         @PathVariable String id,
-    //         @RequestParam(required = false) String title,
-    //         @RequestParam(required = false) MultipartFile file) {
-    // }
+        if (!user.getId().equals(note.getOwner())) {
+            throw new UnauthorizedException("You must be a note's owner to edit it.");
+        }
 
-    // // Endpoint to like a note
-    // @PostMapping("/{id}/like")
-    // public ResponseEntity<String> likeNote(
-    //         HttpServletRequest request,
-    //         @PathVariable String id) {
-    // }
+        if (title != null) {
+            note.setTitle(title);
+        }
 
-    // // Endpoint to check if the user has liked the note
-    // @GetMapping("/{id}/liked")
-    // public ResponseEntity<Boolean> hasLikedNote(
-    //         HttpServletRequest request,
-    //         @PathVariable String id) {
-    // }
+        if (description != null) {
+            note.setDescription(description);
+        }
+        
+        if (tags != null) {
+            note.setTags(tags);
+        }
 
-    // // Endpoint to dislike a note (remove like)
-    // @DeleteMapping("/{id}/like")
-    // public ResponseEntity<String> dislikeNote(
-    //         HttpServletRequest request,
-    //         @PathVariable String id) {
+        if (sectionID != null) {
+            Section section = sections.getById(sectionID);
 
-    // }
+            note.setSection(section.getId());
+            note.setCourse(section.getCourse());
+            note.setMajor(section.getMajor());
+            note.setSchool(section.getSchool());
+            note.setSemester(section.getSemester());
+        }
+
+        try {
+            if (file != null) {
+                ObjectId fileID = files.addFile(file);
+                note.setFile(fileID.toString());
+            }
+        } catch (IOException error) {
+            throw new IllegalArgumentException("Bad file type.");
+        }
+
+        notes.updateNote(note);
+        
+        return ResponseEntity.ok(APIResponse.good(note.getId()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<APIResponse<Boolean>> deleteNote(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        
+        Account user = sessions.getCurrentUser(request);
+        Note note = notes.getById(id);
+
+        if (!user.getId().equals(note.getOwner())) {
+            throw new UnauthorizedException("You must be a note's owner to delete it.");
+        }
+
+        notes.deleteNote(note);
+
+        return ResponseEntity.ok(APIResponse.good(true));
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<APIResponse<Boolean>> likeNote(
+            HttpServletRequest request,
+            @PathVariable String id) {
+
+        Account user = sessions.getCurrentUser(request);
+        likes.likeNote(id, user.getId());
+        return ResponseEntity.ok(APIResponse.good(true));
+    }
+
+    // Endpoint to check if the user has liked the note
+    @GetMapping("/{id}/liked")
+    public ResponseEntity<APIResponse<Boolean>> hasLikedNote(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        
+        Account user = sessions.getCurrentUser(request);
+        return ResponseEntity.ok(APIResponse.good(likes.hasLiked(id, user.getId())));
+    }
+
+    // Endpoint to dislike a note (remove like)
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<APIResponse<Boolean>> dislikeNote(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        
+        Account user = sessions.getCurrentUser(request);
+        likes.dislikeNote(id, user.getId());
+        return ResponseEntity.ok(APIResponse.good(true));
+    }
 }

@@ -53,4 +53,8 @@ public class FileService {
         return result;
     }
 
+    public void deleteFile(String id) {
+        Query query = new Query(Criteria.where("_id").is(id));
+        template.delete(query);
+    }
 }
