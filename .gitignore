@@ -131,3 +131,5 @@ dist
 .vscode
 
 data
+/PuckNotes
+.DS_Store
