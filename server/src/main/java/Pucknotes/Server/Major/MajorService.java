@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import Pucknotes.Server.Response.Types.ResourceNotFoundException;
+import Pucknotes.Server.School.School;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -71,5 +72,17 @@ public class MajorService {
         }
 
         return major;
+    }
+
+    public School getByCode(String code) {
+        return repository.findByCode(code).orElse(null);
+    }
+
+    public boolean existsById(String id) {
+        return repository.existsById(id);
+    }
+
+    public boolean existsByCode(String code) {
+        return repository.existsByCode(code);
     }
 }

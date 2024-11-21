@@ -28,17 +28,14 @@ public class MajorController {
 
     @GetMapping("")
     public ResponseEntity<APIResponse<Object>> getMajorsFull(
+            @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "schoolName", required = false) String schoolName,
             @RequestParam(value = "schoolID", required = false) String schoolID,
-            @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "semesterName", required = false) String semesterName,
             @RequestParam(value = "semesterID", required = false) String semesterID,
             @RequestParam(value = "sort", defaultValue = "name") String sort,
             @RequestParam(value = "order", defaultValue = "asc") String order,
             @RequestParam(value = "full", defaultValue = "false") boolean full) {
-
-        System.out.println(schoolID);
-        System.out.println(schoolName);
 
         if (schoolID != null && !schools.existsById(schoolID)) {
             throw new IllegalArgumentException("A school with 'schoolID' does not exist.");
@@ -57,8 +54,6 @@ public class MajorController {
         if (schoolID == null && schoolName != null) {
             schoolID = schools.getByName(schoolName).getId();
         }
-
-        System.out.println(schoolID);
 
         List<Major> result = majors.getMajors(semesterID, schoolID, name, sort, order);
 
