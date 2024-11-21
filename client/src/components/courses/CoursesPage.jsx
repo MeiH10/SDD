@@ -70,6 +70,9 @@ const CoursesPage = () => {
         {courses.map(course => (
           <div 
             key={course.id}
+            onClick={() => navigate(`/${majorCode}/${course.id}`, { 
+                state: { courseData: course }
+            })}
             className="bg-gray-800 p-4 hover:bg-gray-700 transition-colors cursor-pointer border border-gray-700"
           >
             <div className="flex items-baseline gap-2">

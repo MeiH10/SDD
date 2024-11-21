@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import SchoolMajorSelector from './components/SchoolMajorSelector';
 import CoursesPage from './components/courses/CoursesPage';
+import CourseSectionsPage from './components/courses/CourseSectionsPage';
 
 const App = () => {
   return (
@@ -13,6 +14,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<SchoolMajorSelector />} />
             <Route path="/:majorCode" element={<CoursesPage />} />
+            <Route path="/:majorCode/:courseId" element={<CourseSectionsPage />} />
           </Routes>
         </div>
       </BrowserRouter>
