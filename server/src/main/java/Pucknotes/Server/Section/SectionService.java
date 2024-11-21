@@ -58,4 +58,8 @@ public class SectionService {
 
         return section;
     }
+
+    public boolean existsById(String id) {
+        return repository.existsById(id);
+    }
 }

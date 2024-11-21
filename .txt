@@ -1,30 +1,24 @@
-query: {
-    "school" : "{ $exists: true }",
-    "name" : {
-        "$regularExpression" : {
-            "pattern" : ".*",
-            "options" : "i"
-        }
-    },
-    "semester" : {
-        "$java" : {
-            "$ref" : "semesters",
-            "$id" : "{ $exists: true }"
-        }
-    }
-}
+SELECT
+    i1.instructor,
+FROM
+    instructor i1,
+    instructor i2,
+    instructor i3
+WHERE
+    i1.instructor NOT IN (SELECT name FROM faculty) AND
 
-fields: Document{{}}
+    i1.instructor == "202309" AND
+    i1.coursecode LIKE "___-[1|2|4]___" AND
 
-sort: {
-    "school" : "{ $exists: true }",
-    "name" : {
-        "$regularExpression" : {
-            "pattern" : ".*",
-            "options" : "i"
-        }
-    },
-    "semester" : "{ $exists: true }"
-}
+    i2.instructor == "202309" AND
+    i2.coursecode LIKE "___-[1|2|4]___" AND
 
-for class: class Pucknotes.Server.Major.Major in collection: majors
+    i3.instructor == "202309" AND
+    i3.coursecode LIKE "___-[1|2|4]___" AND
+
+    i1.coursecode != i2.coursecode AND
+    i2.coursecode != i3.coursecode AND
+
+    i1.instructor == i2.instructor AND
+    i2.instructor == i3.instructor
+ORDER BY i1.instructor ASC
