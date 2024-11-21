@@ -33,6 +33,10 @@ public class LikeService {
             throw new UnauthorizedException("You have already liked this note.");
         }
 
+        if(user.getRole() == 1 || user.getRole() == 0) {
+            throw new UnauthorizedException("You do not have permission to like this note.");
+        }
+
         // Create and save a new Like
         Like like = new Like();
         like.setUser(user);
@@ -50,6 +54,11 @@ public class LikeService {
         if (existingLike.isEmpty()) {
             throw new UnauthorizedException("You have not liked this note.");
         }
+
+        if(user.getRole() == 1 || user.getRole() == 0){
+            throw new UnauthorizedException("You do not have permission to dislike this note.");
+        }
+
 
         likeRepository.delete(existingLike.get());
     }

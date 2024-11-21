@@ -28,9 +28,15 @@ public class CommentService {
         if (userID == null) {
             throw new UnauthorizedException("User must be logged in to create a comment.");
         }
-        
+
         Note note = noteServive.getNote(noteID);
         Account account = accountService.getById(userID);
+
+        int accountRole = account.getRole();
+        if(accountRole == 0 || accountRole == 1){
+            throw new UnauthorizedException("User deos not have the correct permissions to post a comment");
+        }
+
         Comment comment = new Comment(account, note, body);
         return commentRepository.save(comment);
     }
@@ -66,8 +72,8 @@ public class CommentService {
         }
 
         Account account = accountService.getById(userID);
-        
-        if (!comment.getAccount().getId().equals(account.getId())) {
+
+        if (!comment.getAccount().getId().equals(account.getId()) && account.getRole() != 3) {
             throw new UnauthorizedException("You are not the owner of this comment.");
         }
 

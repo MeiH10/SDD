@@ -31,6 +31,9 @@ public class CommentController {
             @RequestBody String body,
             @RequestBody String noteID) {
         String currentUserId = getCurrentUserId(request);
+
+
+
         Comment createdComment = commentService.createComment(currentUserId, noteID, body);
         return ResponseEntity.ok(APIResponse.good(createdComment));
     }
