@@ -87,6 +87,8 @@ web_modules/
 .next
 out
 
+./server/src/main/resources/application.properties
+
 # Nuxt.js build / generate output
 .nuxt
 dist
