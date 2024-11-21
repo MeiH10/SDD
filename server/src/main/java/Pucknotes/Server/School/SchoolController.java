@@ -25,7 +25,6 @@ public class SchoolController {
     @GetMapping("")
     public ResponseEntity<APIResponse<Object>> getSchoolsFull(
             @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "semesterName", required = false) String semesterName,
             @RequestParam(value = "semesterID", required = false) String semesterID,
             @RequestParam(value = "sort", defaultValue = "name") String sort,

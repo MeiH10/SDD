@@ -16,32 +16,27 @@ import Pucknotes.Server.Note.Note;
 
 import java.util.Date;
 
+@Getter
 @AllArgsConstructor
 @RequiredArgsConstructor
 @NoArgsConstructor
 @Document(collection = "comments")
 public class Comment {
-
     @Id
-    @Getter
     private String id;
 
     @DBRef
-    @Getter
     @NonNull
     private Account account;
 
     @DBRef
-    @Getter
     @NonNull
     private Note note;
 
-    @Getter
     @Setter
     @NonNull
     private String description;
 
-    @Getter
     @Setter
     private Date createdDate = new Date();
 }

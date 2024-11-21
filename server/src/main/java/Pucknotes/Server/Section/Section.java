@@ -3,10 +3,10 @@ package Pucknotes.Server.Section;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
-import Pucknotes.Server.Course.Course;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +19,8 @@ public class Section {
     @Id
     private String id;
 
-    @DBRef
-    private Course course;
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String course, major, school, semester;
 
     private List<String> professors;
     private String number;

@@ -20,8 +20,5 @@ public class Major {
     private String name;
 
     @Field(targetType = FieldType.OBJECT_ID)
-    private String school;
-
-    @Field(targetType = FieldType.OBJECT_ID)
-    private String semester;
+    private String school, semester;
 }
