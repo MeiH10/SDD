@@ -64,5 +64,32 @@ class AccountServiceTest {
         verify(repository).save(any(Account.class));
     }
 
+    @Test
+    void getByEmail_ShouldThrowException_WhenEmailIsNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> accountService.getByEmail(null));
+    }
+
+    @Test
+    void getByEmail_ShouldThrowResourceNotFoundException_WhenAccountNotFound() {
+        String email = "notfound@example.com";
+        when(repository.findByEmail(email)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> accountService.getByEmail(email));
+    }
+
+    @Test
+    void getByEmail_ShouldReturnAccount_WhenAccountExists() {
+        String email = "test@example.com";
+        Account mockAccount = new Account(email, "username", "password");
+        when(repository.findByEmail(email)).thenReturn(Optional.of(mockAccount));
+
+        Account result = accountService.getByEmail(email);
+
+        assertNotNull(result);
+        assertEquals(mockAccount, result);
+    }
+
 
 }
