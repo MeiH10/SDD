@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -38,10 +39,11 @@ public class Comment {
     @Setter
     private Date createdDate = new Date();
 
-    @Getter
     @Setter
-    @AllArgsConstructor
-    static class Statistics {
-        long likes;
-    }
+    private long totalLikes;
+
+    @Setter
+    // @NonNull
+    @Field(targetType = FieldType.OBJECT_ID)
+    private List<String> likes;
 }

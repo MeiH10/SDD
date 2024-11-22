@@ -5,10 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import Pucknotes.Server.Account.Account;
-import Pucknotes.Server.Like.LikeService;
+import Pucknotes.Server.Account.AccountService;
 import Pucknotes.Server.Note.Note;
 import Pucknotes.Server.Note.NoteService;
 import Pucknotes.Server.Response.APIResponse;
+import Pucknotes.Server.Response.Types.ResourceNotFoundException;
 import Pucknotes.Server.Session.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -25,10 +26,10 @@ public class CommentController {
     private SessionService sessions;
 
     @Autowired
-    private NoteService notes;
+    private AccountService accounts;
 
     @Autowired
-    private LikeService likes;
+    private NoteService notes;
 
     @PostMapping("")
     public ResponseEntity<APIResponse<Comment>> createComment(
@@ -44,11 +45,30 @@ public class CommentController {
     }
 
     @GetMapping("")
-    public ResponseEntity<APIResponse<List<Comment>>> getCommentsByNoteId(
-            @RequestParam(value = "noteID") String noteID) {
+    public ResponseEntity<APIResponse<?>> getComments(
+            HttpServletRequest request,
+            @RequestParam(value = "noteID") String noteID,
+            @RequestParam(value = "ownerID") String userID,
+            @RequestParam(value = "sort", defaultValue = "likes") String sort,
+            @RequestParam(value = "order", defaultValue = "asc") String order,
+            @RequestParam(value = "return", defaultValue = "id") String type) {
+        
+        if (noteID != null && !notes.existsById(noteID)) {
+            throw new ResourceNotFoundException("Note with 'noteID' does not exist.");
+        } else if (userID != null && !accounts.existsById(userID)) {
+            throw new ResourceNotFoundException("Account with 'userID' does not exist.");
+        }
 
-        List<Comment> results = comments.getCommentsByNoteId(noteID);
-        return ResponseEntity.ok(APIResponse.good(results));
+        List<Comment> result = comments.getComments(noteID, userID, sort, order);
+        switch (type) {
+            case "object":
+                return ResponseEntity.ok(APIResponse.good(result));
+            case "count":
+                return ResponseEntity.ok(APIResponse.good(result.size()));
+            default:
+                List<String> ids = result.stream().map(Comment::getId).toList();
+                return ResponseEntity.ok(APIResponse.good(ids));
+        }
     }
 
     @GetMapping("/{id}")
@@ -89,7 +109,7 @@ public class CommentController {
 
         Account user = sessions.getCurrentUser(request);
         Comment comment = comments.getById(id);
-        likes.likeComment(user, comment);
+        comments.like(user, comment);
 
         return ResponseEntity.ok(APIResponse.good(true));
     }
@@ -102,7 +122,7 @@ public class CommentController {
         Account user = sessions.getCurrentUser(request);
         Comment comment = comments.getById(id);
 
-        return ResponseEntity.ok(APIResponse.good(likes.hasLikedComment(user, comment)));
+        return ResponseEntity.ok(APIResponse.good(comments.hasLiked(user, comment)));
     }
 
     @DeleteMapping("/{id}/like")
@@ -112,19 +132,8 @@ public class CommentController {
         
         Account user = sessions.getCurrentUser(request);
         Comment comment = comments.getById(id);
-        likes.dislikeComment(user, comment);
+        comments.dislike(user, comment);
 
         return ResponseEntity.ok(APIResponse.good(false));
-    }
-
-    @GetMapping("/{id}/stats")
-    public ResponseEntity<APIResponse<Comment.Statistics>> getStaistics(
-            HttpServletRequest request,
-            @PathVariable String id) {
-        
-        Comment comment = comments.getById(id);
-        var stats = new Comment.Statistics(likes.totalCommentLikes(comment));
-
-        return ResponseEntity.ok(APIResponse.good(stats));
     }
 }

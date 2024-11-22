@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import Pucknotes.Server.Account.Account;
+import Pucknotes.Server.Account.AccountService;
 import Pucknotes.Server.Course.CourseService;
 import Pucknotes.Server.File.File;
 import Pucknotes.Server.File.FileService;
-import Pucknotes.Server.Like.LikeService;
 import Pucknotes.Server.Major.MajorService;
-import Pucknotes.Server.Note.Note.Statistics;
 import Pucknotes.Server.Response.APIResponse;
+import Pucknotes.Server.Response.Types.ResourceNotFoundException;
 import Pucknotes.Server.Response.Types.UnauthorizedException;
 import Pucknotes.Server.School.SchoolService;
 import Pucknotes.Server.Section.Section;
@@ -54,10 +54,10 @@ public class NoteController {
     private SessionService sessions;
 
     @Autowired
-    private LikeService likes;
+    private FileService files;
 
     @Autowired
-    private FileService files;
+    private AccountService accounts;
 
     // Endpoint to add a new note
     @PostMapping("")
@@ -89,6 +89,7 @@ public class NoteController {
     public ResponseEntity<APIResponse<Object>> getMajorsFull(
             @RequestParam(value = "query", defaultValue = "") String query,
             @RequestParam(value = "tags", defaultValue = "") List<String> tags,
+            @RequestParam(value = "ownerID") String userID,
             @RequestParam(value = "sectionNumber", required = false) String sectionNumber,
             @RequestParam(value = "sectionID", required = false) String sectionID,
             @RequestParam(value = "courseCode", required = false) String courseCode,
@@ -99,7 +100,7 @@ public class NoteController {
             @RequestParam(value = "schoolID", required = false) String schoolID,
             @RequestParam(value = "semesterName", required = false) String semesterName,
             @RequestParam(value = "semesterID", required = false) String semesterID,
-            @RequestParam(value = "sort", defaultValue = "title") String sort,
+            @RequestParam(value = "sort", defaultValue = "likes") String sort,
             @RequestParam(value = "order", defaultValue = "asc") String order,
             @RequestParam(value = "return", defaultValue = "id") String type) {
 
@@ -123,6 +124,8 @@ public class NoteController {
             throw new IllegalArgumentException("A semester with 'semesterID' does not exist.");
         } else if (semesterName != null && !semesters.existsByName(semesterName)) {
             throw new IllegalArgumentException("A semester with 'semesterName' does not exist.");
+        } else if (userID != null && !accounts.existsById(userID)) {
+            throw new ResourceNotFoundException("Account with 'userID' does not exist.");
         }
         
         if (semesterID == null && semesterName != null) {
@@ -145,7 +148,7 @@ public class NoteController {
             sectionID = sections.getByNumber(sectionNumber).getId();
         }
 
-        List<Note> result = notes.getNotes(sectionID, courseID, majorID, semesterID, schoolID, tags, query, sort, order);
+        List<Note> result = notes.getNotes(sectionID, courseID, majorID, semesterID, schoolID, tags, query, sort, order, userID);
 
         switch (type) {
             case "object":
@@ -251,10 +254,10 @@ public class NoteController {
     public ResponseEntity<APIResponse<Boolean>> likeNote(
             HttpServletRequest request,
             @PathVariable String id) {
-
+        
         Account user = sessions.getCurrentUser(request);
         Note note = notes.getById(id);
-        likes.likeNote(user, note);
+        notes.likeNote(user, note);
 
         return ResponseEntity.ok(APIResponse.good(true));
     }
@@ -267,7 +270,7 @@ public class NoteController {
         Account user = sessions.getCurrentUser(request);
         Note note = notes.getById(id);
 
-        return ResponseEntity.ok(APIResponse.good(likes.hasLikedNote(user, note)));
+        return ResponseEntity.ok(APIResponse.good(notes.hasLikedNote(user, note)));
     }
 
     @DeleteMapping("/{id}/like")
@@ -277,19 +280,8 @@ public class NoteController {
         
         Account user = sessions.getCurrentUser(request);
         Note note = notes.getById(id);
-        likes.dislikeNote(user, note);
+        notes.dislikeNote(user, note);
 
         return ResponseEntity.ok(APIResponse.good(false));
-    }
-
-    @GetMapping("/{id}/stats")
-    public ResponseEntity<APIResponse<Statistics>> getStaistics(
-            HttpServletRequest request,
-            @PathVariable String id) {
-        
-        Note note = notes.getById(id);
-        var stats = new Statistics(likes.totalNoteLikes(note));
-
-        return ResponseEntity.ok(APIResponse.good(stats));
     }
 }
