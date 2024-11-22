@@ -92,4 +92,33 @@ class AccountServiceTest {
     }
 
 
+    @Test
+    void updateAccount_ShouldThrowUnauthorizedException_WhenUserIdMismatch() {
+        Account account = new Account("test@example.com", "username", "password");
+        account.setId("accountId");
+
+        assertThrows(UnauthorizedException.class,
+                () -> accountService.updateAccount(account, "differentUserId"));
+    }
+
+    @Test
+    void updateAccount_ShouldUpdateAccount_WhenValidInput() {
+        String userId = "userId";
+        Account existingAccount = new Account("email@example.com", "oldUsername", "oldPassword");
+        existingAccount.setId(userId);
+
+        Account updateAccount = new Account(null, "newUsername", "newPassword");
+        updateAccount.setId(userId);
+
+        when(repository.findById(userId)).thenReturn(Optional.of(existingAccount));
+        when(repository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Account result = accountService.updateAccount(updateAccount, userId);
+
+        assertNotNull(result);
+        assertEquals("newUsername", result.getUsername());
+        assertEquals("newPassword", result.getPassword());
+    }
+
+
 }
