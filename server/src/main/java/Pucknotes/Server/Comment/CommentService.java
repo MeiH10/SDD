@@ -68,7 +68,16 @@ public class CommentService {
     }
 
     public Comment getById(String id) {
-        return repository.findById(id).orElse(null);
+        if (id == null) {
+            throw new IllegalArgumentException("Invalid course ID.");
+        }
+
+        Comment comment = repository.findById(id).orElse(null);
+        if (comment == null) {
+            throw new ResourceNotFoundException("No course with this ID.");
+        }
+
+        return comment;
     }
 }
 
