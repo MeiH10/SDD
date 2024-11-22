@@ -105,10 +105,14 @@ public class NoteService {
                 break;
         }
 
-        query.addCriteria(Criteria.where("tags").all(tags));
+        if (!tags.isEmpty()) {
+            query.addCriteria(Criteria.where("tags").in(tags));
+        }
 
-        query.addCriteria(Criteria.where("title").regex(search, "i")
+        if (search != null) {
+            query.addCriteria(Criteria.where("title").regex(search, "i")
                 .orOperator(Criteria.where("description").regex(search, "i")));
+        }
 
         if (majorID != null) {
             query.addCriteria(Criteria.where("major").is(majorID));

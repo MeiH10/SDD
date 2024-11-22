@@ -87,7 +87,7 @@ public class NoteController {
 
     @GetMapping("")
     public ResponseEntity<APIResponse<Object>> getMajorsFull(
-            @RequestParam(value = "query", defaultValue = "") String query,
+            @RequestParam(value = "query", required = false) String query,
             @RequestParam(value = "tags", defaultValue = "") List<String> tags,
             @RequestParam(value = "ownerID", required = false) String userID,
             @RequestParam(value = "sectionNumber", required = false) String sectionNumber,
