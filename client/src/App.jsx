@@ -3,9 +3,8 @@ import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import SchoolMajorSelector from './components/SchoolMajorSelector';
 import CoursesPage from './components/courses/CoursesPage';
-import CourseSectionsPage from './components/courses/CourseSectionsPage';
-import NotesPage from './components/notes/NotesPage';
 import CourseSemestersPage from './components/courses/CourseSemestersPage';
+import NotesPage from './components/courses/NotesPage';
 
 const App = () => {
   return (
@@ -17,6 +16,7 @@ const App = () => {
             <Route path="/" element={<SchoolMajorSelector />} />
             <Route path="/:majorCode" element={<CoursesPage />} />
             <Route path="/:majorCode/:courseId" element={<CourseSemestersPage />} />
+            <Route path="/:majorCode/:courseId/:semester" element={<NotesPage />} />
           </Routes>
         </div>
       </BrowserRouter>
