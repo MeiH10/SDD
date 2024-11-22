@@ -58,5 +58,37 @@ class AccountControllerTest {
         verify(verificationService, times(1)).verifyToken(registration, token);
         verify(accountService, times(1)).registerAccount(mockAccount);
     }
+
+    @Test
+    void testForceAccount() {
+        String email = "test@example.com";
+        String username = "testUser";
+        String password = "securePassword";
+        Account mockAccount = new Account(email, username, password);
+        mockAccount.setId("forcedAccountId");
+
+        when(accountService.registerAccount(any(Account.class))).thenReturn(mockAccount);
+
+        ResponseEntity<APIResponse<String>> response = accountController.forceAccount(email, username, password);
+
+        assertNotNull(response);
+        assertEquals("forcedAccountId", response.getBody().getData());
+        verify(accountService, times(1)).registerAccount(any(Account.class));
+    }
+
+    @Test
+    void testGetAccount() {
+        String accountId = "123";
+        Account mockAccount = new Account("test@example.com", "testUser", "password");
+        mockAccount.setId(accountId);
+
+        when(accountService.getById(accountId)).thenReturn(mockAccount);
+
+        ResponseEntity<APIResponse<Account>> response = accountController.getAccount(accountId);
+
+        assertNotNull(response);
+        assertEquals(accountId, response.getBody().getData().getId());
+        verify(accountService, times(1)).getById(accountId);
+    }
     
 }
