@@ -95,4 +95,19 @@ public class AccountService {
 
         repository.delete(account);
     }
+
+    public Account updateAccountRole(Account next, String userID, int newRole) {
+        if (account == null) {
+            return;
+        } else if (userID.equals(account.getId())) {
+            throw new UnauthorizedException("You are not this user.");
+        }
+        Account current = getById(next.getId());
+        if (next.getUsername() != null)
+            current.setUsername(next.getUsername());
+        if (next.getPassword() != null)
+            current.setPassword(next.getPassword());
+        current.setRole(newRole);
+        return repository.save(current);
+    }
 }
