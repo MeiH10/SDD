@@ -16,10 +16,20 @@ public class ReportService {
     }
 
     public List<Report> getAllReports() {
+        int accountRole = account.getRole();
+        if(accountRole == 0 || accountRole == 1){
+            throw new UnauthorizedException("User deos not have the correct permissions to view all reports");
+        }
         return repository.findAll();
+
     }
 
     public void deleteReport(String id) {
+        int accountRole = account.getRole();
+        if(accountRole == 0 || accountRole == 1){
+            throw new UnauthorizedException("User deos not have the correct permissions to delete a report");
+        }
+
         repository.deleteById(id);
     }
 }
