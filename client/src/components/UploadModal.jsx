@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Modal from "./Modal";
 import { useAuth } from "../context/AuthContext";
 
 const UploadModal = () => {
   const { userId } = useAuth();
-
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState("");
+  const [sections, setSections] = useState([]);
+  const [debouncedCourseCode, setDebouncedCourseCode] = useState("");
 
   const [values, setValues] = useState({
     courseCode: "",
@@ -20,14 +21,51 @@ const UploadModal = () => {
     videoLink: "",
     tags: "",
     description: "",
+    sectionID: "",
   });
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (values.courseCode.length >= 8) {
+      const timeoutId = setTimeout(() => {
+        setDebouncedCourseCode(values.courseCode);
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    } else {
+      setDebouncedCourseCode("");
+      setSections([]);
+    }
+  }, [values.courseCode]);
+
+  useEffect(() => {
+    const fetchSections = async () => {
+      if (!debouncedCourseCode) return;
+
+      try {
+        const response = await fetch(
+          `/api/section?courseCode=${debouncedCourseCode}&return=object`
+        );
+        const data = await response.json();
+        if (!data.good) {
+          throw new Error("Failed to fetch sections");
+        }
+        setSections(data.data);
+      } catch (error) {
+        console.error("Error fetching sections:", error);
+        setSections([]);
+      }
+    };
+
+    fetchSections();
+  }, [debouncedCourseCode]);
 
   const validateForm = () => {
     const newErrors = {};
     if (!values.courseCode) newErrors.courseCode = "Course code is required";
     if (!values.noteName) newErrors.noteName = "Note name is required";
     if (!values.file) newErrors.file = "File is required";
+    if (!values.sectionID) newErrors.sectionID = "Section is required";
     else {
       const validTypes = ["application/pdf", "image/jpeg", "image/png"];
       if (!validTypes.includes(values.file.type)) {
@@ -39,6 +77,13 @@ const UploadModal = () => {
     }
     if (!values.description) newErrors.description = "Description is required";
     return newErrors;
+  };
+
+  const handleCourseCodeChange = (e) => {
+    const { name, value } = e.target;
+    // Format the course code as user types
+    const formattedValue = value.toUpperCase().replace(/([A-Z]+)(\d)/, "$1-$2");
+    setValues((prev) => ({ ...prev, [name]: formattedValue }));
   };
 
   const handleChange = (e) => {
@@ -73,30 +118,43 @@ const UploadModal = () => {
     try {
       const formData = new FormData();
       formData.append("title", values.noteName);
+      formData.append("description", values.description);
       formData.append("file", values.file);
+      formData.append("sectionID", values.sectionID);
+
+      if (values.tags.trim()) {
+        const tagsList = values.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag);
+        formData.append("tags", tagsList);
+      }
 
       const response = await fetch("/api/note", {
         method: "POST",
         body: formData,
       });
 
-      if (response.ok) {
-        setIsOpen(false);
-        setValues({
-          courseCode: "",
-          noteName: "",
-          fileType: "Lecture Note",
-          professor: "",
-          semester: "Summer 2024",
-          file: null,
-          videoLink: "",
-          tags: "",
-          description: "",
-        });
-        setSelectedFileName("");
-      } else {
-        throw new Error("Upload failed");
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Upload failed");
       }
+
+      setIsOpen(false);
+      setValues({
+        courseCode: "",
+        noteName: "",
+        fileType: "Lecture Note",
+        professor: "",
+        semester: "Summer 2024",
+        file: null,
+        videoLink: "",
+        tags: "",
+        description: "",
+        sectionID: "",
+      });
+      setSelectedFileName("");
+      setSections([]);
     } catch (error) {
       setErrors({ submit: error.message });
     } finally {
@@ -122,6 +180,7 @@ const UploadModal = () => {
         <div className="flex justify-between items-center mb-6">
           <span className="text-gray-300">Upload anonymously</span>
           <button
+            type="button"
             onClick={() => setIsAnonymous(!isAnonymous)}
             className={`w-12 h-6 rounded-full p-1 transition-colors ${
               isAnonymous ? "bg-teal-500" : "bg-gray-600"
@@ -140,16 +199,45 @@ const UploadModal = () => {
             <input
               name="courseCode"
               type="text"
-              placeholder="e.g. MATH 4100"
+              placeholder="Course Code (e.g. MATH-4100)"
               value={values.courseCode}
-              onChange={handleChange}
+              onChange={handleCourseCodeChange}
+              pattern="[A-Z]{4}-\d{4}"
               className={`w-full px-3 py-2 bg-gray-700 text-white rounded-lg border ${
                 errors.courseCode ? "border-red-500" : "border-gray-600"
               } focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none`}
               disabled={isLoading}
             />
+            {values.courseCode && values.courseCode.length < 8 && (
+              <p className="text-gray-400 text-sm mt-1">
+                Please enter complete course code (e.g., MATH-4100)
+              </p>
+            )}
             {errors.courseCode && (
               <p className="text-red-500 text-sm mt-1">{errors.courseCode}</p>
+            )}
+          </div>
+
+          <div>
+            <select
+              name="sectionID"
+              value={values.sectionID}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 bg-gray-700 text-white rounded-lg border ${
+                errors.sectionID ? "border-red-500" : "border-gray-600"
+              } focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none`}
+              disabled={isLoading || sections.length === 0}
+            >
+              <option value="">Select a section</option>
+              {sections.map((section) => (
+                <option key={section.id} value={section.id}>
+                  Section {section.number} - Prof.{" "}
+                  {section.professors?.[0] || "Unknown"}
+                </option>
+              ))}
+            </select>
+            {errors.sectionID && (
+              <p className="text-red-500 text-sm mt-1">{errors.sectionID}</p>
             )}
           </div>
 
@@ -157,7 +245,7 @@ const UploadModal = () => {
             <input
               name="noteName"
               type="text"
-              placeholder="Lec 1 Note"
+              placeholder="Note Name (e.g. Lecture 1 Notes)"
               value={values.noteName}
               onChange={handleChange}
               className={`w-full px-3 py-2 bg-gray-700 text-white rounded-lg border ${
@@ -176,32 +264,12 @@ const UploadModal = () => {
               value={values.fileType}
               onChange={handleChange}
               className="w-1/3 bg-gray-700 text-white rounded-lg border border-gray-600 px-3 py-2"
+              disabled={isLoading}
             >
               <option value="Lecture Note">Lecture Note</option>
               <option value="Summary">Summary</option>
               <option value="Practice Problem">Practice Problem</option>
             </select>
-            <select
-              name="semester"
-              value={values.semester}
-              onChange={handleChange}
-              className="w-2/3 bg-gray-700 text-white rounded-lg border border-gray-600 px-3 py-2"
-            >
-              <option>Summer 2024</option>
-              <option>Fall 2023</option>
-              <option>Spring 2024</option>
-            </select>
-          </div>
-
-          <div>
-            <input
-              name="professor"
-              type="text"
-              placeholder="e.g. Maria Brown"
-              value={values.professor}
-              onChange={handleChange}
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
-            />
           </div>
 
           <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
@@ -212,6 +280,7 @@ const UploadModal = () => {
               accept=".pdf,.jpg,.png"
               onChange={handleChange}
               className="hidden"
+              disabled={isLoading}
             />
             <label
               htmlFor="file-upload"
@@ -245,7 +314,7 @@ const UploadModal = () => {
                     or drag and drop
                   </span>
                   <span className="text-gray-400 text-sm mt-1">
-                    SVG, PNG, JPG or PDF (max. 2MB)
+                    PDF, JPG or PNG (max. 2MB)
                   </span>
                 </>
               )}
@@ -254,27 +323,30 @@ const UploadModal = () => {
               <p className="text-red-500 text-sm mt-2">{errors.file}</p>
             )}
           </div>
+
           <input
             name="videoLink"
             type="text"
-            placeholder="e.g. https://www.youtube.com/watch?v=GngBZDNZMy4"
+            placeholder="Video Link (optional)"
             value={values.videoLink}
             onChange={handleChange}
             className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
+            disabled={isLoading}
           />
 
           <input
             name="tags"
             type="text"
-            placeholder="Add 1-10 tags, separated by comma. For example, clear, examples, concise, ..."
+            placeholder="Tags (comma separated, e.g., midterm, chapter1, formulas)"
             value={values.tags}
             onChange={handleChange}
             className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
+            disabled={isLoading}
           />
 
           <textarea
             name="description"
-            placeholder="What topic does the note cover..."
+            placeholder="Description (what topics are covered...)"
             value={values.description}
             onChange={handleChange}
             rows="3"
@@ -285,6 +357,10 @@ const UploadModal = () => {
           />
           {errors.description && (
             <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+          )}
+
+          {errors.submit && (
+            <p className="text-red-500 text-sm">{errors.submit}</p>
           )}
 
           <div className="flex gap-4 pt-4">
@@ -326,7 +402,7 @@ const UploadModal = () => {
                   Uploading...
                 </>
               ) : (
-                "Confirm"
+                "Upload Note"
               )}
             </button>
           </div>

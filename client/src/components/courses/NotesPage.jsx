@@ -134,7 +134,7 @@ const NotesPage = () => {
              )}
              <div className="mt-4 flex gap-4">
                <button
-                 onClick={() => window.location.href = `/api/note/${note.id}?download=true`}
+                 onClick={() => window.location.href = `/api/note/${note.id}/file`}
                  className="text-teal-400 hover:text-teal-300 transition-colors"
                >
                  Download
