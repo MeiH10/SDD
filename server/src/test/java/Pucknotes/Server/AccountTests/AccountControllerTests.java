@@ -143,5 +143,22 @@ class AccountControllerTest {
         verify(accountService, times(1)).getById(accountId);
     }
 
+    @Test
+    void testUpdateAccountRole() {
+        String accountId = "123";
+        int newRole = 1;
+        String userID = "sessionUserID";
 
+        Account mockAccount = new Account("test@example.com", "testUser", "password");
+        mockAccount.setId(accountId);
+
+        when(sessionService.getSession(request)).thenReturn(userID);
+        when(accountService.getByEmail(accountId)).thenReturn(mockAccount);
+
+        ResponseEntity<String> response = accountController.updateAccountRole(request, accountId, newRole);
+
+        assertNotNull(response);
+        assertEquals("Account Role updated successfully.", response.getBody());
+        verify(accountService, times(1)).updateAccountRole(mockAccount, userID, newRole);
+    }
 }
