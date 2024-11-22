@@ -25,7 +25,7 @@ public class CommentService {
     }
 
     public List<Comment> getCommentsByNoteId(String noteId) {
-        return repository.findByNoteId(noteId);
+        return repository.findByNote(noteId);
     }
 
     public Comment getCommentById(String id) {
