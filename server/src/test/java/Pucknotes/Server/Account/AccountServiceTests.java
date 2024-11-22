@@ -148,5 +148,22 @@ class AccountServiceTest {
         assertEquals(mockAccount, result);
     }
 
+    @Test
+    void deleteAccount_ShouldThrowUnauthorizedException_WhenUserIdMismatch() {
+        Account account = new Account("test@example.com", "username", "password");
+        account.setId("accountId");
 
+        assertThrows(UnauthorizedException.class,
+                () -> accountService.deleteAccount(account, "differentUserId"));
+    }
+
+    @Test
+    void deleteAccount_ShouldDeleteAccount_WhenValidInput() {
+        Account account = new Account("test@example.com", "username", "password");
+        account.setId("userId");
+
+        accountService.deleteAccount(account, "adminId");
+
+        verify(repository).delete(account);
+    }
 }
