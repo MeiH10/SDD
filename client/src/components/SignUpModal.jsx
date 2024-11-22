@@ -1,72 +1,93 @@
-import React, { useState } from 'react';
-import Modal from './Modal';
+import { useState } from 'react'
+import Modal from './Modal'
 
 const SignUpModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [values, setValues] = useState({
     email: '',
     password: '',
     confirmPassword: '',
-    name: ''
-  });
-  const [errors, setErrors] = useState({});
+    username: ''
+  })
+  const [errors, setErrors] = useState({})
 
   const validateForm = () => {
-    const newErrors = {};
-    if (!values.name) newErrors.name = 'Name is required';
-    if (!values.email) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(values.email)) newErrors.email = 'Email is invalid';
-    if (!values.password) newErrors.password = 'Password is required';
-    if (!values.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
-    else if (values.password !== values.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    return newErrors;
-};
-
+    const newErrors = {}
+    if (!values.username) newErrors.username = 'Username is required'
+    if (!values.email) newErrors.email = 'Email is required'
+    else if (!/\S+@\S+\.\S+/.test(values.email)) newErrors.email = 'Email is invalid'
+    if (!values.password) newErrors.password = 'Password is required'
+    if (!values.confirmPassword) newErrors.confirmPassword = 'Please confirm your password'
+    else if (values.password !== values.confirmPassword) 
+      newErrors.confirmPassword = 'Passwords do not match'
+    return newErrors
+  }
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setValues(prev => ({ ...prev, [name]: value }));
+    const { name, value } = e.target
+    setValues(prev => ({ ...prev, [name]: value }))
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors(prev => ({ ...prev, [name]: '' }))
     }
-  };
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formErrors = validateForm();
+    e.preventDefault()
+    const formErrors = validateForm()
     
     if (Object.keys(formErrors).length === 0) {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
-        const { confirmPassword, ...signupData } = values;
-        
-        const response = await fetch('/api/auth/signup', {
+        const formData = new URLSearchParams()
+        formData.append('email', values.email)
+        formData.append('username', values.username)
+        formData.append('password', values.password)
+
+        const response = await fetch('/api/account/force', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
-          body: JSON.stringify(signupData)
-        });
-  
-        if (!response.ok) {
-          throw new Error('Signup failed');
+          body: formData.toString()
+        })
+
+        const data = await response.json()
+        if (!data.good) {
+          throw new Error(data.error || 'Registration failed')
         }
-  
-        const data = await response.json();
-        console.log('Signup successful:', data);
-        setIsOpen(false);
+
+        // Success - close modal and reset form
+        setIsOpen(false)
+        setValues({
+          email: '',
+          password: '',
+          confirmPassword: '',
+          username: ''
+        })
+        setErrors({})
       } catch (error) {
-        console.error('Signup error:', error);
-        setErrors({ submit: 'Failed to create account. Please try again.' });
+        setErrors({ submit: error.message })
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     } else {
-      setErrors(formErrors);
+      setErrors(formErrors)
     }
-  };
+  }
 
+  const handleClose = () => {
+    if (!isLoading) {
+      setIsOpen(false)
+      setValues({
+        email: '',
+        password: '',
+        confirmPassword: '',
+        username: ''
+      })
+      setErrors({})
+    }
+  }
 
   return (
     <>
@@ -79,27 +100,28 @@ const SignUpModal = () => {
 
       <Modal 
         isOpen={isOpen} 
-        onClose={() => !isLoading && setIsOpen(false)} 
+        onClose={handleClose}
         title="Create an account"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-white mb-2">Full Name</label>
+            <label htmlFor="username" className="block text-white mb-2">Username</label>
             <input
-              id="name"
-              name="name"
+              id="username"
+              name="username"
               type="text"
-              value={values.name}
+              value={values.username}
               onChange={handleChange}
               className={`w-full px-3 py-2 bg-gray-700 text-white rounded-lg border ${
-                errors.name ? 'border-red-500' : 'border-gray-600'
+                errors.username ? 'border-red-500' : 'border-gray-600'
               } focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none`}
               disabled={isLoading}
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+            {errors.username && (
+              <p className="text-red-500 text-sm mt-1">{errors.username}</p>
             )}
           </div>
+
           <div>
             <label htmlFor="email" className="block text-white mb-2">Email</label>
             <input
@@ -117,6 +139,7 @@ const SignUpModal = () => {
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
+
           <div>
             <label htmlFor="password" className="block text-white mb-2">Password</label>
             <input
@@ -134,6 +157,7 @@ const SignUpModal = () => {
               <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
           </div>
+
           <div>
             <label htmlFor="confirmPassword" className="block text-white mb-2">Confirm Password</label>
             <input
@@ -151,9 +175,11 @@ const SignUpModal = () => {
               <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
             )}
           </div>
+
           {errors.submit && (
             <p className="text-red-500 text-sm">{errors.submit}</p>
           )}
+
           <button
             type="submit"
             disabled={isLoading}
@@ -174,7 +200,7 @@ const SignUpModal = () => {
         </form>
       </Modal>
     </>
-  );
-};
+  )
+}
 
-export default SignUpModal;
+export default SignUpModal
