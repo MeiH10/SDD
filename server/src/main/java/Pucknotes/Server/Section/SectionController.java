@@ -28,7 +28,7 @@ public class SectionController {
             @RequestParam(value = "courseID", required = false) String courseID,
             @RequestParam(value = "sort", defaultValue = "name") String sort,
             @RequestParam(value = "order", defaultValue = "asc") String order,
-            @RequestParam(value = "full", defaultValue = "false") boolean full) {
+            @RequestParam(value = "return", defaultValue = "id") String type) {
         
         if (courseID != null && !courses.existsById(courseID)) {
             throw new IllegalArgumentException("A course with 'courseID' does not exist.");
@@ -42,11 +42,14 @@ public class SectionController {
 
         List<Section> result = sections.getSections(courseID, sort, order);
 
-        if (full) {
-            return ResponseEntity.ok(APIResponse.good(result));
-        } else {
-            List<String> ids = result.stream().map(Section::getId).toList();
-            return ResponseEntity.ok(APIResponse.good(ids));
+        switch (type) {
+            case "object":
+                return ResponseEntity.ok(APIResponse.good(result));
+            case "count":
+                return ResponseEntity.ok(APIResponse.good(result.size()));
+            default:
+                List<String> ids = result.stream().map(Section::getId).toList();
+                return ResponseEntity.ok(APIResponse.good(ids));
         }
     }
 
