@@ -22,6 +22,7 @@ public class SecurityConfig {
                         .disable())
                 .authorizeHttpRequests(r -> r
                         .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(s -> s
                         .sessionFixation()
