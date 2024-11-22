@@ -61,15 +61,15 @@ public class NoteService {
 
     public Note getById(String id) {
         if (id == null) {
-            throw new IllegalArgumentException("Invalid account ID.");
+            throw new IllegalArgumentException("Invalid note ID.");
         }
 
-        var query = Query.query(Criteria.where("id").is(id));
+        var query = Query.query(Criteria.where("_id").is(id));
         query.fields().exclude("likes");
 
         Note note = template.findOne(query, Note.class);
         if (note == null) {
-            throw new ResourceNotFoundException("No account with this ID.");
+            throw new ResourceNotFoundException("No note with this ID.");
         }
 
         return note;

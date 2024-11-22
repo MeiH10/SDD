@@ -32,16 +32,16 @@ public class CommentController {
     private NoteService notes;
 
     @PostMapping("")
-    public ResponseEntity<APIResponse<Comment>> createComment(
+    public ResponseEntity<APIResponse<String>> createComment(
             HttpServletRequest request,
-            @RequestBody String body,
-            @RequestBody String noteID) {
+            @RequestParam(value = "body") String body,
+            @RequestParam(value = "noteID") String noteID) {
 
         Account user = sessions.getCurrentUser(request);
         Note note = notes.getById(noteID);
 
-        Comment createdComment = comments.createComment(note, user, body);
-        return ResponseEntity.ok(APIResponse.good(createdComment));
+        Comment comment = comments.createComment(note, user, body);
+        return ResponseEntity.ok(APIResponse.good(comment.getId()));
     }
 
     @GetMapping("")
@@ -75,7 +75,7 @@ public class CommentController {
     public ResponseEntity<APIResponse<Comment>> getCommentById(
             @PathVariable String id) {
 
-        Comment comment = comments.getCommentById(id);
+        Comment comment = comments.getById(id);
         return ResponseEntity.ok(APIResponse.good(comment));
     }
 
@@ -96,7 +96,7 @@ public class CommentController {
             @PathVariable String id) {
 
         Account user = sessions.getCurrentUser(request);
-        Comment comment = comments.getCommentById(id);
+        Comment comment = comments.getById(id);
 
         comments.deleteComment(comment, user);
         return ResponseEntity.ok(APIResponse.good(true));

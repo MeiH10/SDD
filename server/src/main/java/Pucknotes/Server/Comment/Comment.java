@@ -45,5 +45,5 @@ public class Comment {
     @Setter
     // @NonNull
     @Field(targetType = FieldType.OBJECT_ID)
-    private List<String> likes;
+    private List<String> likes = List.of();
 }

@@ -36,19 +36,6 @@ public class CommentService {
         return repository.findByNote(noteId);
     }
 
-    public Comment getCommentById(String id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Invalid account ID.");
-        }
-
-        Comment comment = repository.findById(id).orElse(null);
-        if (comment == null) {
-            throw new ResourceNotFoundException("No account with this ID.");
-        }
-
-        return comment;
-    }
-
     public Comment editComment(String commentID, String body, Account account) {
         Comment comment = repository.findById(commentID).orElse(null);
         if (comment == null) {
@@ -80,7 +67,7 @@ public class CommentService {
             throw new IllegalArgumentException("Invalid course ID.");
         }
 
-        var query = Query.query(Criteria.where("id").is(id));
+        var query = Query.query(Criteria.where("_id").is(id));
         query.fields().exclude("likes");
 
         Comment comment = template.findOne(query, Comment.class);
