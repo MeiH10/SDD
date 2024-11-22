@@ -90,5 +90,25 @@ class AccountControllerTest {
         assertEquals(accountId, response.getBody().getData().getId());
         verify(accountService, times(1)).getById(accountId);
     }
+
+    @Test
+    void testUpdateAccount() {
+        String accountId = "123";
+        String username = "newUsername";
+        String password = "newPassword";
+        String userID = "sessionUserID";
+
+        Account mockAccount = new Account("test@example.com", "oldUsername", "oldPassword");
+        mockAccount.setId(accountId);
+
+        when(sessionService.getSession(request)).thenReturn(userID);
+        when(accountService.getByEmail(accountId)).thenReturn(mockAccount);
+
+        ResponseEntity<String> response = accountController.updateAccount(request, accountId, username, password);
+
+        assertNotNull(response);
+        assertEquals("Account updated successfully.", response.getBody());
+        verify(accountService, times(1)).updateAccount(mockAccount, userID);
+    }
     
 }
