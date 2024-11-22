@@ -114,6 +114,10 @@ public class NoteService {
                 .orOperator(Criteria.where("description").regex(search, "i")));
         }
 
+        if (courseID != null) {
+            query.addCriteria(Criteria.where("course").is(courseID));
+        }
+
         if (majorID != null) {
             query.addCriteria(Criteria.where("major").is(majorID));
         }
