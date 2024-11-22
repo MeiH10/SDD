@@ -14,7 +14,7 @@ const CoursesPage = () => {
     const fetchCourses = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/course?majorCode=${majorCode}&full=true&sort=code&order=asc`);
+        const response = await fetch(`/api/course?majorCode=${majorCode}&return=object&sort=code&order=asc`);
         const data = await response.json();
         if (!data.good) {
           throw new Error(data.error || 'Failed to fetch courses');
@@ -31,15 +31,12 @@ const CoursesPage = () => {
   }, [majorCode]);
 
   const handleCourseClick = (course) => {
-    // Get all semesters for this course
-    const uniqueSemesters = courses
-      .filter(c => c.code === course.code)
-      .map(c => c.semester);
-
     navigate(`/${majorCode}/${course.id}`, { 
       state: { 
         courseData: course,
-        semesters: uniqueSemesters
+        semesters: courses
+          .filter(c => c.code === course.code)
+          .map(c => c.semester)
       }
     });
   };
@@ -81,7 +78,7 @@ const CoursesPage = () => {
       <div className="space-y-2">
         {courses.map(course => (
           <div 
-            key={course.id}
+            key={`${course.id}-${course.code}`}
             onClick={() => handleCourseClick(course)}
             className="bg-gray-800 p-4 hover:bg-gray-700 transition-colors cursor-pointer border border-gray-700"
           >

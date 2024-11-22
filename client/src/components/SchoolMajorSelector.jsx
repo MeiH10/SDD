@@ -9,13 +9,12 @@ const SchoolMajorSelector = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [schoolsResponse, majorsResponse] = await Promise.all([
-          fetch('/api/school?full=true'),
-          fetch('/api/major?full=true')
+          fetch('/api/school?return=object'),
+          fetch('/api/major?return=object')
         ]);
 
         const schoolsData = await schoolsResponse.json();
@@ -29,6 +28,7 @@ const SchoolMajorSelector = () => {
         setAllMajors(majorsData.data);
         setLoading(false);
       } catch (err) {
+        console.error('Error fetching data:', err);
         setError(err.message);
         setLoading(false);
       }
