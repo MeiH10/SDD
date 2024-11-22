@@ -72,6 +72,9 @@ const CourseSectionsPage = () => {
           <div 
             key={section.id || section._id}
             className="bg-gray-800 p-6 hover:bg-gray-700 transition-colors border border-gray-700"
+            onClick={() => navigate(`/${majorCode}/${courseId}/${section.number}`, {
+                state: { courseData }
+              })}
           >
             <div className="flex justify-between items-start">
               <div>

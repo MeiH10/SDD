@@ -30,6 +30,20 @@ const CoursesPage = () => {
     fetchCourses();
   }, [majorCode]);
 
+  const handleCourseClick = (course) => {
+    // Get all semesters for this course
+    const uniqueSemesters = courses
+      .filter(c => c.code === course.code)
+      .map(c => c.semester);
+
+    navigate(`/${majorCode}/${course.id}`, { 
+      state: { 
+        courseData: course,
+        semesters: uniqueSemesters
+      }
+    });
+  };
+
   if (loading) {
     return (
       <div className="px-4 sm:px-24 mx-auto">
@@ -50,7 +64,6 @@ const CoursesPage = () => {
 
   return (
     <div className="px-4 sm:px-24 mx-auto">
-      {/* Major Title Bar */}
       <div className="bg-teal-500 p-4 rounded-t-lg">
         <div className="flex items-center">
           <button 
@@ -65,14 +78,11 @@ const CoursesPage = () => {
         </div>
       </div>
 
-      {/* Courses List */}
       <div className="space-y-2">
         {courses.map(course => (
           <div 
             key={course.id}
-            onClick={() => navigate(`/${majorCode}/${course.id}`, { 
-                state: { courseData: course }
-            })}
+            onClick={() => handleCourseClick(course)}
             className="bg-gray-800 p-4 hover:bg-gray-700 transition-colors cursor-pointer border border-gray-700"
           >
             <div className="flex items-baseline gap-2">

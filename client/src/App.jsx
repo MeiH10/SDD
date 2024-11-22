@@ -4,6 +4,8 @@ import Navbar from './components/Navbar';
 import SchoolMajorSelector from './components/SchoolMajorSelector';
 import CoursesPage from './components/courses/CoursesPage';
 import CourseSectionsPage from './components/courses/CourseSectionsPage';
+import NotesPage from './components/notes/NotesPage';
+import CourseSemestersPage from './components/courses/CourseSemestersPage';
 
 const App = () => {
   return (
@@ -14,7 +16,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<SchoolMajorSelector />} />
             <Route path="/:majorCode" element={<CoursesPage />} />
-            <Route path="/:majorCode/:courseId" element={<CourseSectionsPage />} />
+            <Route path="/:majorCode/:courseId" element={<CourseSemestersPage />} />
           </Routes>
         </div>
       </BrowserRouter>
