@@ -40,4 +40,11 @@ public class Note {
     @Setter
     @Field(targetType = FieldType.OBJECT_ID)
     private String section, course, major, school, semester;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    static class Statistics {
+        long likes;
+    }
 }

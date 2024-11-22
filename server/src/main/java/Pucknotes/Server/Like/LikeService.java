@@ -1,64 +1,58 @@
 package Pucknotes.Server.Like;
 
 import Pucknotes.Server.Account.Account;
-import Pucknotes.Server.Account.AccountService;
 import Pucknotes.Server.Note.Note;
-import Pucknotes.Server.Note.NoteService;
-import Pucknotes.Server.Response.Types.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class LikeService {
 
     @Autowired
-    private LikeRepository likeRepository;
+    private LikeRepository repository;
 
     @Autowired
-    private AccountService accountService;
+    private MongoTemplate template;
 
-    @Autowired
-    private NoteService noteService;
+    public Like getLikeNote(Account user, Note note) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("type").is("note"));
+        query.addCriteria(Criteria.where("user").is(user.getId()));
+        query.addCriteria(Criteria.where("item").is(note.getId()));
 
-    // Like a note
-    public void likeNote(String noteId, String userId) {
-        Account user = accountService.getById(userId);
-        Note note = noteService.getById(noteId);
-
-        // Check if the user has already liked the note
-        Optional<Like> existingLike = likeRepository.findByUserAndNote(user, note);
-        if (existingLike.isPresent()) {
-            throw new UnauthorizedException("You have already liked this note.");
-        }
-
-        // Create and save a new Like
-        Like like = new Like();
-        like.setUser(user);
-        like.setNote(note);
-        likeRepository.save(like);
+        return template.findOne(query, Like.class);
     }
 
-    // Dislike a note (remove like)
-    public void dislikeNote(String noteId, String userId) {
-        Account user = accountService.getById(userId);
-        Note note = noteService.getById(noteId);
+    public Like likeNote(Account user, Note note) {
+        Like like = getLikeNote(user, note);
+        if (like != null) return like;
 
-        // Find and remove the like
-        Optional<Like> existingLike = likeRepository.findByUserAndNote(user, note);
-        if (existingLike.isEmpty()) {
-            throw new UnauthorizedException("You have not liked this note.");
-        }
+        Like new_like = new Like(user.getId(), "note", note.getId());
+        repository.save(new_like);
 
-        likeRepository.delete(existingLike.get());
+        return new_like;
     }
 
-    // Check if a user has liked a note
-    public boolean hasLiked(String noteId, String userId) {
-        Account user = accountService.getById(userId);
-        Note note = noteService.getById(noteId);
-        return likeRepository.findByUserAndNote(user, note).isPresent();
+    public void dislikeNote(Account user, Note note) {
+        Like like = getLikeNote(user, note);
+        if (like == null) return;
+
+        repository.delete(like);
+    }
+
+    public boolean hasLiked(Account user, Note note) {
+        return getLikeNote(user, note) != null;
+    }
+
+    public long totalLikes(Note note) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("type").is("note"));
+        query.addCriteria(Criteria.where("item").is(note.getId()));
+
+        return template.count(query, Like.class);
     }
 }
 

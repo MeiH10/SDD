@@ -15,6 +15,7 @@ import Pucknotes.Server.File.File;
 import Pucknotes.Server.File.FileService;
 import Pucknotes.Server.Like.LikeService;
 import Pucknotes.Server.Major.MajorService;
+import Pucknotes.Server.Note.Note.Statistics;
 import Pucknotes.Server.Response.APIResponse;
 import Pucknotes.Server.Response.Types.UnauthorizedException;
 import Pucknotes.Server.School.SchoolService;
@@ -104,7 +105,7 @@ public class NoteController {
 
         if (sectionID != null && !sections.existsById(sectionID)) {
             throw new IllegalArgumentException("A section with 'sectionID' does not exist.");
-        } else if (sectionNumber != null && !sections.existsByCode(sectionNumber)) {
+        } else if (sectionNumber != null && !sections.existsByNumber(sectionNumber)) {
             throw new IllegalArgumentException("A section with 'sectionNumber' does not exist.");
         } else if (courseID != null && !courses.existsById(courseID)) {
             throw new IllegalArgumentException("A course with 'courseID' does not exist.");
@@ -246,34 +247,49 @@ public class NoteController {
         return ResponseEntity.ok(APIResponse.good(true));
     }
 
-    @PostMapping("/{id}/like")
+    @PutMapping("/{id}/like")
     public ResponseEntity<APIResponse<Boolean>> likeNote(
             HttpServletRequest request,
             @PathVariable String id) {
 
         Account user = sessions.getCurrentUser(request);
-        likes.likeNote(id, user.getId());
+        Note note = notes.getById(id);
+        likes.likeNote(user, note);
+
         return ResponseEntity.ok(APIResponse.good(true));
     }
 
-    // Endpoint to check if the user has liked the note
-    @GetMapping("/{id}/liked")
+    @GetMapping("/{id}/like")
     public ResponseEntity<APIResponse<Boolean>> hasLikedNote(
             HttpServletRequest request,
             @PathVariable String id) {
         
         Account user = sessions.getCurrentUser(request);
-        return ResponseEntity.ok(APIResponse.good(likes.hasLiked(id, user.getId())));
+        Note note = notes.getById(id);
+
+        return ResponseEntity.ok(APIResponse.good(likes.hasLiked(user, note)));
     }
 
-    // Endpoint to dislike a note (remove like)
     @DeleteMapping("/{id}/like")
     public ResponseEntity<APIResponse<Boolean>> dislikeNote(
             HttpServletRequest request,
             @PathVariable String id) {
         
         Account user = sessions.getCurrentUser(request);
-        likes.dislikeNote(id, user.getId());
-        return ResponseEntity.ok(APIResponse.good(true));
+        Note note = notes.getById(id);
+        likes.dislikeNote(user, note);
+
+        return ResponseEntity.ok(APIResponse.good(false));
+    }
+
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<APIResponse<Statistics>> getStaistics(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        
+        Note note = notes.getById(id);
+        var stats = new Statistics(likes.totalLikes(note));
+
+        return ResponseEntity.ok(APIResponse.good(stats));
     }
 }

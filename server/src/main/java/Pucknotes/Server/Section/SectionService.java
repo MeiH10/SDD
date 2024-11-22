@@ -63,8 +63,8 @@ public class SectionService {
         return repository.existsById(id);
     }
 
-    public boolean existsByCode(String number) {
-        return repository.existsByCode(number);
+    public boolean existsByNumber(String number) {
+        return repository.existsByNumber(number);
     }
 
     public Section getByNumber(String number) {
