@@ -120,5 +120,33 @@ class AccountServiceTest {
         assertEquals("newPassword", result.getPassword());
     }
 
+    @Test
+    void getById_ShouldThrowException_WhenIdIsNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> accountService.getById(null));
+    }
+
+    @Test
+    void getById_ShouldThrowResourceNotFoundException_WhenAccountNotFound() {
+        String id = "nonexistentId";
+        when(repository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> accountService.getById(id));
+    }
+
+    @Test
+    void getById_ShouldReturnAccount_WhenAccountExists() {
+        String id = "accountId";
+        Account mockAccount = new Account("email@example.com", "username", "password");
+        mockAccount.setId(id);
+        when(repository.findById(id)).thenReturn(Optional.of(mockAccount));
+
+        Account result = accountService.getById(id);
+
+        assertNotNull(result);
+        assertEquals(mockAccount, result);
+    }
+
 
 }
