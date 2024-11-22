@@ -47,8 +47,8 @@ public class CommentController {
     @GetMapping("")
     public ResponseEntity<APIResponse<?>> getComments(
             HttpServletRequest request,
-            @RequestParam(value = "noteID") String noteID,
-            @RequestParam(value = "ownerID") String userID,
+            @RequestParam(value = "noteID", required = false) String noteID,
+            @RequestParam(value = "ownerID", required = false) String userID,
             @RequestParam(value = "sort", defaultValue = "likes") String sort,
             @RequestParam(value = "order", defaultValue = "asc") String order,
             @RequestParam(value = "return", defaultValue = "id") String type) {

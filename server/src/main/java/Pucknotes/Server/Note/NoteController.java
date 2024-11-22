@@ -89,7 +89,7 @@ public class NoteController {
     public ResponseEntity<APIResponse<Object>> getMajorsFull(
             @RequestParam(value = "query", defaultValue = "") String query,
             @RequestParam(value = "tags", defaultValue = "") List<String> tags,
-            @RequestParam(value = "ownerID") String userID,
+            @RequestParam(value = "ownerID", required = false) String userID,
             @RequestParam(value = "sectionNumber", required = false) String sectionNumber,
             @RequestParam(value = "sectionID", required = false) String sectionID,
             @RequestParam(value = "courseCode", required = false) String courseCode,
