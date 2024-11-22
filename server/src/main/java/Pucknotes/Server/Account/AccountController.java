@@ -102,7 +102,7 @@ public class AccountController {
 
         String userID = getCurrentUserId(request);
         Account account = service.getByEmail(id);
-        service.changeAccountRole(account, userID, role);
+        service.updateAccountRole(account, userID, role);
         return new ResponseEntity<>("Account Role updated successfully.", HttpStatus.OK);
     }
 
