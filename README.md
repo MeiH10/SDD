@@ -39,7 +39,7 @@ Again, you can just run `task frontend` if you have [`task`](taskfile.dev).
 
 ## :memo: Documentation
 
-For more information about this site, look no further:
+Want more information about this site? Look no further:
 
 - For information as to the type of information we collect from QuACS, go [here](docs/quacs_data.md).
 - For our database schema, go [here](docs/database/main.md).

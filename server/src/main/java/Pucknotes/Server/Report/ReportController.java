@@ -12,12 +12,12 @@ public class ReportController {
     @Autowired
     private ReportService reports;
 
-    @PostMapping("/create")
+    @PostMapping("")
     public Report createReport(@RequestBody Report report) {
         return reports.createReport(report);
     }
 
-    @GetMapping
+    @GetMapping("")
     public List<Report> getAllReports() {
         return reports.getAllReports();
     }
