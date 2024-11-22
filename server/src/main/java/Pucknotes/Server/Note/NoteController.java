@@ -104,7 +104,7 @@ public class NoteController {
 
         if (sectionID != null && !sections.existsById(sectionID)) {
             throw new IllegalArgumentException("A section with 'sectionID' does not exist.");
-        } else if (sectionNumber != null && !sections.existsByCode(sectionNumber)) {
+        } else if (sectionNumber != null && !sections.existsByNumber(sectionNumber)) {
             throw new IllegalArgumentException("A section with 'sectionNumber' does not exist.");
         } else if (courseID != null && !courses.existsById(courseID)) {
             throw new IllegalArgumentException("A course with 'courseID' does not exist.");
