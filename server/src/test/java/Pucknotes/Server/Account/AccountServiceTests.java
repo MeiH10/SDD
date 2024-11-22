@@ -34,5 +34,35 @@ class AccountServiceTest {
                 () -> accountService.registerAccount(null, "username", "password"));
         assertEquals("Must specify non-null email, username, and password to create an account.", exception.getMessage());
     }
-    
+
+    @Test
+    void registerAccount_ShouldThrowResourceConflictException_WhenEmailExists() {
+        String email = "test@example.com";
+        when(repository.findByEmail(email)).thenReturn(Optional.of(new Account()));
+
+        assertThrows(ResourceConflictException.class,
+                () -> accountService.registerAccount(email, "username", "password"));
+    }
+
+    @Test
+    void registerAccount_ShouldSaveAccount_WhenValidInput() {
+        String email = "test@example.com";
+        String username = "testuser";
+        String password = "password";
+        String encodedPassword = "encodedPassword";
+
+        when(repository.findByEmail(email)).thenReturn(Optional.empty());
+        when(encoder.encode(password)).thenReturn(encodedPassword);
+        when(repository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Account result = accountService.registerAccount(email, username, password);
+
+        assertNotNull(result);
+        assertEquals(email, result.getEmail());
+        assertEquals(username, result.getUsername());
+        assertEquals(encodedPassword, result.getPassword());
+        verify(repository).save(any(Account.class));
+    }
+
+
 }
