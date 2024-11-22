@@ -267,7 +267,7 @@ public class NoteController {
         Account user = sessions.getCurrentUser(request);
         Note note = notes.getById(id);
 
-        return ResponseEntity.ok(APIResponse.good(likes.hasLiked(user, note)));
+        return ResponseEntity.ok(APIResponse.good(likes.hasLikedNote(user, note)));
     }
 
     @DeleteMapping("/{id}/like")
@@ -288,7 +288,7 @@ public class NoteController {
             @PathVariable String id) {
         
         Note note = notes.getById(id);
-        var stats = new Statistics(likes.totalLikes(note));
+        var stats = new Statistics(likes.totalNoteLikes(note));
 
         return ResponseEntity.ok(APIResponse.good(stats));
     }

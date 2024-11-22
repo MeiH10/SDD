@@ -8,11 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import Pucknotes.Server.Account.Account;
-import Pucknotes.Server.Note.Note;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import java.util.Date;
 
@@ -25,13 +23,13 @@ public class Comment {
     @Id
     private String id;
 
-    @DBRef
+    @Field(targetType = FieldType.OBJECT_ID)
     @NonNull
-    private Account account;
+    private String account;
 
-    @DBRef
+    @Field(targetType = FieldType.OBJECT_ID)
     @NonNull
-    private Note note;
+    private String note;
 
     @Setter
     @NonNull
@@ -39,4 +37,11 @@ public class Comment {
 
     @Setter
     private Date createdDate = new Date();
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    static class Statistics {
+        long likes;
+    }
 }

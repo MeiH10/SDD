@@ -4,48 +4,59 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import Pucknotes.Server.Account.Account;
+import Pucknotes.Server.Like.LikeService;
+import Pucknotes.Server.Note.Note;
+import Pucknotes.Server.Note.NoteService;
 import Pucknotes.Server.Response.APIResponse;
 import Pucknotes.Server.Session.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/comment")
 public class CommentController {
 
     @Autowired
-    private CommentService commentService;
+    private CommentService comments;
 
     @Autowired
-    private SessionService sessionService;
+    private SessionService sessions;
 
-    private String getCurrentUserId(HttpServletRequest request) {
-        return sessionService.getSession(request);
-    }
+    @Autowired
+    private NoteService notes;
+
+    @Autowired
+    private LikeService likes;
 
     @PostMapping("")
     public ResponseEntity<APIResponse<Comment>> createComment(
             HttpServletRequest request,
             @RequestBody String body,
             @RequestBody String noteID) {
-        String currentUserId = getCurrentUserId(request);
-        Comment createdComment = commentService.createComment(currentUserId, noteID, body);
+
+        Account user = sessions.getCurrentUser(request);
+        Note note = notes.getById(noteID);
+
+        Comment createdComment = comments.createComment(note, user, body);
         return ResponseEntity.ok(APIResponse.good(createdComment));
     }
 
-    @GetMapping("/note/{noteId}")
-    public ResponseEntity<APIResponse<List<Comment>>> getCommentsByNoteId(@PathVariable String noteId) {
-        List<Comment> comments = commentService.getCommentsByNoteId(noteId);
-        return ResponseEntity.ok(APIResponse.good(comments));
+    @GetMapping("")
+    public ResponseEntity<APIResponse<List<Comment>>> getCommentsByNoteId(
+            @RequestParam(value = "noteID") String noteID) {
+
+        List<Comment> results = comments.getCommentsByNoteId(noteID);
+        return ResponseEntity.ok(APIResponse.good(results));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Comment> getCommentById(@PathVariable String id) {
-        Optional<Comment> commentOpt = commentService.getCommentById(id);
-        return commentOpt.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<APIResponse<Comment>> getCommentById(
+            @PathVariable String id) {
+
+        Comment comment = comments.getCommentById(id);
+        return ResponseEntity.ok(APIResponse.good(comment));
     }
 
     @PutMapping("/{id}")
@@ -53,8 +64,9 @@ public class CommentController {
             HttpServletRequest request,
             @PathVariable String id,
             @RequestBody String body) {
-        String currentUserId = getCurrentUserId(request);
-        Comment updated = commentService.editComment(id, body, currentUserId);
+
+        Account user = sessions.getCurrentUser(request);
+        Comment updated = comments.editComment(id, body, user);
         return ResponseEntity.ok(APIResponse.good(updated));
     }
 
@@ -62,8 +74,57 @@ public class CommentController {
     public ResponseEntity<APIResponse<Boolean>> deleteComment(
             HttpServletRequest request,
             @PathVariable String id) {
-        String currentUserId = getCurrentUserId(request);
-        commentService.deleteComment(id, currentUserId);
+
+        Account user = sessions.getCurrentUser(request);
+        Comment comment = comments.getCommentById(id);
+
+        comments.deleteComment(comment, user);
         return ResponseEntity.ok(APIResponse.good(true));
+    }
+
+    @PutMapping("/{id}/like")
+    public ResponseEntity<APIResponse<Boolean>> likeNote(
+            HttpServletRequest request,
+            @PathVariable String id) {
+
+        Account user = sessions.getCurrentUser(request);
+        Comment comment = comments.getById(id);
+        likes.likeComment(user, comment);
+
+        return ResponseEntity.ok(APIResponse.good(true));
+    }
+
+    @GetMapping("/{id}/like")
+    public ResponseEntity<APIResponse<Boolean>> hasLikedNote(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        
+        Account user = sessions.getCurrentUser(request);
+        Comment comment = comments.getById(id);
+
+        return ResponseEntity.ok(APIResponse.good(likes.hasLikedComment(user, comment)));
+    }
+
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<APIResponse<Boolean>> dislikeNote(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        
+        Account user = sessions.getCurrentUser(request);
+        Comment comment = comments.getById(id);
+        likes.dislikeComment(user, comment);
+
+        return ResponseEntity.ok(APIResponse.good(false));
+    }
+
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<APIResponse<Comment.Statistics>> getStaistics(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        
+        Comment comment = comments.getById(id);
+        var stats = new Comment.Statistics(likes.totalCommentLikes(comment));
+
+        return ResponseEntity.ok(APIResponse.good(stats));
     }
 }
