@@ -29,7 +29,7 @@ public class CommentService {
             throw new UnauthorizedException("User must be logged in to create a comment.");
         }
         
-        Note note = noteServive.getNote(noteID);
+        Note note = noteServive.getById(noteID);
         Account account = accountService.getById(userID);
         Comment comment = new Comment(account, note, body);
         return commentRepository.save(comment);

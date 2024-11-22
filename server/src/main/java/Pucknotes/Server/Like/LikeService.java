@@ -25,7 +25,7 @@ public class LikeService {
     // Like a note
     public void likeNote(String noteId, String userId) {
         Account user = accountService.getById(userId);
-        Note note = noteService.getNote(noteId);
+        Note note = noteService.getById(noteId);
 
         // Check if the user has already liked the note
         Optional<Like> existingLike = likeRepository.findByUserAndNote(user, note);
@@ -43,7 +43,7 @@ public class LikeService {
     // Dislike a note (remove like)
     public void dislikeNote(String noteId, String userId) {
         Account user = accountService.getById(userId);
-        Note note = noteService.getNote(noteId);
+        Note note = noteService.getById(noteId);
 
         // Find and remove the like
         Optional<Like> existingLike = likeRepository.findByUserAndNote(user, note);
@@ -57,7 +57,7 @@ public class LikeService {
     // Check if a user has liked a note
     public boolean hasLiked(String noteId, String userId) {
         Account user = accountService.getById(userId);
-        Note note = noteService.getNote(noteId);
+        Note note = noteService.getById(noteId);
         return likeRepository.findByUserAndNote(user, note).isPresent();
     }
 }
