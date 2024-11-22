@@ -110,5 +110,38 @@ class AccountControllerTest {
         assertEquals("Account updated successfully.", response.getBody());
         verify(accountService, times(1)).updateAccount(mockAccount, userID);
     }
-    
+
+    @Test
+    void testDeleteAccount_Success() {
+        String accountId = "123";
+        String userID = "sessionUserID";
+        Account mockAccount = new Account("test@example.com", "testUser", "password");
+        mockAccount.setId(accountId);
+
+        when(sessionService.getSession(request)).thenReturn(userID);
+        when(accountService.getById(accountId)).thenReturn(mockAccount);
+
+        ResponseEntity<APIResponse<Boolean>> response = accountController.deleteAccount(request, accountId);
+
+        assertNotNull(response);
+        assertTrue(response.getBody().getData());
+        verify(accountService, times(1)).deleteAccount(mockAccount, userID);
+    }
+
+    @Test
+    void testDeleteAccount_NotFound() {
+        String accountId = "123";
+        String userID = "sessionUserID";
+
+        when(sessionService.getSession(request)).thenReturn(userID);
+        when(accountService.getById(accountId)).thenThrow(new ResourceNotFoundException("Account not found"));
+
+        ResponseEntity<APIResponse<Boolean>> response = accountController.deleteAccount(request, accountId);
+
+        assertNotNull(response);
+        assertFalse(response.getBody().getData());
+        verify(accountService, times(1)).getById(accountId);
+    }
+
+
 }
