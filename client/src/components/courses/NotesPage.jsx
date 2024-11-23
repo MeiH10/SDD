@@ -154,7 +154,7 @@ const NotesPage = () => {
         </div>
       </div>
     </div>
-  );
+  ); 
 };
 
 export default NotesPage;
