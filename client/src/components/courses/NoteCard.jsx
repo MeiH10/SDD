@@ -80,6 +80,8 @@ const NoteCard = ({ note, onDownload }) => {
     }
   };
   
+  const mainProfessor = section?.professors?.[0]?.split(',')?.[0];
+
   return (
     <div className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700/50 transition-colors border border-[#1a1f2e]">
       <div className="flex">
@@ -130,9 +132,9 @@ const NoteCard = ({ note, onDownload }) => {
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
-            {section?.professors?.[0] && (
+            {mainProfessor && mainProfessor !== 'TBA' && (
               <span className="px-2 py-1 bg-gray-700 rounded-full text-sm text-gray-300">
-                {section.professors[0]}
+                {mainProfessor}
               </span>
             )}
 

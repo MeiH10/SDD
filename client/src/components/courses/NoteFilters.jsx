@@ -1,13 +1,17 @@
 const NoteFilters = ({ 
     sortBy, 
-    onSortChange, 
+    onSortChange,
+    sortOrder,
+    onSortOrderChange,
     selectedTags, 
     onTagToggle,
     selectedSection,
     onSectionChange,
     selectedProfessor,
     onProfessorChange,
-    onClearFilters 
+    onClearFilters,
+    availableProfessors,
+    availableSections
   }) => {
     const filterTags = [
       'Concise',
@@ -22,18 +26,29 @@ const NoteFilters = ({
   
     return (
       <div className="w-64">
-        <div className="mb-6">
-          <select
-            value={sortBy}
-            onChange={(e) => onSortChange(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-teal-500"
-          >
-            <option value="likes">Sort by likes</option>
-            <option value="date">Sort by date</option>
-            <option value="title">Sort by title</option>
-          </select>
+        <div className="mb-6 space-y-2">
+          <div className="flex flex-col space-y-2">
+            <select
+              value={sortBy}
+              onChange={(e) => onSortChange(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-teal-500"
+            >
+              <option value="likes">Sort by likes</option>
+              <option value="createdDate">Sort by date</option>
+              <option value="title">Sort by title</option>
+            </select>
+
+            <select
+              value={sortOrder}
+              onChange={(e) => onSortOrderChange(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-teal-500"
+            >
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+          </div>
         </div>
-  
+
         <div className="mb-6">
           <h3 className="text-white mb-2">Filter by tags:</h3>
           <div className="flex flex-wrap gap-2">
@@ -60,7 +75,7 @@ const NoteFilters = ({
             </button>
           )}
         </div>
-  
+
         <div className="mb-6">
           <h3 className="text-white mb-2">Sections:</h3>
           <select
@@ -69,11 +84,14 @@ const NoteFilters = ({
             className="w-full px-3 py-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-teal-500"
           >
             <option value="">All Sections</option>
-            <option value="1">Section 1</option>
-            <option value="2">Section 2</option>
+            {availableSections.map(section => (
+              <option key={section} value={section}>
+                Section {section}
+              </option>
+            ))}
           </select>
         </div>
-  
+
         <div className="mb-6">
           <h3 className="text-white mb-2">Prof:</h3>
           <select
@@ -82,11 +100,15 @@ const NoteFilters = ({
             className="w-full px-3 py-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-teal-500"
           >
             <option value="">All Professors</option>
-            <option value="brown">Maria Brown</option>
+            {availableProfessors.map(professor => (
+              <option key={professor} value={professor}>
+                {professor}
+              </option>
+            ))}
           </select>
         </div>
       </div>
     );
-  };
-  
-  export default NoteFilters;
+};
+
+export default NoteFilters;
