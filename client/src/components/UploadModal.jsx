@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Modal from "./Modal";
 import { useAuth } from "../context/AuthContext";
+import { useNote } from '../context/NoteContext';
+
 
 const UploadModal = () => {
   const { userId } = useAuth();
@@ -10,6 +12,8 @@ const UploadModal = () => {
   const [selectedFileName, setSelectedFileName] = useState("");
   const [sections, setSections] = useState([]);
   const [debouncedCourseCode, setDebouncedCourseCode] = useState("");
+
+  const { triggerNoteRefresh } = useNote();
 
   const [values, setValues] = useState({
     courseCode: "",
@@ -139,6 +143,8 @@ const UploadModal = () => {
         const data = await response.json();
         throw new Error(data.error || "Upload failed");
       }
+
+      triggerNoteRefresh();
 
       setIsOpen(false);
       setValues({

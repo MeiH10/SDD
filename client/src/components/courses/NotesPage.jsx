@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useNote } from '../../context/NoteContext';
 
 const NotesPage = () => {
  const { majorCode, courseId } = useParams();
@@ -9,6 +10,7 @@ const NotesPage = () => {
  const courseData = state?.courseData;
  const semesterData = state?.semesterData;
  const { isLoggedIn } = useAuth();
+ const { shouldRefreshNotes } = useNote();
  
  const [notes, setNotes] = useState([]);
  const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ const NotesPage = () => {
    };
 
    fetchNotes();
- }, [courseId, semesterData, courseData]);
+ }, [courseId, semesterData, courseData, shouldRefreshNotes]);
 
  if (!courseData || !semesterData) {
    return (
@@ -98,14 +100,6 @@ const NotesPage = () => {
              </h2>
            </div>
          </div>
-         {isLoggedIn && (
-           <button
-             onClick={() => navigate('upload')}
-             className="bg-white text-teal-500 px-4 py-2 rounded hover:bg-gray-100 transition-colors"
-           >
-             Upload Note
-           </button>
-         )}
        </div>
      </div>
 
@@ -149,6 +143,8 @@ const NotesPage = () => {
                          });
                          if (!response.ok) throw new Error('Failed to like note');
                          // Optionally refresh notes here or update UI
+                         const { shouldRefreshNotes } = useNote();
+                         shouldRefreshNotes();
                        } catch (err) {
                          console.error('Error liking note:', err);
                        }
