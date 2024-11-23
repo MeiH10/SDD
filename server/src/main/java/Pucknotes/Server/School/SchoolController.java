@@ -55,4 +55,41 @@ class SchoolControllerTest {
 
         assertEquals("A semester with 'semesterName' does not exist.", exception.getMessage());
     }
+
+    @Test
+    void getSchoolsFull_ShouldResolveSemesterId_FromSemesterName() {
+        String semesterName = "Spring 2024";
+        String semesterID = "semesterId123";
+
+        when(semesterService.existsByName(semesterName)).thenReturn(true);
+        when(semesterService.getByName(semesterName)).thenReturn(new Semester(semesterID, semesterName));
+
+        when(schoolService.getSchool(null, semesterID, "name", "asc")).thenReturn(Collections.emptyList());
+
+        ResponseEntity<APIResponse<Object>> response = schoolController.getSchoolsFull(null, semesterName, null, "name", "asc", "id");
+
+        verify(semesterService).getByName(semesterName);
+        verify(schoolService).getSchool(null, semesterID, "name", "asc");
+
+        assertNotNull(response);
+        assertTrue(response.getBody().isSuccess());
+    }
+
+    @Test
+    void getSchoolsFull_ShouldReturnIds_WhenTypeIsDefault() {
+        String semesterID = "semesterId123";
+        List<School> mockSchools = List.of(
+                new School("1", "School 1"),
+                new School("2", "School 2")
+        );
+
+        when(semesterService.existsById(semesterID)).thenReturn(true);
+        when(schoolService.getSchool(null, semesterID, "name", "asc")).thenReturn(mockSchools);
+
+        ResponseEntity<APIResponse<Object>> response = schoolController.getSchoolsFull(null, null, semesterID, "name", "asc", "id");
+
+        assertNotNull(response);
+        assertTrue(response.getBody().isSuccess());
+        assertEquals(List.of("1", "2"), response.getBody().getData());
+    }
 }
