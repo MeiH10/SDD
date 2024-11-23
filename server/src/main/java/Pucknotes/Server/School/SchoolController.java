@@ -92,4 +92,48 @@ class SchoolControllerTest {
         assertTrue(response.getBody().isSuccess());
         assertEquals(List.of("1", "2"), response.getBody().getData());
     }
+
+    @Test
+    void getSchoolsFull_ShouldReturnCount_WhenTypeIsCount() {
+        String semesterID = "semesterId123";
+        List<School> mockSchools = List.of(
+                new School("1", "School 1"),
+                new School("2", "School 2")
+        );
+
+        when(semesterService.existsById(semesterID)).thenReturn(true);
+        when(schoolService.getSchool(null, semesterID, "name", "asc")).thenReturn(mockSchools);
+
+        ResponseEntity<APIResponse<Object>> response = schoolController.getSchoolsFull(null, null, semesterID, "name", "asc", "count");
+
+        assertNotNull(response);
+        assertTrue(response.getBody().isSuccess());
+        assertEquals(2, response.getBody().getData());
+    }
+
+    @Test
+    void getSpecificSchool_ShouldReturnSchool_WhenValidId() {
+        String schoolId = "schoolId123";
+        School mockSchool = new School(schoolId, "Test School");
+
+        when(schoolService.getById(schoolId)).thenReturn(mockSchool);
+
+        ResponseEntity<APIResponse<Object>> response = schoolController.getSpecificSchool(schoolId);
+
+        assertNotNull(response);
+        assertTrue(response.getBody().isSuccess());
+        assertEquals(mockSchool, response.getBody().getData());
+    }
+
+    @Test
+    void getSpecificSchool_ShouldThrowException_WhenSchoolNotFound() {
+        String schoolId = "nonexistentSchoolId";
+
+        when(schoolService.getById(schoolId)).thenThrow(new IllegalArgumentException("School not found"));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> schoolController.getSpecificSchool(schoolId));
+
+        assertEquals("School not found", exception.getMessage());
+    }
 }
