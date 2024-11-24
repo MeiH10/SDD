@@ -5,9 +5,11 @@ import {
   Eye,
   Download,
   Link as LinkIcon,
+  MessageSquare,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "../Modal";
+import CommentModal from "./CommentModal";
 
 const NoteCard = ({ note }) => {
   const [author, setAuthor] = useState(null);
@@ -19,6 +21,8 @@ const NoteCard = ({ note }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
+  const [commentCount, setCommentCount] = useState(0);
   const { isLoggedIn } = useAuth();
 
   useEffect(() => {
@@ -57,6 +61,24 @@ const NoteCard = ({ note }) => {
     fetchAuthorAndSection();
     checkIfLiked();
   }, [note.owner, note.section, note.id, isLoggedIn]);
+
+  useEffect(() => {
+    const fetchCommentCount = async () => {
+      try {
+        const response = await fetch(
+          `/api/comment?noteID=${note.id}&return=count`
+        );
+        const data = await response.json();
+        if (data.good) {
+          setCommentCount(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching comment count:", error);
+      }
+    };
+
+    fetchCommentCount();
+  }, [note.id]);
 
   const handleVote = async (isUpvote) => {
     if (!isLoggedIn) return;
@@ -268,6 +290,20 @@ const NoteCard = ({ note }) => {
             >
               <Download className="w-5 h-5" />
             </button>
+            <button
+              onClick={() => setIsCommentModalOpen(true)}
+              className="p-2 text-gray-400 hover:text-teal-500 transition-colors rounded-full hover:bg-gray-700/50"
+              title="Comments"
+            >
+              <div className="relative">
+                <MessageSquare className="w-5 h-5" />
+                {commentCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-teal-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {commentCount}
+                  </span>
+                )}
+              </div>
+            </button>
           </div>
         </div>
       </div>
@@ -298,6 +334,12 @@ const NoteCard = ({ note }) => {
           )}
         </div>
       </Modal>
+
+      <CommentModal
+        isOpen={isCommentModalOpen}
+        onClose={() => setIsCommentModalOpen(false)}
+        noteId={note.id}
+      />
     </>
   );
 };
