@@ -1,15 +1,11 @@
-package Pucknotes.Server.Report;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
+import org.bson.types.ObjectId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
-@Document(collection = "comments")
+@Document(collection = "reports")
 public class Report {
     @Id
     private String id;
@@ -19,4 +15,11 @@ public class Report {
 
     @Setter
     private String description;
+
+    @Setter
+    private String type;
+
+    @Setter
+    @Field(targetType = FieldType.OBJECT_ID)
+    private ObjectId item;
 }
