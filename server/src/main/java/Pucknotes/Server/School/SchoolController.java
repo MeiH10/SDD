@@ -1,139 +1,63 @@
 package Pucknotes.Server.School;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import Pucknotes.Server.Response.APIResponse;
 import Pucknotes.Server.Semester.SemesterService;
 
-import java.util.Collections;
-import java.util.List;
+@RestController
+@RequestMapping("/api/school")
+public class SchoolController {
+    @Autowired
+    private SchoolService schools;
 
-class SchoolControllerTest {
+    @Autowired
+    private SemesterService semesters;
 
-    @Mock
-    private SchoolService schoolService;
+    @GetMapping("")
+    public ResponseEntity<APIResponse<Object>> getSchoolsFull(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "semesterName", required = false) String semesterName,
+            @RequestParam(value = "semesterID", required = false) String semesterID,
+            @RequestParam(value = "sort", defaultValue = "name") String sort,
+            @RequestParam(value = "order", defaultValue = "asc") String order,
+            @RequestParam(value = "return", defaultValue = "id") String type) {
 
-    @Mock
-    private SemesterService semesterService;
+        if (semesterID != null && !semesters.existsById(semesterID)) {
+            throw new IllegalArgumentException("A semester with 'semesterID' does not exist.");
+        } else if (semesterName != null && !semesters.existsByName(semesterName)) {
+            throw new IllegalArgumentException("A semester with 'semesterName' does not exist.");
+        }
 
-    @InjectMocks
-    private SchoolController schoolController;
+        if (semesterID == null && semesterName != null) {
+            semesterID = semesters.getByName(semesterName).getId();
+        }
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+        List<School> result = schools.getSchool(name, semesterID, sort, order);
+
+        switch (type) {
+            case "object":
+                return ResponseEntity.ok(APIResponse.good(result));
+            case "count":
+                return ResponseEntity.ok(APIResponse.good(result.size()));
+            default:
+                List<String> ids = result.stream().map(School::getId).toList();
+                return ResponseEntity.ok(APIResponse.good(ids));
+        }
     }
 
-    @Test
-    void getSchoolsFull_ShouldThrowException_WhenSemesterIdDoesNotExist() {
-        String semesterID = "nonexistentSemester";
+    @GetMapping("/{id}")
+    public ResponseEntity<APIResponse<Object>> getSpecificSchool(
+            @PathVariable(value = "id") String id) {
 
-        when(semesterService.existsById(semesterID)).thenReturn(false);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> schoolController.getSchoolsFull(null, null, semesterID, "name", "asc", "id"));
-
-        assertEquals("A semester with 'semesterID' does not exist.", exception.getMessage());
-    }
-
-    @Test
-    void getSchoolsFull_ShouldThrowException_WhenSemesterNameDoesNotExist() {
-        String semesterName = "nonexistentSemester";
-
-        when(semesterService.existsByName(semesterName)).thenReturn(false);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> schoolController.getSchoolsFull(null, semesterName, null, "name", "asc", "id"));
-
-        assertEquals("A semester with 'semesterName' does not exist.", exception.getMessage());
-    }
-
-    @Test
-    void getSchoolsFull_ShouldResolveSemesterId_FromSemesterName() {
-        String semesterName = "Spring 2024";
-        String semesterID = "semesterId123";
-
-        when(semesterService.existsByName(semesterName)).thenReturn(true);
-        when(semesterService.getByName(semesterName)).thenReturn(new Semester(semesterID, semesterName));
-
-        when(schoolService.getSchool(null, semesterID, "name", "asc")).thenReturn(Collections.emptyList());
-
-        ResponseEntity<APIResponse<Object>> response = schoolController.getSchoolsFull(null, semesterName, null, "name", "asc", "id");
-
-        verify(semesterService).getByName(semesterName);
-        verify(schoolService).getSchool(null, semesterID, "name", "asc");
-
-        assertNotNull(response);
-        assertTrue(response.getBody().isSuccess());
-    }
-
-    @Test
-    void getSchoolsFull_ShouldReturnIds_WhenTypeIsDefault() {
-        String semesterID = "semesterId123";
-        List<School> mockSchools = List.of(
-                new School("1", "School 1"),
-                new School("2", "School 2")
-        );
-
-        when(semesterService.existsById(semesterID)).thenReturn(true);
-        when(schoolService.getSchool(null, semesterID, "name", "asc")).thenReturn(mockSchools);
-
-        ResponseEntity<APIResponse<Object>> response = schoolController.getSchoolsFull(null, null, semesterID, "name", "asc", "id");
-
-        assertNotNull(response);
-        assertTrue(response.getBody().isSuccess());
-        assertEquals(List.of("1", "2"), response.getBody().getData());
-    }
-
-    @Test
-    void getSchoolsFull_ShouldReturnCount_WhenTypeIsCount() {
-        String semesterID = "semesterId123";
-        List<School> mockSchools = List.of(
-                new School("1", "School 1"),
-                new School("2", "School 2")
-        );
-
-        when(semesterService.existsById(semesterID)).thenReturn(true);
-        when(schoolService.getSchool(null, semesterID, "name", "asc")).thenReturn(mockSchools);
-
-        ResponseEntity<APIResponse<Object>> response = schoolController.getSchoolsFull(null, null, semesterID, "name", "asc", "count");
-
-        assertNotNull(response);
-        assertTrue(response.getBody().isSuccess());
-        assertEquals(2, response.getBody().getData());
-    }
-
-    @Test
-    void getSpecificSchool_ShouldReturnSchool_WhenValidId() {
-        String schoolId = "schoolId123";
-        School mockSchool = new School(schoolId, "Test School");
-
-        when(schoolService.getById(schoolId)).thenReturn(mockSchool);
-
-        ResponseEntity<APIResponse<Object>> response = schoolController.getSpecificSchool(schoolId);
-
-        assertNotNull(response);
-        assertTrue(response.getBody().isSuccess());
-        assertEquals(mockSchool, response.getBody().getData());
-    }
-
-    @Test
-    void getSpecificSchool_ShouldThrowException_WhenSchoolNotFound() {
-        String schoolId = "nonexistentSchoolId";
-
-        when(schoolService.getById(schoolId)).thenThrow(new IllegalArgumentException("School not found"));
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> schoolController.getSpecificSchool(schoolId));
-
-        assertEquals("School not found", exception.getMessage());
+        return ResponseEntity.ok(APIResponse.good(schools.getById(id)));
     }
 }
