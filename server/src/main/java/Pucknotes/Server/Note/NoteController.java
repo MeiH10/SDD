@@ -68,7 +68,8 @@ public class NoteController {
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "link", required = false) String link,
             @RequestParam(value = "sectionID", required = true) String sectionID,
-            @RequestParam(value = "tags", defaultValue = "") List<String> tags) {
+            @RequestParam(value = "tags", defaultValue = "") List<String> tags,
+            @RequestParam(value = "anonymous", defaultValue = "false") boolean anonymous) {
 
         if (!sections.existsById(sectionID)) {
             throw new IllegalArgumentException("A section with 'sectionID' does not exist.");
@@ -78,7 +79,7 @@ public class NoteController {
         Section section = sections.getById(sectionID);
 
         try {
-            Note note = notes.createNote(user, section, title, description, file, link, tags);
+            Note note = notes.createNote(user, section, title, description, file, link, tags, anonymous);
             return ResponseEntity.ok(APIResponse.good(note.getId()));
         } catch (Exception error) {
             throw new InternalException("Could not create note.");
@@ -149,6 +150,9 @@ public class NoteController {
         }
 
         List<Note> result = notes.getNotes(sectionID, courseID, majorID, semesterID, schoolID, tags, query, sort, order, userID);
+        result.forEach(note -> {
+            if (note.isAnonymous()) note.setOwner(null);
+        });
 
         switch (type) {
             case "object":
@@ -164,6 +168,7 @@ public class NoteController {
     @GetMapping("/{id}")
     public ResponseEntity<APIResponse<Note>> getNoteById(@PathVariable String id) {
         Note note = notes.getById(id);
+        if (note.isAnonymous()) note.setOwner(null);
         return ResponseEntity.ok(APIResponse.good(note));
     }
 
@@ -188,7 +193,8 @@ public class NoteController {
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) List<String> tags,
-            @RequestParam(required = false) String sectionID) {
+            @RequestParam(required = false) String sectionID,
+            @RequestParam(required = false) Boolean anonymous) {
         
         Account user = sessions.getCurrentUser(request);
         Note note = notes.getById(id);
@@ -207,6 +213,10 @@ public class NoteController {
         
         if (tags != null) {
             note.setTags(tags);
+        }
+
+        if (anonymous != null) {
+            note.setAnonymous(anonymous);
         }
 
         if (sectionID != null) {
