@@ -17,17 +17,19 @@ public class Report {
     @Id
     private String id;
 
-    @Setter
     @Field(targetType = FieldType.OBJECT_ID)
+    @NonNull
     private String owner;
 
-    @Setter
     @Field(targetType = FieldType.OBJECT_ID)
+    @NonNull
     private String note;
 
     @Setter
+    @NonNull
     private String title;
 
     @Setter
+    @NonNull
     private String description;
 }
