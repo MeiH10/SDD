@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Modal from "./Modal";
 import { useAuth } from "../context/AuthContext";
-import { useNote } from '../context/NoteContext';
-
+import { useNote } from "../context/NoteContext";
 
 const UploadModal = () => {
   const { userId } = useAuth();
@@ -64,6 +63,15 @@ const UploadModal = () => {
     fetchSections();
   }, [debouncedCourseCode]);
 
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
     if (!values.courseCode) newErrors.courseCode = "Course code is required";
@@ -80,6 +88,10 @@ const UploadModal = () => {
       }
     }
     if (!values.description) newErrors.description = "Description is required";
+    if (values.videoLink && !isValidUrl(values.videoLink)) {
+      newErrors.videoLink =
+        "Please enter a valid URL (e.g., https://youtu.be/PFDu9oVAE-g?si=2MXUd2nR-56OCXMq)";
+    }
     return newErrors;
   };
 
@@ -126,7 +138,6 @@ const UploadModal = () => {
       formData.append("file", values.file);
       formData.append("sectionID", values.sectionID);
       formData.append("link", values.videoLink);
-
 
       if (values.tags.trim()) {
         const tagsList = values.tags
@@ -332,15 +343,27 @@ const UploadModal = () => {
             )}
           </div>
 
-          <input
-            name="videoLink"
-            type="text"
-            placeholder="Video Link (optional)"
-            value={values.videoLink}
-            onChange={handleChange}
-            className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
-            disabled={isLoading}
-          />
+          <div>
+            <input
+              name="videoLink"
+              type="text"
+              placeholder="Useful Link (optional) e.g. https://youtu.be/PFDu9oVAE-g?si=2MXUd2nR-56OCXMq"
+              value={values.videoLink}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 bg-gray-700 text-white rounded-lg border ${
+                errors.videoLink ? "border-red-500" : "border-gray-600"
+              } focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none`}
+              disabled={isLoading}
+            />
+            {errors.videoLink && (
+              <p className="text-red-500 text-sm mt-1">{errors.videoLink}</p>
+            )}
+            {values.videoLink && !errors.videoLink && (
+              <p className="text-gray-400 text-sm mt-1">
+                Make sure the link is accessible to others
+              </p>
+            )}
+          </div>
 
           <input
             name="tags"

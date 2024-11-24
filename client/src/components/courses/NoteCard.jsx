@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { ChevronUp, ChevronDown, Eye, Download } from "lucide-react";
+import {
+  ChevronUp,
+  ChevronDown,
+  Eye,
+  Download,
+  Link as LinkIcon,
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "../Modal";
 
@@ -137,7 +143,21 @@ const NoteCard = ({ note }) => {
     }
   };
 
+  const handleLinkClick = (url) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const mainProfessor = section?.professors?.[0]?.split(",")?.[0];
+
+  // Function to check if a string is a valid URL
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
 
   return (
     <>
@@ -188,6 +208,19 @@ const NoteCard = ({ note }) => {
                 <p className="text-gray-300 text-sm">{note.description}</p>
               )}
             </div>
+
+            {/* Links section */}
+            {note.link && isValidUrl(note.link) && (
+              <div className="mb-3">
+                <button
+                  onClick={() => handleLinkClick(note.link)}
+                  className="inline-flex items-center px-3 py-1 bg-gray-700 rounded-lg text-teal-400 hover:text-teal-300 hover:bg-gray-600 transition-colors text-sm"
+                >
+                  <LinkIcon className="w-4 h-4 mr-2" />
+                  Related Resource
+                </button>
+              </div>
+            )}
 
             {/* Tags */}
             <div className="flex flex-wrap gap-2">
