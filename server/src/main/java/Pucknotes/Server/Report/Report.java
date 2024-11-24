@@ -18,15 +18,16 @@ public class Report {
     private String id;
 
     @Setter
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String owner;
+
+    @Setter
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String note;
+
+    @Setter
     private String title;
 
     @Setter
     private String description;
-
-    @Setter
-    private String type;
-
-    @Setter
-    @Field(targetType = FieldType.OBJECT_ID)
-    private ObjectId item;
 }
