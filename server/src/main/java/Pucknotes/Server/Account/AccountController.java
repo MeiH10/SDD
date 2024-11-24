@@ -30,11 +30,7 @@ public class AccountController {
     private VerificationService verify_service;
 
     @Autowired
-    private SessionService sessionService;
-
-    private String getCurrentUserId(HttpServletRequest request) {
-        return sessionService.getSession(request);
-    }
+    private SessionService sessions;
 
     @PostMapping("")
     public ResponseEntity<APIResponse<String>> createAccount(
@@ -71,11 +67,10 @@ public class AccountController {
             @RequestParam(value = "username", required = false) String username,
             @RequestParam(value = "password", required = false) String password) {
         
-        String userID = getCurrentUserId(request);
-        Account account = service.getByEmail(id);
+        Account account = sessions.getCurrentUser(request);
         account.setUsername(username);
         account.setPassword(password);
-        service.updateAccount(account, userID);
+        service.updateAccount(account, account.getId());
 
         return new ResponseEntity<>("Account updated successfully.", HttpStatus.OK);
     }
@@ -85,9 +80,8 @@ public class AccountController {
         HttpServletRequest request,
         @PathVariable String id) {
         try {
-            String userID = getCurrentUserId(request);
-            Account account = service.getById(id);
-            service.deleteAccount(account, userID);
+            Account account = sessions.getCurrentUser(request);
+            service.deleteAccount(account, account.getId());
             return ResponseEntity.ok(APIResponse.good(true));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.ok(APIResponse.good(false));

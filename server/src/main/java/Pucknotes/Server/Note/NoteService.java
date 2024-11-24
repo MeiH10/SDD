@@ -16,6 +16,7 @@ import Pucknotes.Server.Response.Types.UnauthorizedException;
 import Pucknotes.Server.Section.Section;
 import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class NoteService {
@@ -30,7 +31,7 @@ public class NoteService {
     private MongoTemplate template;
 
     public Note createNote(Account user, Section section, String title, String description, MultipartFile upload,
-            String link, List<String> tags) throws IOException {
+            String link, List<String> tags, boolean anonymous) throws IOException {
         if (user == null) {
             throw new UnauthorizedException("You must log in to create a note.");
         } else if (section == null) {
@@ -53,6 +54,7 @@ public class NoteService {
         note.setLink(link);
         note.setTags(tags);
         note.setFile(fileID.toString());
+        note.setAnonymous(anonymous);
 
         repository.save(note);
         return note;
@@ -60,21 +62,28 @@ public class NoteService {
 
     public Note getById(String id) {
         if (id == null) {
-            throw new IllegalArgumentException("Invalid account ID.");
+            throw new IllegalArgumentException("Invalid note ID.");
         }
 
-        Note note = repository.findById(id).orElse(null);
+        var query = Query.query(Criteria.where("_id").is(id));
+        query.fields().exclude("likes");
+
+        Note note = template.findOne(query, Note.class);
         if (note == null) {
-            throw new ResourceNotFoundException("No account with this ID.");
+            throw new ResourceNotFoundException("No note with this ID.");
         }
 
         return note;
     }
 
+    public boolean existsById(String id) {
+        return repository.existsById(id);
+    }
+
     public List<Note> getNotes(
             String sectionID, String courseID, String majorID,
             String semesterID, String schoolID, List<String> tags,
-            String search, String sortType, String orderType) {
+            String search, String sortType, String orderType, String ownerID) {
 
         Query query = new Query();
 
@@ -89,12 +98,26 @@ public class NoteService {
             case "semester":
                 query.with(Sort.by(direction, "semester.year"));
                 break;
+            case "likes":
+                query.with(Sort.by(direction, "totalLikes"));
+                break;
+            case "date":
+                query.with(Sort.by(direction, "date"));
+                break;
         }
 
-        query.addCriteria(Criteria.where("tags").all(tags));
+        if (!tags.isEmpty()) {
+            query.addCriteria(Criteria.where("tags").in(tags));
+        }
 
-        query.addCriteria(Criteria.where("title").regex(search, "i")
+        if (search != null) {
+            query.addCriteria(Criteria.where("title").regex(search, "i")
                 .orOperator(Criteria.where("description").regex(search, "i")));
+        }
+
+        if (courseID != null) {
+            query.addCriteria(Criteria.where("course").is(courseID));
+        }
 
         if (majorID != null) {
             query.addCriteria(Criteria.where("major").is(majorID));
@@ -108,6 +131,12 @@ public class NoteService {
             query.addCriteria(Criteria.where("school").is(schoolID));
         }
 
+        if (ownerID != null) {
+            query.addCriteria(Criteria.where("account").is(ownerID));
+        }
+
+        query.fields().exclude("likes");
+
         return template.find(query, Note.class);
     }
 
@@ -118,5 +147,33 @@ public class NoteService {
     public void deleteNote(Note note) {
         repository.delete(note);
         files.deleteFile(note.getFile());
+    }
+
+    public void likeNote(Account user, Note note) {
+        if (note.getLikes().contains(user.getId())) return;
+        
+        ArrayList<String> next = new ArrayList<String>(note.getLikes());
+        next.add(user.getId());
+        note.setLikes(next);
+
+        note.setTotalLikes(note.getTotalLikes() + 1);
+
+        repository.save(note);
+    }
+
+    public void dislikeNote(Account user, Note note) {
+        if (!note.getLikes().contains(user.getId())) return;
+    
+        ArrayList<String> next = new ArrayList<String>(note.getLikes());
+        next.remove(user.getId());
+        note.setLikes(next);
+
+        note.setTotalLikes(note.getTotalLikes() - 1);
+
+        repository.save(note);
+    }
+
+    public boolean hasLikedNote(Account user, Note note) {
+        return note.getLikes().contains(user.getId());
     }
 }

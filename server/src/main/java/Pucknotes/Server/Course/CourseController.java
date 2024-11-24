@@ -41,7 +41,7 @@ public class CourseController {
             @RequestParam(value = "semesterID", required = false) String semesterID,
             @RequestParam(value = "sort", defaultValue = "name") String sort,
             @RequestParam(value = "order", defaultValue = "asc") String order,
-            @RequestParam(value = "full", defaultValue = "false") boolean full) {
+            @RequestParam(value = "return", defaultValue = "id") String type) {
 
         if (majorID != null && !majors.existsById(majorID)) {
             throw new IllegalArgumentException("A major with 'majorID' does not exist.");
@@ -71,11 +71,14 @@ public class CourseController {
 
         List<Course> result = courses.getCourses(majorID, semesterID, schoolID, name, sort, order);
 
-        if (full) {
-            return ResponseEntity.ok(APIResponse.good(result));
-        } else {
-            List<String> ids = result.stream().map(Course::getId).toList();
-            return ResponseEntity.ok(APIResponse.good(ids));
+        switch (type) {
+            case "object":
+                return ResponseEntity.ok(APIResponse.good(result));
+            case "count":
+                return ResponseEntity.ok(APIResponse.good(result.size()));
+            default:
+                List<String> ids = result.stream().map(Course::getId).toList();
+                return ResponseEntity.ok(APIResponse.good(ids));
         }
     }
 

@@ -73,6 +73,10 @@ public class AccountService {
         return account != null;
     }
 
+    public boolean existsById(String id) {
+        return id != null && repository.existsById(id);
+    }
+
     public Account getById(String id) {
         if (id == null) {
             throw new IllegalArgumentException("Invalid account ID.");

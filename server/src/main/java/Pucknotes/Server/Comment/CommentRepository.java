@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface CommentRepository extends MongoRepository<Comment, String> {
-    List<Comment> findByNoteId(String noteId);
-    List<Comment> findByAccountId(String accountId);
+    List<Comment> findByNote(String note);
+    List<Comment> findByAccount(String account);
     Optional<Comment> findById(String id);
 }

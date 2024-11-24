@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,4 +42,18 @@ public class Note {
     @Setter
     @Field(targetType = FieldType.OBJECT_ID)
     private String section, course, major, school, semester;
+
+    @Setter
+    private Date createdDate = new Date();
+
+    @Setter
+    private long totalLikes;
+
+    @Setter
+    // @NonNull
+    @Field(targetType = FieldType.OBJECT_ID)
+    private List<String> likes = List.of();
+
+    @Setter
+    private boolean anonymous;
 }
