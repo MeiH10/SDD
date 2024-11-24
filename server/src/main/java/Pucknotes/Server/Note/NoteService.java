@@ -31,7 +31,7 @@ public class NoteService {
     private MongoTemplate template;
 
     public Note createNote(Account user, Section section, String title, String description, MultipartFile upload,
-            String link, List<String> tags) throws IOException {
+            String link, List<String> tags, boolean anonymous) throws IOException {
         if (user == null) {
             throw new UnauthorizedException("You must log in to create a note.");
         } else if (section == null) {
@@ -54,6 +54,7 @@ public class NoteService {
         note.setLink(link);
         note.setTags(tags);
         note.setFile(fileID.toString());
+        note.setAnonymous(anonymous);
 
         repository.save(note);
         return note;

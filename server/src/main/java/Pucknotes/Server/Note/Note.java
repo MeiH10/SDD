@@ -53,4 +53,7 @@ public class Note {
     // @NonNull
     @Field(targetType = FieldType.OBJECT_ID)
     private List<String> likes = List.of();
+
+    @Setter
+    private boolean anonymous;
 }
