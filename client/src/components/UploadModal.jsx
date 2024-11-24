@@ -125,6 +125,8 @@ const UploadModal = () => {
       formData.append("description", values.description);
       formData.append("file", values.file);
       formData.append("sectionID", values.sectionID);
+      formData.append("link", values.videoLink);
+
 
       if (values.tags.trim()) {
         const tagsList = values.tags
