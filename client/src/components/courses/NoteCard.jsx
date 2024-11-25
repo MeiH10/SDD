@@ -15,8 +15,11 @@ import { AlertTriangle } from "lucide-react";
 import ReportModal from "../reports/ReportModal";
 import { Trash2 } from "lucide-react";
 import { useNote } from "../../context/NoteContext";
+import NoteEditModal from "./NoteEditModal";
+import { PencilIcon } from "lucide-react";
 
 const NoteCard = ({ note }) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { userId } = useAuth();
   const { triggerNoteRefresh } = useNote();
   const [author, setAuthor] = useState(null);
@@ -344,13 +347,22 @@ const NoteCard = ({ note }) => {
             </button>
 
             {userId === note.owner && (
-              <button
-                onClick={handleDelete}
-                className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-gray-700/50"
-                title="Delete note"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
+              <>
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="p-2 text-gray-400 hover:text-teal-500 transition-colors rounded-full hover:bg-gray-700/50"
+                  title="Edit note"
+                >
+                  <PencilIcon className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-gray-700/50"
+                  title="Delete note"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -392,6 +404,13 @@ const NoteCard = ({ note }) => {
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
         noteId={note.id}
+      />
+
+      <NoteEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        note={note}
+        onUpdateSuccess={triggerNoteRefresh}
       />
     </>
   );

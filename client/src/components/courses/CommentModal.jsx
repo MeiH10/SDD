@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
-import { MessageSquare, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
+import {
+  MessageSquare,
+  ChevronUp,
+  ChevronDown,
+  Trash2,
+  PencilIcon,
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "../Modal";
+import CommentEditModal from "./CommentEditModal";
 
 const CommentModal = ({ isOpen, onClose, noteId }) => {
   const [comments, setComments] = useState([]);
@@ -9,6 +16,7 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [commentAuthors, setCommentAuthors] = useState({});
+  const [editingComment, setEditingComment] = useState(null);
   const { isLoggedIn, userId } = useAuth();
 
   useEffect(() => {
@@ -117,101 +125,129 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Comments" width="max-w-2xl">
-      <div className="flex flex-col h-[70vh]">
-        <div className="flex-1 overflow-y-auto mb-4">
-          {isLoading && !comments.length ? (
-            <div className="flex justify-center items-center h-32">
-              <div className="animate-spin h-8 w-8 border-4 border-teal-500 rounded-full border-t-transparent" />
-            </div>
-          ) : comments.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">
-              No comments yet. Be the first to comment!
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {comments.map((comment) => (
-                <div
-                  key={comment.id}
-                  className="bg-gray-700 rounded-lg p-4 relative"
-                >
-                  <div className="flex items-start">
-                    <div className="flex flex-col items-center mr-4">
-                      <button
-                        onClick={() => handleVote(comment.id, true)}
-                        disabled={!isLoggedIn}
-                        className={`transition-colors ${
-                          !isLoggedIn
-                            ? "text-gray-600 cursor-not-allowed"
-                            : "text-gray-400 hover:text-teal-500"
-                        }`}
-                      >
-                        <ChevronUp className="w-5 h-5" />
-                      </button>
-                      <span className="text-white my-1 text-sm">
-                        {comment.totalLikes}
-                      </span>
-                      <button
-                        onClick={() => handleVote(comment.id, false)}
-                        disabled={!isLoggedIn}
-                        className={`transition-colors ${
-                          !isLoggedIn
-                            ? "text-gray-600 cursor-not-allowed"
-                            : "text-gray-400 hover:text-red-500"
-                        }`}
-                      >
-                        <ChevronDown className="w-5 h-5" />
-                      </button>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center mb-2">
-                        <span className="text-sm text-gray-400">
-                          {commentAuthors[comment.account] || "Anonymous"} •{" "}
-                          {new Date(comment.createdDate).toLocaleDateString()}
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Comments"
+        width="max-w-2xl"
+      >
+        <div className="flex flex-col h-[70vh]">
+          <div className="flex-1 overflow-y-auto mb-4">
+            {isLoading && !comments.length ? (
+              <div className="flex justify-center items-center h-32">
+                <div className="animate-spin h-8 w-8 border-4 border-teal-500 rounded-full border-t-transparent" />
+              </div>
+            ) : comments.length === 0 ? (
+              <div className="text-center text-gray-400 py-8">
+                No comments yet. Be the first to comment!
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {comments.map((comment) => (
+                  <div
+                    key={comment.id}
+                    className="bg-gray-700 rounded-lg p-4 relative"
+                  >
+                    <div className="flex items-start">
+                      <div className="flex flex-col items-center mr-4">
+                        <button
+                          onClick={() => handleVote(comment.id, true)}
+                          disabled={!isLoggedIn}
+                          className={`transition-colors ${
+                            !isLoggedIn
+                              ? "text-gray-600 cursor-not-allowed"
+                              : "text-gray-400 hover:text-teal-500"
+                          }`}
+                        >
+                          <ChevronUp className="w-5 h-5" />
+                        </button>
+                        <span className="text-white my-1 text-sm">
+                          {comment.totalLikes}
                         </span>
+                        <button
+                          onClick={() => handleVote(comment.id, false)}
+                          disabled={!isLoggedIn}
+                          className={`transition-colors ${
+                            !isLoggedIn
+                              ? "text-gray-600 cursor-not-allowed"
+                              : "text-gray-400 hover:text-red-500"
+                          }`}
+                        >
+                          <ChevronDown className="w-5 h-5" />
+                        </button>
                       </div>
-                      <p className="text-white">{comment.description}</p>
+                      <div className="flex-1">
+                        <div className="flex items-center mb-2">
+                          <span className="text-sm text-gray-400">
+                            {commentAuthors[comment.account] || "Anonymous"} •{" "}
+                            {new Date(comment.createdDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-white">{comment.description}</p>
+                      </div>
+                      {userId === comment.account && (
+                        <div className="absolute top-2 right-2 flex gap-2">
+                          <button
+                            onClick={() => setEditingComment(comment)}
+                            className="p-2 text-gray-400 hover:text-teal-500 transition-colors rounded-full"
+                            title="Edit comment"
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(comment.id)}
+                            className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full"
+                            title="Delete comment"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    {userId === comment.account && (
-                      <button
-                        onClick={() => handleDelete(comment.id)}
-                        className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full"
-                        title="Delete comment"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-        <div className="mt-auto">
-          {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <input
-              type="text"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder={
-                isLoggedIn ? "Write a comment..." : "Login to comment"
-              }
-              disabled={!isLoggedIn || isLoading}
-              className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-            />
-            <button
-              type="submit"
-              disabled={!isLoggedIn || isLoading || !newComment.trim()}
-              className="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Post
-            </button>
-          </form>
+          <div className="mt-auto">
+            {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+            <form onSubmit={handleSubmit} className="flex gap-2">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder={
+                  isLoggedIn ? "Write a comment..." : "Login to comment"
+                }
+                disabled={!isLoggedIn || isLoading}
+                className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <button
+                type="submit"
+                disabled={!isLoggedIn || isLoading || !newComment.trim()}
+                className="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Post
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
-    </Modal>
+      </Modal>
+
+      {editingComment && (
+        <CommentEditModal
+          isOpen={!!editingComment}
+          onClose={() => setEditingComment(null)}
+          comment={editingComment}
+          onUpdateSuccess={() => {
+            fetchComments();
+            setEditingComment(null);
+          }}
+        />
+      )}
+    </>
   );
 };
 
