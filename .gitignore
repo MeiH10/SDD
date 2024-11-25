@@ -87,6 +87,8 @@ web_modules/
 .next
 out
 
+./server/src/main/resources/application.properties
+
 # Nuxt.js build / generate output
 .nuxt
 dist
@@ -131,5 +133,9 @@ dist
 .vscode
 
 data
+<<<<<<< HEAD
+tree.txt
+=======
 /PuckNotes
 .DS_Store
+>>>>>>> origin
