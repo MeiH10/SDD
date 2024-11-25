@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import Modal from '../Modal';
-import { useAuth } from '../../context/AuthContext';
+import { useState } from "react";
+import Modal from "../Modal";
+import { useAuth } from "../../context/AuthContext";
 
 const ReportModal = ({ isOpen, onClose, noteId }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [error, setError] = useState(null);
   const { isLoggedIn } = useAuth();
 
@@ -16,26 +16,26 @@ const ReportModal = ({ isOpen, onClose, noteId }) => {
     setIsLoading(true);
     try {
       const formData = new URLSearchParams();
-      formData.append('title', title);
-      formData.append('description', description);
-      formData.append('noteID', noteId);
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("noteID", noteId);
 
-      const response = await fetch('/api/reports', {
-        method: 'POST',
+      const response = await fetch("/api/reports", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          "Content-Type": "application/x-www-form-urlencoded",
         },
         body: formData,
       });
 
       const data = await response.json();
       if (!data.good) {
-        throw new Error(data.error || 'Failed to submit report');
+        throw new Error(data.error || "Failed to submit report");
       }
 
       onClose();
-      setTitle('');
-      setDescription('');
+      setTitle("");
+      setDescription("");
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -84,9 +84,7 @@ const ReportModal = ({ isOpen, onClose, noteId }) => {
           />
         </div>
 
-        {error && (
-          <p className="text-red-500 text-sm">{error}</p>
-        )}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
 
         <div className="flex gap-4 pt-4">
           <button
@@ -127,7 +125,7 @@ const ReportModal = ({ isOpen, onClose, noteId }) => {
                 Submitting...
               </>
             ) : (
-              'Submit Report'
+              "Submit Report"
             )}
           </button>
         </div>
