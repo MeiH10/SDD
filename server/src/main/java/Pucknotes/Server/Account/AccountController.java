@@ -65,12 +65,16 @@ public class AccountController {
             HttpServletRequest request,
             @PathVariable String id,
             @RequestParam(value = "username", required = false) String username,
-            @RequestParam(value = "password", required = false) String password) {
+            @RequestParam(value = "password", required = false) String password,
+            @RequestParam(value = "role", required = true) int role) {
+
         
         Account account = sessions.getCurrentUser(request);
         account.setUsername(username);
         account.setPassword(password);
         service.updateAccount(account, account.getId());
+        service.updateAccountRole(account, account, role);
+
 
         return new ResponseEntity<>("Account updated successfully.", HttpStatus.OK);
     }
