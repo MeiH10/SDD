@@ -5,38 +5,28 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.lang.NonNull;
 
 @Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "reports")
 public class Report {
     @Id
     private String id;
 
+    @Setter
     @Field(targetType = FieldType.OBJECT_ID)
-    @NonNull
     private String owner;
 
-    private String type;
-
+    @Setter
     @Field(targetType = FieldType.OBJECT_ID)
-    private String item;
+    private String note;
 
     @Setter
-    @NonNull
     private String title;
 
     @Setter
-    @NonNull
     private String description;
-
-    private Date createdDate = new Date();
 }
