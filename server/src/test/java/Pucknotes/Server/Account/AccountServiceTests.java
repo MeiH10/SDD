@@ -91,6 +91,7 @@ class AccountServiceTest {
         assertEquals(mockAccount, result);
     }
 
+
     @Test
     void updateAccount_ShouldThrowUnauthorizedException_WhenUserIdMismatch() {
         Account account = new Account("test@example.com", "username", "password");
