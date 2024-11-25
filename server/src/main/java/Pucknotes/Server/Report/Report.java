@@ -22,7 +22,10 @@ public class Report {
 
     @Setter
     @Field(targetType = FieldType.OBJECT_ID)
-    private String note;
+    private String item;
+
+    @Setter
+    private String type;
 
     @Setter
     private String title;

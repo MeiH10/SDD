@@ -251,11 +251,7 @@ public class NoteController {
         Account user = sessions.getCurrentUser(request);
         Note note = notes.getById(id);
 
-        if (!user.getId().equals(note.getOwner())) {
-            throw new UnauthorizedException("You must be a note's owner to delete it.");
-        }
-
-        notes.deleteNote(note);
+        notes.deleteNote(note, user);
 
         return ResponseEntity.ok(APIResponse.good(true));
     }
