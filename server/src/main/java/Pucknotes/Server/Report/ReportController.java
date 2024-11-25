@@ -5,11 +5,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import Pucknotes.Server.Account.Account;
-import Pucknotes.Server.Note.Note;
-import Pucknotes.Server.Note.NoteService;
 import Pucknotes.Server.Response.APIResponse;
+<<<<<<< HEAD
 
 // import Pucknotes.Server.Response.Types.UnauthorizedException;
+=======
+>>>>>>> origin
 import Pucknotes.Server.Session.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -29,6 +30,7 @@ public class ReportController {
     @Autowired
     private SessionService sessions;
 
+<<<<<<< HEAD
     @Autowired
     private NoteService notes;
 
@@ -41,14 +43,22 @@ public class ReportController {
      * @param noteId The unique identifier of the note associated with the report.
      * @return A ResponseEntity containing an APIResponse with the ID of the newly created report.
      */
+=======
+>>>>>>> origin
     @PostMapping("")
     public ResponseEntity<APIResponse<String>> createReport(
             HttpServletRequest request,
             @RequestParam("title") String title,
             @RequestParam("description") String description,
+<<<<<<< HEAD
             @RequestParam("noteID") String noteId) {
 
         // Retrieve the current user from the session information.
+=======
+            @RequestParam("type") String type,
+            @RequestParam("item") String itemId) {
+        
+>>>>>>> origin
         Account user = sessions.getCurrentUser(request);
         
         // Retrieve the note by its ID to associate it with the report.
@@ -58,10 +68,17 @@ public class ReportController {
         Report report = new Report();
         report.setTitle(title);
         report.setDescription(description);
+<<<<<<< HEAD
         report.setItem(note.getId()); // Set the associated note ID.
         report.setOwner(user.getId()); // Set the owner of the report.
 
         // Save the report and retrieve the saved instance.
+=======
+        report.setType(type);
+        report.setItem(itemId);
+        report.setOwner(user.getId());
+        
+>>>>>>> origin
         report = reports.createReport(report);
 
         // Return a successful response containing the new report's ID.
