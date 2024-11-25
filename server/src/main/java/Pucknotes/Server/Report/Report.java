@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.lang.NonNull;
 
 @Getter
 @Setter
@@ -21,12 +22,21 @@ public class Report {
     private String id;
 
     @Field(targetType = FieldType.OBJECT_ID)
+    @NonNull
     private String owner;
 
-    @Field(targetType = FieldType.OBJECT_ID)
-    private String note;
+    private String type;
 
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String item;
+
+    @Setter
+    @NonNull
     private String title;
+
+    @Setter
+    @NonNull
     private String description;
+
     private Date createdDate = new Date();
 }
