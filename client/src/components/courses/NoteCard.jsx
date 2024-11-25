@@ -403,7 +403,8 @@ const NoteCard = ({ note }) => {
       <ReportModal
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
-        noteId={note.id}
+        type="note"
+        itemId={note.id}
       />
 
       <NoteEditModal

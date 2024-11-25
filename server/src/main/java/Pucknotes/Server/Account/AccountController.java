@@ -32,7 +32,6 @@ public class AccountController {
     @Autowired
     private SessionService sessions;
 
-    //
     @PostMapping("")
     public ResponseEntity<APIResponse<String>> createAccount(
             @RequestParam("token") String token,
@@ -42,7 +41,6 @@ public class AccountController {
         Account account = service.registerAccount(details);
         return ResponseEntity.ok(APIResponse.good(account.getId()));
     }
-
 
     @PostMapping("/force")
     public ResponseEntity<APIResponse<String>> forceAccount(
@@ -56,29 +54,30 @@ public class AccountController {
         return ResponseEntity.ok(APIResponse.good(account.getId()));
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<APIResponse<Account>> getAccount(@PathVariable String id) {
         Account account = service.getById(id);
         return ResponseEntity.ok(APIResponse.good(account));
     }
 
-
     @PutMapping("/{id}")
     public ResponseEntity<String> updateAccount(
             HttpServletRequest request,
             @PathVariable String id,
             @RequestParam(value = "username", required = false) String username,
-            @RequestParam(value = "password", required = false) String password) {
+            @RequestParam(value = "password", required = false) String password,
+            @RequestParam(value = "role", required = true) int role) {
+
         
         Account account = sessions.getCurrentUser(request);
         account.setUsername(username);
         account.setPassword(password);
         service.updateAccount(account, account.getId());
+        service.updateAccountRole(account, account, role);
+
 
         return new ResponseEntity<>("Account updated successfully.", HttpStatus.OK);
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<APIResponse<Boolean>> deleteAccount(

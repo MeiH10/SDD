@@ -2,7 +2,7 @@ import { useState } from "react";
 import Modal from "../Modal";
 import { useAuth } from "../../context/AuthContext";
 
-const ReportModal = ({ isOpen, onClose, noteId }) => {
+const ReportModal = ({ isOpen, onClose, type = "note", itemId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -18,7 +18,8 @@ const ReportModal = ({ isOpen, onClose, noteId }) => {
       const formData = new URLSearchParams();
       formData.append("title", title);
       formData.append("description", description);
-      formData.append("noteID", noteId);
+      formData.append("type", type);
+      formData.append("item", itemId);
 
       const response = await fetch("/api/reports", {
         method: "POST",
@@ -48,7 +49,7 @@ const ReportModal = ({ isOpen, onClose, noteId }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Report Note"
+      title={`Report ${type.charAt(0).toUpperCase() + type.slice(1)}`}
       width="max-w-lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">

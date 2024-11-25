@@ -5,11 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import Pucknotes.Server.Account.Account;
-import Pucknotes.Server.Note.Note;
-import Pucknotes.Server.Note.NoteService;
 import Pucknotes.Server.Response.APIResponse;
-
-import Pucknotes.Server.Response.Types.UnauthorizedException;
 import Pucknotes.Server.Session.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -25,23 +21,21 @@ public class ReportController {
     @Autowired
     private SessionService sessions;
 
-    @Autowired
-    private NoteService notes;
-
     @PostMapping("")
     public ResponseEntity<APIResponse<String>> createReport(
             HttpServletRequest request,
             @RequestParam("title") String title,
             @RequestParam("description") String description,
-            @RequestParam("noteID") String noteId) {
+            @RequestParam("type") String type,
+            @RequestParam("item") String itemId) {
         
         Account user = sessions.getCurrentUser(request);
-        Note note = notes.getById(noteId);
         
         Report report = new Report();
         report.setTitle(title);
         report.setDescription(description);
-        report.setNote(noteId);
+        report.setType(type);
+        report.setItem(itemId);
         report.setOwner(user.getId());
         
         report = reports.createReport(report);
