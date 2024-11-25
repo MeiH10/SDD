@@ -2,6 +2,7 @@ package Pucknotes.Server.Course;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -59,15 +60,15 @@ public class CourseService {
 
         // Add criteria to the query based on the provided identifiers.
         if (majorID != null) {
-            query.addCriteria(Criteria.where("major").is(majorID));
+            query.addCriteria(Criteria.where("major").is(new ObjectId(majorID)));
         }
         
         if (semesterID != null) {
-            query.addCriteria(Criteria.where("semester").is(semesterID));
+            query.addCriteria(Criteria.where("semester").is(new ObjectId(semesterID)));
         }
 
         if (schoolID != null) {
-            query.addCriteria(Criteria.where("school").is(schoolID));
+            query.addCriteria(Criteria.where("school").is(new ObjectId(schoolID)));
         }
 
         if (name != null) {

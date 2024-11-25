@@ -2,6 +2,7 @@ package Pucknotes.Server.School;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -110,7 +111,7 @@ public class SchoolService {
 
         // Add criteria to filter by semester ID if provided
         if (semesterID != null) {
-            query.addCriteria(Criteria.where("semester").is(semesterID));
+            query.addCriteria(Criteria.where("semester").is(new ObjectId(semesterID)));
         }
 
         // Add criteria to filter by name using a case-insensitive regex if provided.

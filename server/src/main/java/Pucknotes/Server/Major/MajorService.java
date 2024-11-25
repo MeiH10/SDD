@@ -2,6 +2,7 @@ package Pucknotes.Server.Major;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -69,12 +70,12 @@ public class MajorService {
 
         // Filter by semester ID, if provided.
         if (semesterID != null) {
-            query.addCriteria(Criteria.where("semester").is(semesterID));
+            query.addCriteria(Criteria.where("semester").is(new ObjectId(semesterID)));
         }
 
         // Filter by school ID, if provided.
         if (schoolID != null) {
-            query.addCriteria(Criteria.where("school").is(schoolID));
+            query.addCriteria(Criteria.where("school").is(new ObjectId(schoolID)));
         }
 
         // Filter by name using regex for case insensitive matching.

@@ -1,5 +1,6 @@
 package Pucknotes.Server.Comment;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -120,7 +121,7 @@ public class CommentService {
             throw new IllegalArgumentException("Invalid comment ID.");
         }
 
-        var query = Query.query(Criteria.where("_id").is(id));
+        var query = Query.query(Criteria.where("_id").is(new ObjectId(id)));
         query.fields().exclude("likes");
 
         Comment comment = template.findOne(query, Comment.class);
@@ -164,11 +165,11 @@ public class CommentService {
         }
 
         if (noteID != null) {
-            query.addCriteria(Criteria.where("note").is(noteID));
+            query.addCriteria(Criteria.where("note").is(new ObjectId(noteID)));
         }
 
         if (userID != null) {
-            query.addCriteria(Criteria.where("account").is(userID));
+            query.addCriteria(Criteria.where("account").is(new ObjectId(userID)));
         }
 
         query.fields().exclude("likes");

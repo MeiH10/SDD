@@ -100,7 +100,7 @@ public class NoteService {
             throw new IllegalArgumentException("Invalid note ID.");
         }
 
-        var query = Query.query(Criteria.where("_id").is(id));
+        var query = Query.query(Criteria.where("_id").is(new ObjectId(id)));
         query.fields().exclude("likes");
 
         Note note = template.findOne(query, Note.class);
@@ -175,23 +175,23 @@ public class NoteService {
         }
 
         if (courseID != null) {
-            query.addCriteria(Criteria.where("course").is(courseID));
+            query.addCriteria(Criteria.where("course").is(new ObjectId(courseID)));
         }
 
         if (majorID != null) {
-            query.addCriteria(Criteria.where("major").is(majorID));
+            query.addCriteria(Criteria.where("major").is(new ObjectId(majorID)));
         }
 
         if (semesterID != null) {
-            query.addCriteria(Criteria.where("semester").is(semesterID));
+            query.addCriteria(Criteria.where("semester").is(new ObjectId(semesterID)));
         }
 
         if (schoolID != null) {
-            query.addCriteria(Criteria.where("school").is(schoolID));
+            query.addCriteria(Criteria.where("school").is(new ObjectId(schoolID)));
         }
 
         if (ownerID != null) {
-            query.addCriteria(Criteria.where("account").is(ownerID));
+            query.addCriteria(Criteria.where("account").is(new ObjectId(ownerID)));
         }
 
         query.fields().exclude("likes");

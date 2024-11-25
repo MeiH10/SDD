@@ -63,7 +63,7 @@ public class FileService {
      * File object that includes the filename, content type, file size, and file bytes.
      */
     public File downloadFile(String id) throws IOException {
-        Query query = new Query(Criteria.where("_id").is(id));
+        Query query = new Query(Criteria.where("_id").is(new ObjectId(id)));
         GridFSFile file = template.findOne(query);
         File result = new File();
 
@@ -89,7 +89,7 @@ public class FileService {
      * from GridFS. It does not provide feedback if the file was not found.
      */
     public void deleteFile(String id) {
-        Query query = new Query(Criteria.where("_id").is(id));
+        Query query = new Query(Criteria.where("_id").is(new ObjectId(id)));
         template.delete(query);
         // Note: Additional error handling could be implemented here.
     }
