@@ -87,4 +87,16 @@ public class AccountController {
             return ResponseEntity.ok(APIResponse.good(false));
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateAccountRole(
+            HttpServletRequest request,
+            @PathVariable String id,
+            @RequestParam(value = "role", required = true) int role) {
+
+        Account account = sessions.getCurrentUser(request);
+        service.updateAccountRole(account, account, role);
+        return new ResponseEntity<>("Account Role updated successfully.", HttpStatus.OK);
+    }
+
 }

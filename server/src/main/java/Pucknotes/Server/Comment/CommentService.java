@@ -28,6 +28,12 @@ public class CommentService {
             throw new UnauthorizedException("User must be logged in to create a comment.");
         }
 
+        int accountRole = account.getRole();
+        if(accountRole == 0 || accountRole == 1){
+            throw new UnauthorizedException("User deos not have the correct permissions to post a comment");
+        }
+
+
         Comment comment = new Comment(account.getId(), note.getId(), body);
         return repository.save(comment);
     }
@@ -54,8 +60,8 @@ public class CommentService {
         if (comment == null) {
             throw new ResourceNotFoundException("Comment not found.");
         }
-        
-        if (!comment.getAccount().equals(user.getId())) {
+
+        if (!comment.getAccount().equals(user.getId()) && user.getRole() != 3) {
             throw new UnauthorizedException("You are not the owner of this comment.");
         }
 
