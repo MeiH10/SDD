@@ -1,5 +1,7 @@
 package Pucknotes.Server.Note;
 
+import java.io.IOException;
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -14,8 +16,6 @@ import Pucknotes.Server.File.FileService;
 import Pucknotes.Server.Response.Types.ResourceNotFoundException;
 import Pucknotes.Server.Response.Types.UnauthorizedException;
 import Pucknotes.Server.Section.Section;
-import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
 
 /**
@@ -57,6 +57,10 @@ public class NoteService {
             throw new UnauthorizedException("You must log in to create a note.");
         } else if (section == null) {
             throw new ResourceNotFoundException("Specify a valid course.");
+        }
+
+        if(user.getRole() == 0 || user.getRole() == 1){
+            throw new UnauthorizedException("You are not permitted to add a note.");
         }
 
         ObjectId fileID = files.addFile(upload);
@@ -200,8 +204,12 @@ public class NoteService {
      *
      * @param note The Note object containing updated information.
      */
-    public void updateNote(Note note) {
-        repository.save(note); // Save the updated note to the repository.
+    public void updateNote(Note note, Account user) {
+        if (!user.getId().equals(note.getOwner()) && user.getRole() != 3) {
+            throw new UnauthorizedException("You are not the note's owner.");
+        }
+
+        repository.save(note);
     }
 
     /**
@@ -209,9 +217,12 @@ public class NoteService {
      *
      * @param note The Note object to delete.
      */
-    public void deleteNote(Note note) {
-        repository.delete(note); // Remove the note from the repository.
-        files.deleteFile(note.getFile()); // Delete the associated file from storage.
+    public void deleteNote(Note note, Account account) {
+        if (!account.getId().equals(note.getOwner()) && account.getRole() != 3) {
+            throw new UnauthorizedException("You are not the note's owner.");
+        }
+        repository.delete(note);
+        files.deleteFile(note.getFile());
     }
 
     /**

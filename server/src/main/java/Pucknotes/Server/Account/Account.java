@@ -49,4 +49,8 @@ public class Account {
     @Setter
     @NonNull
     private String password;
+
+    @Setter
+    @NonNull
+    private int role = 2;
 }

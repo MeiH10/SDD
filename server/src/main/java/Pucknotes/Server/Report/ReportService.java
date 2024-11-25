@@ -3,6 +3,9 @@ package Pucknotes.Server.Report;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import Pucknotes.Server.Account.Account;
+import Pucknotes.Server.Response.Types.UnauthorizedException;
+
 import java.util.List;
 
 /**
@@ -37,9 +40,12 @@ public class ReportService {
      * @return A list of all reports in the database.
      * This may return an empty list if there are no reports.
      */
-    public List<Report> getAllReports() {
-        // Fetch all reports from the repository.
-        return repository.findAll(); // Return the list of reports, which can be empty but never null.
+    public List<Report> getAllReports(Account account) {
+        int role = account.getRole();
+        if (role == 0 || role == 1) {
+            throw new UnauthorizedException("User deos not have the correct permissions to view all reports");
+        }
+        return repository.findAll();
     }
 
     /**
@@ -49,11 +55,11 @@ public class ReportService {
      * @throws IllegalArgumentException if the id is null or empty.
      * @throws ReportNotFoundException if no report is found with the given id (this can be thrown by the repository).
      */
-    public void deleteReport(String id) {
-        // Validate the id before attempting to delete.
-        if (id == null || id.isEmpty()) {
-            throw new IllegalArgumentException("ID must not be null or empty.");
+    public void deleteReport(String id, Account account) {
+        int role = account.getRole();
+        if (role == 0 || role == 1) {
+            throw new UnauthorizedException("User deos not have the correct permissions to view all reports");
         }
-        repository.deleteById(id); // Delete the report by its ID from the database.
+        repository.deleteById(id);
     }
 }

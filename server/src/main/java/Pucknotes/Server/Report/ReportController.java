@@ -75,11 +75,9 @@ public class ReportController {
      * @return A ResponseEntity containing an APIResponse with a list of all reports.
      */
     @GetMapping("")
-    public ResponseEntity<APIResponse<List<Report>>> getAllReports(HttpServletRequest request) {
-        // Retrieving the current user is currently commented out; user authorization may be needed here.
-        
-        // Return a successful response with a list of all reports.
-        return ResponseEntity.ok(APIResponse.good(reports.getAllReports()));
+    public List<Report> getAllReports(HttpServletRequest request) {
+        Account account = sessions.getCurrentUser(request);
+        return reports.getAllReports(account);
     }
 
     /**
@@ -90,15 +88,8 @@ public class ReportController {
      * @return A ResponseEntity containing an APIResponse confirming the deletion of the report.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<APIResponse<Boolean>> deleteReport(
-            HttpServletRequest request,
-            @PathVariable String id) {
-        // Retrieving the current user is currently commented out; user authorization is a consideration here.
-
-        // Proceed to delete the report identified by the given ID.
-        reports.deleteReport(id);
-
-        // Return a successful response indicating that the deletion was processed.
-        return ResponseEntity.ok(APIResponse.good(true));
+    public void deleteReport(HttpServletRequest request, @PathVariable String id) {
+        Account account = sessions.getCurrentUser(request);
+        reports.deleteReport(id, account);
     }
 }

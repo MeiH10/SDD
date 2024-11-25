@@ -324,8 +324,7 @@ public class NoteController {
             throw new IllegalArgumentException("Bad file type.");
         }
 
-        // Commit the updated note to the database.
-        notes.updateNote(note);
+        notes.updateNote(note, user);
         
         return ResponseEntity.ok(APIResponse.good(note.getId()));
     }
@@ -346,13 +345,7 @@ public class NoteController {
         Account user = sessions.getCurrentUser(request);
         Note note = notes.getById(id);
 
-        // Only the owner can delete a note.
-        if (!user.getId().equals(note.getOwner())) {
-            throw new UnauthorizedException("You must be a note's owner to delete it.");
-        }
-
-        // Delete the note from the system.
-        notes.deleteNote(note);
+        notes.deleteNote(note, user);
 
         return ResponseEntity.ok(APIResponse.good(true));
     }

@@ -1,16 +1,17 @@
 package Pucknotes.Server.Report;
 
+import java.util.Date;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.lang.NonNull;
+
 
 /**
  * Represents a report entity in the application.
@@ -20,9 +21,8 @@ import org.springframework.lang.NonNull;
  * and the date of creation.
  */
 @Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Document(collection = "reports")
 public class Report {
     
@@ -37,29 +37,26 @@ public class Report {
      * The identifier of the owner of the report.
      * This field cannot be null as it is marked with @NonNull.
      */
+    @Setter
     @Field(targetType = FieldType.OBJECT_ID)
-    @NonNull
     private String owner;
 
     /**
      * The type of the report.
      * This field is optional and may contain different values based on reporting needs.
      */
+    @Setter
     private String type;
 
     /**
      * The identifier of the associated item.
      * This field may be null, indicating that the report is not associated with any item.
      */
+    @Setter
     @Field(targetType = FieldType.OBJECT_ID)
     private String item;
 
-    /**
-     * The title of the report.
-     * This field cannot be null and must be set at creation.
-     */
     @Setter
-    @NonNull
     private String title;
 
     /**
@@ -67,7 +64,6 @@ public class Report {
      * This field cannot be null and must be set at creation.
      */
     @Setter
-    @NonNull
     private String description;
 
     /**

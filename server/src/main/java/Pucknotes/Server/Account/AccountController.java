@@ -71,7 +71,6 @@ public class AccountController {
             @RequestParam(value = "username", required = false) String username,
             @RequestParam(value = "password", required = false) String password,
             @RequestParam(value = "role", required = true) int role) {
-
         
         // Get the current user from the session.
         Account account = sessions.getCurrentUser(request);

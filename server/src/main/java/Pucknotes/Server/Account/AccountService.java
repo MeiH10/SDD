@@ -57,8 +57,7 @@ public class AccountService {
      */
     public Account registerAccount(Account account) {
         return registerAccount(
-            account.getEmail(), account.getUsername(), account.getPassword()
-        );
+                account.getEmail(), account.getUsername(), account.getPassword());
     }
 
     /**
@@ -180,5 +179,20 @@ public class AccountService {
         }
 
         repository.delete(account);
+    }
+
+    public Account updateAccountRole(Account next, Account user, int newRole) {
+        if (next == null) {
+            return null;
+        } else if (user.getId().equals(next.getId())) {
+            throw new UnauthorizedException("You are not this user.");
+        }
+        Account current = getById(next.getId());
+        if (next.getUsername() != null)
+            current.setUsername(next.getUsername());
+        if (next.getPassword() != null)
+            current.setPassword(next.getPassword());
+        current.setRole(newRole);
+        return repository.save(current);
     }
 }
