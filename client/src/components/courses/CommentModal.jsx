@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MessageSquare, ChevronUp, ChevronDown } from "lucide-react";
+import { MessageSquare, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "../Modal";
 
@@ -9,9 +9,8 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [commentAuthors, setCommentAuthors] = useState({});
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, userId } = useAuth();
 
-  // get comments when modal opens
   useEffect(() => {
     if (isOpen && noteId) {
       fetchComments();
@@ -28,7 +27,6 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
       if (!data.good) throw new Error(data.error || "Failed to fetch comments");
       setComments(data.data);
 
-      // get authors for all comments
       const authorIds = [
         ...new Set(data.data.map((comment) => comment.account)),
       ];
@@ -73,13 +71,26 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
       const data = await response.json();
       if (!data.good) throw new Error(data.error || "Failed to post comment");
 
-      // refresh comments
       await fetchComments();
       setNewComment("");
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (commentId) => {
+    if (!window.confirm("Are you sure you want to delete this comment?"))
+      return;
+    try {
+      const response = await fetch(`/api/comment/${commentId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete comment");
+      await fetchComments();
+    } catch (error) {
+      setError(error.message);
     }
   };
 
@@ -99,8 +110,6 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
       }
 
       if (!response.ok) throw new Error("Failed to update vote");
-
-      // refresh comments to get updated vote count
       await fetchComments();
     } catch (err) {
       setError(err.message);
@@ -122,7 +131,10 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
           ) : (
             <div className="space-y-4">
               {comments.map((comment) => (
-                <div key={comment.id} className="bg-gray-700 rounded-lg p-4">
+                <div
+                  key={comment.id}
+                  className="bg-gray-700 rounded-lg p-4 relative"
+                >
                   <div className="flex items-start">
                     <div className="flex flex-col items-center mr-4">
                       <button
@@ -160,6 +172,15 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
                       </div>
                       <p className="text-white">{comment.description}</p>
                     </div>
+                    {userId === comment.account && (
+                      <button
+                        onClick={() => handleDelete(comment.id)}
+                        className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full"
+                        title="Delete comment"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -167,7 +188,6 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
           )}
         </div>
 
-        {/* form to add comment */}
         <div className="mt-auto">
           {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
           <form onSubmit={handleSubmit} className="flex gap-2">
