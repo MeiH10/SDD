@@ -5,10 +5,12 @@ import {
   ChevronDown,
   Trash2,
   PencilIcon,
+  AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "../Modal";
 import CommentEditModal from "./CommentEditModal";
+import ReportModal from "../reports/ReportModal";
 
 const CommentModal = ({ isOpen, onClose, noteId }) => {
   const [comments, setComments] = useState([]);
@@ -17,6 +19,7 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
   const [error, setError] = useState(null);
   const [commentAuthors, setCommentAuthors] = useState({});
   const [editingComment, setEditingComment] = useState(null);
+  const [reportingComment, setReportingComment] = useState(null);
   const { isLoggedIn, userId } = useAuth();
 
   useEffect(() => {
@@ -186,24 +189,40 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
                         </div>
                         <p className="text-white">{comment.description}</p>
                       </div>
-                      {userId === comment.account && (
-                        <div className="absolute top-2 right-2 flex gap-2">
-                          <button
-                            onClick={() => setEditingComment(comment)}
-                            className="p-2 text-gray-400 hover:text-teal-500 transition-colors rounded-full"
-                            title="Edit comment"
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(comment.id)}
-                            className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full"
-                            title="Delete comment"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
+                      <div className="absolute top-2 right-2 flex gap-2">
+                        <button
+                          onClick={() => setReportingComment(comment)}
+                          disabled={!isLoggedIn}
+                          className={`p-2 transition-colors rounded-full ${
+                            isLoggedIn
+                              ? "text-gray-400 hover:text-red-500 hover:bg-gray-600/50"
+                              : "text-gray-600 cursor-not-allowed"
+                          }`}
+                          title={
+                            isLoggedIn ? "Report comment" : "Login to report"
+                          }
+                        >
+                          <AlertTriangle className="w-4 h-4" />
+                        </button>
+                        {userId === comment.account && (
+                          <>
+                            <button
+                              onClick={() => setEditingComment(comment)}
+                              className="p-2 text-gray-400 hover:text-teal-500 hover:bg-gray-600/50 transition-colors rounded-full"
+                              title="Edit comment"
+                            >
+                              <PencilIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(comment.id)}
+                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-gray-600/50 transition-colors rounded-full"
+                              title="Delete comment"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -245,6 +264,15 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
             fetchComments();
             setEditingComment(null);
           }}
+        />
+      )}
+
+      {reportingComment && (
+        <ReportModal
+          isOpen={!!reportingComment}
+          onClose={() => setReportingComment(null)}
+          type="comment"
+          itemId={reportingComment.id}
         />
       )}
     </>
