@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import Pucknotes.Server.Account.Account;
-import Pucknotes.Server.Response.Types.UnauthorizedException;
 import Pucknotes.Server.Session.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 
