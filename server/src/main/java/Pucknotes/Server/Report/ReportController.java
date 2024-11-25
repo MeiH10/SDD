@@ -1,7 +1,13 @@
 package Pucknotes.Server.Report;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import Pucknotes.Server.Account.Account;
+import Pucknotes.Server.Note.Note;
+import Pucknotes.Server.Note.NoteService;
+import Pucknotes.Server.Response.APIResponse;
 
 import Pucknotes.Server.Response.Types.UnauthorizedException;
 import Pucknotes.Server.Session.SessionService;
@@ -19,26 +25,43 @@ public class ReportController {
     @Autowired
     private SessionService sessions;
 
+    @Autowired
+    private NoteService notes;
+
     @PostMapping("")
-    public Report createReport(@RequestBody Report report) {
-        return reports.createReport(report);
+    public ResponseEntity<APIResponse<String>> createReport(
+            HttpServletRequest request,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("noteID") String noteId) {
+        
+        Account user = sessions.getCurrentUser(request);
+        Note note = notes.getById(noteId);
+        
+        Report report = new Report();
+        report.setTitle(title);
+        report.setDescription(description);
+        report.setNote(noteId);
+        report.setOwner(user.getId());
+        
+        report = reports.createReport(report);
+        
+        return ResponseEntity.ok(APIResponse.good(report.getId()));
     }
 
     @GetMapping("")
-    public List<Report> getAllReports(HttpServletRequest request) {
-        int accountRole = sessions.getCurrentUser(request).getRole();
-        if(accountRole == 0 || accountRole == 1){
-            throw new UnauthorizedException("User deos not have the correct permissions to view all reports");
-        }
-        return reports.getAllReports();
+    public ResponseEntity<APIResponse<List<Report>>> getAllReports(HttpServletRequest request) {
+        Account user = sessions.getCurrentUser(request);
+        return ResponseEntity.ok(APIResponse.good(reports.getAllReports()));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteReport(HttpServletRequest request, @PathVariable String id) {
-        int accountRole = sessions.getCurrentUser(request).getRole();
-        if(accountRole == 0 || accountRole == 1){
-            throw new UnauthorizedException("User deos not have the correct permissions to delete a report");
-        }
+    public ResponseEntity<APIResponse<Boolean>> deleteReport(
+            HttpServletRequest request,
+            @PathVariable String id) {
+        Account user = sessions.getCurrentUser(request);
+
         reports.deleteReport(id);
+        return ResponseEntity.ok(APIResponse.good(true));
     }
 }

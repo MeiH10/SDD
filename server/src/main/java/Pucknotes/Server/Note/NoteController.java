@@ -238,7 +238,7 @@ public class NoteController {
             throw new IllegalArgumentException("Bad file type.");
         }
 
-        notes.updateNote(note, user);
+        notes.updateNote(note);
         
         return ResponseEntity.ok(APIResponse.good(note.getId()));
     }

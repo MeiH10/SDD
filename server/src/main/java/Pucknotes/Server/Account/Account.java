@@ -31,19 +31,9 @@ public class Account {
     @NonNull
     private String password;
 
-    private int role;
-
     public Account(String email, String username, String password, String firstname, String lastname) {
         this.email = email;
         this.username = username;
         this.password = password;
-    }
-
-    public int getRole(){
-        return this.role;
-    }
-
-    public void setRole(int newRole){
-        this.role = newRole;
     }
 }
