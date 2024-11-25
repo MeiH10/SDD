@@ -133,7 +133,9 @@ dist
 .vscode
 
 data
+<<<<<<< HEAD
+tree.txt
+=======
 /PuckNotes
 .DS_Store
-
-tree.txt
+>>>>>>> origin

@@ -11,9 +11,6 @@ import { useAuth } from "../../context/AuthContext";
 import Modal from "../Modal";
 import CommentModal from "./CommentModal";
 
-import { AlertTriangle } from "lucide-react";
-import ReportModal from "../reports/ReportModal";
-
 const NoteCard = ({ note }) => {
   const [author, setAuthor] = useState(null);
   const [section, setSection] = useState(null);
@@ -27,7 +24,6 @@ const NoteCard = ({ note }) => {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
   const { isLoggedIn } = useAuth();
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchAuthorAndSection = async () => {
@@ -308,19 +304,6 @@ const NoteCard = ({ note }) => {
                 )}
               </div>
             </button>
-
-            <button
-              onClick={() => setIsReportModalOpen(true)}
-              disabled={!isLoggedIn}
-              className={`p-2 transition-colors rounded-full hover:bg-gray-700/50 ${
-                isLoggedIn
-                  ? "text-gray-400 hover:text-red-500"
-                  : "text-gray-600 cursor-not-allowed"
-              }`}
-              title={isLoggedIn ? "Report" : "Login to report"}
-            >
-              <AlertTriangle className="w-5 h-5" />
-            </button>
           </div>
         </div>
       </div>
@@ -355,11 +338,6 @@ const NoteCard = ({ note }) => {
       <CommentModal
         isOpen={isCommentModalOpen}
         onClose={() => setIsCommentModalOpen(false)}
-        noteId={note.id}
-      />
-      <ReportModal
-        isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
         noteId={note.id}
       />
     </>
