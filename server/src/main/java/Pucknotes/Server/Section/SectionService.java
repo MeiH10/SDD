@@ -2,6 +2,7 @@ package Pucknotes.Server.Section;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -40,7 +41,7 @@ public class SectionService {
         }
 
         if (courseId != null) {
-            query.addCriteria(Criteria.where("course").is(courseId));
+            query.addCriteria(Criteria.where("course").is(new ObjectId(courseId)));
         }
 
         return template.find(query, Section.class);
