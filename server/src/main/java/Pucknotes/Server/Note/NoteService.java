@@ -64,26 +64,6 @@ public class NoteService {
         return note;
     }
 
-    // // Method to get all note IDs
-    // public List<String> getAllNoteIds() {
-    //     return NoteRepo.findAll().stream().map(Note::getId).collect(Collectors.toList());
-    // }
-
-    // public void deleteNote(String id, String userID) {
-    //     Optional<Note> optionalNote = NoteRepo.findById(id);
-    //     if (optionalNote.isPresent()) {
-    //         Note note = optionalNote.get();
-    //         Account account = accounts.getById(userID);
-
-    //         // Check if the user is the owner of the note
-    //         if (!account.getId().equals(note.getOwner().getId()) && account.getRole() != 3) {
-    //             throw new UnauthorizedException("You are not the note's owner.");
-    //         }
-
-    //         // Perform the deletion
-    //         NoteRepo.delete(note);
-    //     } else {
-    //         throw new NoteNotFoundException(id);
     public Note getById(String id) {
         if (id == null) {
             throw new IllegalArgumentException("Invalid note ID.");
@@ -172,7 +152,10 @@ public class NoteService {
         repository.save(note);
     }
 
-    public void deleteNote(Note note) {
+    public void deleteNote(Note note, Account account) {
+        if (!account.getId().equals(note.getOwner()) && account.getRole() != 3) {
+            throw new UnauthorizedException("You are not the note's owner.");
+        }
         repository.delete(note);
         files.deleteFile(note.getFile());
     }
