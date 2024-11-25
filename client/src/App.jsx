@@ -1,40 +1,31 @@
-import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import SchoolMajorSelector from './components/SchoolMajorSelector';
-import NoteForm from './components/NoteForm';
-import NoteList from './components/NoteList';
-import { useEffect, useState } from 'react';
+import CoursesPage from './components/courses/CoursesPage';
+import CourseSemestersPage from './components/courses/CourseSemestersPage';
+import NotesPage from './components/courses/NotesPage';
+import { NoteProvider } from './context/NoteContext';
+
 
 const App = () => {
-    const [notes, setNotes] = useState([]);
-    const [selectedNote, setSelectedNote] = useState(null);
-
-    // useEffect(() => {
-    //     fetchNotes();
-    // }, []);
-
-    const fetchNotes = async () => {
-        const response = await fetch('/api/note');
-        const data = await response.json();
-        setNotes(data);
-    };
-
-    const addOrUpdateNote = async (note) => {
-        const method = note.id ? 'PUT' : 'POST';
-        const response = await fetch(`/api/note${note.id ? `/${note.id}` : ''}`, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(note),
-        });
-        fetchNotes();
-    };
-
-    return (
+  return (
+    <AuthProvider>
+      <NoteProvider>
+      <BrowserRouter>
         <div className="min-h-screen bg-gray-900 text-white">
-            <Navbar />
-            <SchoolMajorSelector />
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<SchoolMajorSelector />} />
+            <Route path="/:majorCode" element={<CoursesPage />} />
+            <Route path="/:majorCode/:courseId" element={<CourseSemestersPage />} />
+            <Route path="/:majorCode/:courseId/:semester" element={<NotesPage />} />
+          </Routes>
         </div>
-    );
+      </BrowserRouter>
+      </NoteProvider>
+    </AuthProvider>
+  );
 };
 
 export default App;

@@ -1,5 +1,7 @@
 package Pucknotes.Server.Note;
 
+import org.apache.logging.log4j.util.InternalException;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -7,153 +9,289 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import Pucknotes.Server.Like.LikeService;
+import Pucknotes.Server.Account.Account;
+import Pucknotes.Server.Account.AccountService;
+import Pucknotes.Server.Course.CourseService;
+import Pucknotes.Server.File.File;
+import Pucknotes.Server.File.FileService;
+import Pucknotes.Server.Major.MajorService;
+import Pucknotes.Server.Response.APIResponse;
+import Pucknotes.Server.Response.Types.ResourceNotFoundException;
 import Pucknotes.Server.Response.Types.UnauthorizedException;
+import Pucknotes.Server.School.SchoolService;
+import Pucknotes.Server.Section.Section;
+import Pucknotes.Server.Section.SectionService;
+import Pucknotes.Server.Semester.SemesterService;
 import Pucknotes.Server.Session.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/note")
 public class NoteController {
 
     @Autowired
-    private NoteService noteService;
+    private NoteService notes;
 
     @Autowired
-    private LikeService likeService;
+    private SectionService sections;
 
     @Autowired
-    private SessionService sessionService;
+    private CourseService courses;
 
-    private String getCurrentUserId(HttpServletRequest request) {
-        return sessionService.getSession(request);
-    }
+    @Autowired
+    private MajorService majors;
+
+    @Autowired
+    private SchoolService schools;
+
+    @Autowired
+    private SemesterService semesters;
+
+    @Autowired
+    private SessionService sessions;
+
+    @Autowired
+    private FileService files;
+
+    @Autowired
+    private AccountService accounts;
 
     // Endpoint to add a new note
     @PostMapping("")
-    public ResponseEntity<String> addNote(
+    public ResponseEntity<APIResponse<String>> addNote(
             HttpServletRequest request,
-            @RequestParam("title") String title,
-            @RequestParam("file") MultipartFile file) {
-        try {
-            String userID = getCurrentUserId(request);
-            String noteId = noteService.addNote(title, file, userID);
-            return new ResponseEntity<>("Note created successfully with ID: " + noteId, HttpStatus.CREATED);
-        } catch (IOException e) {
-            return new ResponseEntity<>("Error while uploading file: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("Invalid input: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            @RequestParam(value = "title", required = true) String title,
+            @RequestParam(value = "description", defaultValue = "") String description,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "link", required = false) String link,
+            @RequestParam(value = "sectionID", required = true) String sectionID,
+            @RequestParam(value = "tags", defaultValue = "") List<String> tags,
+            @RequestParam(value = "anonymous", defaultValue = "false") boolean anonymous) {
+
+        if (!sections.existsById(sectionID)) {
+            throw new IllegalArgumentException("A section with 'sectionID' does not exist.");
         }
+
+        Account user = sessions.getCurrentUser(request);
+        Section section = sections.getById(sectionID);
+
+        try {
+            Note note = notes.createNote(user, section, title, description, file, link, tags, anonymous);
+            return ResponseEntity.ok(APIResponse.good(note.getId()));
+        } catch (Exception error) {
+            throw new InternalException("Could not create note.");
+        }    
     }
 
-    // Endpoint to get all note IDs
     @GetMapping("")
-    public ResponseEntity<List<String>> getAllNoteIds() {
-        List<String> noteIds = noteService.getAllNoteIds();
-        return new ResponseEntity<>(noteIds, HttpStatus.OK);
+    public ResponseEntity<APIResponse<Object>> getMajorsFull(
+            @RequestParam(value = "query", required = false) String query,
+            @RequestParam(value = "tags", defaultValue = "") List<String> tags,
+            @RequestParam(value = "ownerID", required = false) String userID,
+            @RequestParam(value = "sectionNumber", required = false) String sectionNumber,
+            @RequestParam(value = "sectionID", required = false) String sectionID,
+            @RequestParam(value = "courseCode", required = false) String courseCode,
+            @RequestParam(value = "courseID", required = false) String courseID,
+            @RequestParam(value = "majorCode", required = false) String majorCode,
+            @RequestParam(value = "majorID", required = false) String majorID,
+            @RequestParam(value = "schoolName", required = false) String schoolName,
+            @RequestParam(value = "schoolID", required = false) String schoolID,
+            @RequestParam(value = "semesterName", required = false) String semesterName,
+            @RequestParam(value = "semesterID", required = false) String semesterID,
+            @RequestParam(value = "sort", defaultValue = "likes") String sort,
+            @RequestParam(value = "order", defaultValue = "asc") String order,
+            @RequestParam(value = "return", defaultValue = "id") String type) {
+
+        if (sectionID != null && !sections.existsById(sectionID)) {
+            throw new IllegalArgumentException("A section with 'sectionID' does not exist.");
+        } else if (sectionNumber != null && !sections.existsByNumber(sectionNumber)) {
+            throw new IllegalArgumentException("A section with 'sectionNumber' does not exist.");
+        } else if (courseID != null && !courses.existsById(courseID)) {
+            throw new IllegalArgumentException("A course with 'courseID' does not exist.");
+        } else if (courseCode != null && !courses.existsByCode(courseCode)) {
+            throw new IllegalArgumentException("A course with 'courseCode' does not exist.");
+        } else if (majorID != null && !majors.existsById(majorID)) {
+            throw new IllegalArgumentException("A major with 'majorID' does not exist.");
+        } else if (majorCode != null && !majors.existsByCode(majorCode)) {
+            throw new IllegalArgumentException("A major with 'majorName' does not exist.");
+        } else if (schoolID != null && !schools.existsById(schoolID)) {
+            throw new IllegalArgumentException("A school with 'schoolID' does not exist.");
+        } else if (schoolName != null && !schools.existsByName(schoolName)) {
+            throw new IllegalArgumentException("A school with 'schoolName' does not exist.");
+        } else if (semesterID != null && !semesters.existsById(semesterID)) {
+            throw new IllegalArgumentException("A semester with 'semesterID' does not exist.");
+        } else if (semesterName != null && !semesters.existsByName(semesterName)) {
+            throw new IllegalArgumentException("A semester with 'semesterName' does not exist.");
+        } else if (userID != null && !accounts.existsById(userID)) {
+            throw new ResourceNotFoundException("Account with 'userID' does not exist.");
+        }
+        
+        if (semesterID == null && semesterName != null) {
+            semesterID = semesters.getByName(semesterName).getId();
+        }
+
+        if (schoolID == null && schoolName != null) {
+            schoolID = schools.getByName(schoolName).getId();
+        }
+
+        if (majorID == null && majorCode != null) {
+            majorID = majors.getByCode(majorCode).getId();
+        }
+
+        if (courseID == null && courseCode != null) {
+            courseID = courses.getByCode(courseCode).getId();
+        }
+
+        if (sectionID == null && sectionNumber != null) {
+            sectionID = sections.getByNumber(sectionNumber).getId();
+        }
+
+        List<Note> result = notes.getNotes(sectionID, courseID, majorID, semesterID, schoolID, tags, query, sort, order, userID);
+        result.forEach(note -> {
+            if (note.isAnonymous()) note.setOwner(null);
+        });
+
+        switch (type) {
+            case "object":
+                return ResponseEntity.ok(APIResponse.good(result));
+            case "count":
+                return ResponseEntity.ok(APIResponse.good(result.size()));
+            default:
+                List<String> ids = result.stream().map(Note::getId).toList();
+                return ResponseEntity.ok(APIResponse.good(ids));
+        }
     }
 
-    // Endpoint to get a note by ID
-    // Endpoint to get a note by ID or download the file
     @GetMapping("/{id}")
-    public ResponseEntity<?> getNoteById(
+    public ResponseEntity<APIResponse<Note>> getNoteById(@PathVariable String id) {
+        Note note = notes.getById(id);
+        if (note.isAnonymous()) note.setOwner(null);
+        return ResponseEntity.ok(APIResponse.good(note));
+    }
+
+    @GetMapping("/{id}/file")
+    public ResponseEntity<byte[]> getNoteFileById(@PathVariable String id) throws IOException {
+
+        Note note = notes.getById(id);
+        File file = files.downloadFile(note.getFile());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(file.getFileType());
+        headers.setContentLength(file.getFileSize());
+
+        return new ResponseEntity<byte[]>(file.getFile(), headers, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<APIResponse<String>> updateNote(
+            HttpServletRequest request,
             @PathVariable String id,
-            @RequestParam(required = false) String download) {
-        try {
-            Note note = noteService.getNote(id);
-            if ("true".equalsIgnoreCase(download)) {
-                // Prepare to download the file
-                byte[] fileData = note.getImage().getData();
-                HttpHeaders headers = new HttpHeaders();
-                headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + note.getTitle() + "\"");
-                return new ResponseEntity<>(fileData, headers, HttpStatus.OK);
-            } else {
-                // Return note information
-                return new ResponseEntity<>(note, HttpStatus.OK);
-            }
-        } catch (NoteNotFoundException e) {
-            return new ResponseEntity<>("Note not found with ID: " + id, HttpStatus.NOT_FOUND);
-        } catch (NoSuchElementException e) {
-            return new ResponseEntity<>("Note not found with ID: " + id, HttpStatus.NOT_FOUND);
+            @RequestParam(required = false) MultipartFile file,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) List<String> tags,
+            @RequestParam(required = false) String sectionID,
+            @RequestParam(required = false) Boolean anonymous) {
+        
+        Account user = sessions.getCurrentUser(request);
+        Note note = notes.getById(id);
+
+        if (!user.getId().equals(note.getOwner())) {
+            throw new UnauthorizedException("You must be a note's owner to edit it.");
         }
+
+        if (title != null) {
+            note.setTitle(title);
+        }
+
+        if (description != null) {
+            note.setDescription(description);
+        }
+        
+        if (tags != null) {
+            note.setTags(tags);
+        }
+
+        if (anonymous != null) {
+            note.setAnonymous(anonymous);
+        }
+
+        if (sectionID != null) {
+            Section section = sections.getById(sectionID);
+
+            note.setSection(section.getId());
+            note.setCourse(section.getCourse());
+            note.setMajor(section.getMajor());
+            note.setSchool(section.getSchool());
+            note.setSemester(section.getSemester());
+        }
+
+        try {
+            if (file != null) {
+                ObjectId fileID = files.addFile(file);
+                note.setFile(fileID.toString());
+            }
+        } catch (IOException error) {
+            throw new IllegalArgumentException("Bad file type.");
+        }
+
+        notes.updateNote(note, user);
+        
+        return ResponseEntity.ok(APIResponse.good(note.getId()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteNote(
+    public ResponseEntity<APIResponse<Boolean>> deleteNote(
             HttpServletRequest request,
             @PathVariable String id) {
-        try {
-            String userID = getCurrentUserId(request);
-            noteService.deleteNote(id, userID);
-            return new ResponseEntity<>("Note deleted successfully.", HttpStatus.OK);
-        } catch (NoteNotFoundException e) {
-            return new ResponseEntity<>("Note not found with ID: " + id, HttpStatus.NOT_FOUND);
-        } catch (UnauthorizedException e) {
-            return new ResponseEntity<>("Unauthorized to delete the note: " + e.getMessage(), HttpStatus.FORBIDDEN);
+        
+        Account user = sessions.getCurrentUser(request);
+        Note note = notes.getById(id);
+
+        if (!user.getId().equals(note.getOwner())) {
+            throw new UnauthorizedException("You must be a note's owner to delete it.");
         }
+
+        notes.deleteNote(note);
+
+        return ResponseEntity.ok(APIResponse.good(true));
     }
 
-    // Endpoint to update an existing note
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateNote(
-            HttpServletRequest request,
-            @PathVariable String id,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) MultipartFile file) {
-        try {
-            String userID = getCurrentUserId(request);
-            noteService.updateNote(id, title, file, userID);
-            return new ResponseEntity<>("Note updated successfully.", HttpStatus.OK);
-        } catch (NoteNotFoundException e) {
-            return new ResponseEntity<>("Note not found with ID: " + id, HttpStatus.NOT_FOUND);
-        } catch (IOException e) {
-            return new ResponseEntity<>("Error while uploading file: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("Invalid input: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    // Endpoint to like a note
-    @PostMapping("/{id}/like")
-    public ResponseEntity<String> likeNote(
+    @PutMapping("/{id}/like")
+    public ResponseEntity<APIResponse<Boolean>> likeNote(
             HttpServletRequest request,
             @PathVariable String id) {
-        try {
-            String userID = getCurrentUserId(request);
-            likeService.likeNote(id, userID);
-            return new ResponseEntity<>("Note liked successfully.", HttpStatus.OK);
-        } catch (UnauthorizedException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
-        }
+        
+        Account user = sessions.getCurrentUser(request);
+        Note note = notes.getById(id);
+        notes.likeNote(user, note);
+
+        return ResponseEntity.ok(APIResponse.good(true));
     }
 
-    // Endpoint to check if the user has liked the note
-    @GetMapping("/{id}/liked")
-    public ResponseEntity<Boolean> hasLikedNote(
+    @GetMapping("/{id}/like")
+    public ResponseEntity<APIResponse<Boolean>> hasLikedNote(
             HttpServletRequest request,
             @PathVariable String id) {
-        String userID = getCurrentUserId(request);
-        boolean hasLiked = likeService.hasLiked(id, userID);
-        return new ResponseEntity<>(hasLiked, HttpStatus.OK);
+        
+        Account user = sessions.getCurrentUser(request);
+        Note note = notes.getById(id);
+
+        return ResponseEntity.ok(APIResponse.good(notes.hasLikedNote(user, note)));
     }
 
-    // Endpoint to dislike a note (remove like)
     @DeleteMapping("/{id}/like")
-    public ResponseEntity<String> dislikeNote(
+    public ResponseEntity<APIResponse<Boolean>> dislikeNote(
             HttpServletRequest request,
             @PathVariable String id) {
-        try {
-            String userID = getCurrentUserId(request);
-            likeService.dislikeNote(id, userID);
-            return new ResponseEntity<>("Note disliked successfully.", HttpStatus.OK);
-        } catch (UnauthorizedException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
-        }
+        
+        Account user = sessions.getCurrentUser(request);
+        Note note = notes.getById(id);
+        notes.dislikeNote(user, note);
+
+        return ResponseEntity.ok(APIResponse.good(false));
     }
 }

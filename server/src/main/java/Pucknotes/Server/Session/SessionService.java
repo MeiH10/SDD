@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import Pucknotes.Server.Account.Account;
 import Pucknotes.Server.Account.AccountService;
+import Pucknotes.Server.Response.Types.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
@@ -33,5 +34,14 @@ public class SessionService {
 
     public String getSession(HttpServletRequest request) {
         return (String) request.getSession().getAttribute("id");
+    }
+
+    public Account getCurrentUser(HttpServletRequest request) {
+        String id = getSession(request);
+        try {
+            return accountService.getById(id);
+        } catch (ResourceNotFoundException error) {
+            return null;
+        }
     }
 }

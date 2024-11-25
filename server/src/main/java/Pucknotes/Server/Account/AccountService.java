@@ -23,7 +23,7 @@ public class AccountService {
         } else if (existsEmail(email)) {
             throw new ResourceConflictException("Account with email '" + email + "' already exists.");
         }
-        
+
         Account account = new Account(email, username, encoder.encode(password));
         account = repository.save(account);
         return account;
@@ -31,8 +31,7 @@ public class AccountService {
 
     public Account registerAccount(Account account) {
         return registerAccount(
-            account.getEmail(), account.getUsername(), account.getPassword()
-        );
+                account.getEmail(), account.getUsername(), account.getPassword());
     }
 
     public Account updateAccount(Account next, String userID) {
@@ -73,6 +72,10 @@ public class AccountService {
         return account != null;
     }
 
+    public boolean existsById(String id) {
+        return id != null && repository.existsById(id);
+    }
+
     public Account getById(String id) {
         if (id == null) {
             throw new IllegalArgumentException("Invalid account ID.");
@@ -96,10 +99,10 @@ public class AccountService {
         repository.delete(account);
     }
 
-    public Account updateAccountRole(Account next, String userID, int newRole) {
-        if (account == null) {
-            return;
-        } else if (userID.equals(account.getId())) {
+    public Account updateAccountRole(Account next, Account user, int newRole) {
+        if (next == null) {
+            return null;
+        } else if (user.getId().equals(next.getId())) {
             throw new UnauthorizedException("You are not this user.");
         }
         Account current = getById(next.getId());

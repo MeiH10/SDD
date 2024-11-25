@@ -1,39 +1,59 @@
 package Pucknotes.Server.Note;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.List;
 
-import Pucknotes.Server.Account.Account;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import org.bson.types.Binary;
+import java.util.Date;
 
-@AllArgsConstructor
-@RequiredArgsConstructor
+@Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Document(collection = "notes")
 public class Note {
-
     @Id
-    @Getter @Setter
     private String id;
 
-    @Getter @Setter
-    @NonNull
-    private String title;
+    @Setter
+    private String title, description;
 
-    @Getter
-    @NonNull
-    @DBRef
-    private Account owner;
+    @Setter
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String owner;
 
-    @Getter @Setter
-    @NonNull
-    private Binary image;
+    @Setter
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String file;
+
+    @Setter
+    private String link;
+
+    @Setter
+    private List<String> tags;
+
+    @Setter
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String section, course, major, school, semester;
+
+    @Setter
+    private Date createdDate = new Date();
+
+    @Setter
+    private long totalLikes;
+
+    @Setter
+    // @NonNull
+    @Field(targetType = FieldType.OBJECT_ID)
+    private List<String> likes = List.of();
+
+    @Setter
+    private boolean anonymous;
 }
