@@ -13,12 +13,8 @@ import CommentModal from "./CommentModal";
 
 import { AlertTriangle } from "lucide-react";
 import ReportModal from "../reports/ReportModal";
-import { Trash2 } from "lucide-react";
-import { useNote } from "../../context/NoteContext";
 
 const NoteCard = ({ note }) => {
-  const { userId } = useAuth();
-  const { triggerNoteRefresh } = useNote();
   const [author, setAuthor] = useState(null);
   const [section, setSection] = useState(null);
   const [hasLiked, setHasLiked] = useState(false);
@@ -87,23 +83,6 @@ const NoteCard = ({ note }) => {
 
     fetchCommentCount();
   }, [note.id]);
-
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this note?")) return;
-
-    try {
-      const response = await fetch(`/api/note/${note.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) throw new Error("Failed to delete note");
-
-      // refresh of notes list
-      triggerNoteRefresh();
-    } catch (error) {
-      console.error("Error deleting note:", error);
-    }
-  };
 
   const handleVote = async (isUpvote) => {
     if (!isLoggedIn) return;
@@ -342,16 +321,6 @@ const NoteCard = ({ note }) => {
             >
               <AlertTriangle className="w-5 h-5" />
             </button>
-
-            {userId === note.owner && (
-              <button
-                onClick={handleDelete}
-                className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-gray-700/50"
-                title="Delete note"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
-            )}
           </div>
         </div>
       </div>
