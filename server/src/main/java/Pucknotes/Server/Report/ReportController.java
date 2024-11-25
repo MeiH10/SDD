@@ -8,6 +8,8 @@ import Pucknotes.Server.Account.Account;
 import Pucknotes.Server.Note.Note;
 import Pucknotes.Server.Note.NoteService;
 import Pucknotes.Server.Response.APIResponse;
+
+import Pucknotes.Server.Response.Types.UnauthorizedException;
 import Pucknotes.Server.Session.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -58,6 +60,7 @@ public class ReportController {
             HttpServletRequest request,
             @PathVariable String id) {
         Account user = sessions.getCurrentUser(request);
+
         reports.deleteReport(id);
         return ResponseEntity.ok(APIResponse.good(true));
     }
