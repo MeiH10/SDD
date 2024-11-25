@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.lang.NonNull;
 
 @Getter
 @AllArgsConstructor
@@ -21,9 +22,10 @@ public class Report {
     @NonNull
     private String owner;
 
+    private String type;
+
     @Field(targetType = FieldType.OBJECT_ID)
-    @NonNull
-    private String note;
+    private String item;
 
     @Setter
     @NonNull

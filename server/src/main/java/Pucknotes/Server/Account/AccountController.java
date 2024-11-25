@@ -32,6 +32,7 @@ public class AccountController {
     @Autowired
     private SessionService sessions;
 
+    //
     @PostMapping("")
     public ResponseEntity<APIResponse<String>> createAccount(
             @RequestParam("token") String token,
@@ -41,6 +42,7 @@ public class AccountController {
         Account account = service.registerAccount(details);
         return ResponseEntity.ok(APIResponse.good(account.getId()));
     }
+
 
     @PostMapping("/force")
     public ResponseEntity<APIResponse<String>> forceAccount(
@@ -54,11 +56,13 @@ public class AccountController {
         return ResponseEntity.ok(APIResponse.good(account.getId()));
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<APIResponse<Account>> getAccount(@PathVariable String id) {
         Account account = service.getById(id);
         return ResponseEntity.ok(APIResponse.good(account));
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateAccount(
@@ -74,6 +78,7 @@ public class AccountController {
 
         return new ResponseEntity<>("Account updated successfully.", HttpStatus.OK);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<APIResponse<Boolean>> deleteAccount(
