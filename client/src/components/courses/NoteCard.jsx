@@ -11,7 +11,17 @@ import { useAuth } from "../../context/AuthContext";
 import Modal from "../Modal";
 import CommentModal from "./CommentModal";
 
+import { AlertTriangle } from "lucide-react";
+import ReportModal from "../reports/ReportModal";
+import { Trash2 } from "lucide-react";
+import { useNote } from "../../context/NoteContext";
+import NoteEditModal from "./NoteEditModal";
+import { PencilIcon } from "lucide-react";
+
 const NoteCard = ({ note }) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { userId } = useAuth();
+  const { triggerNoteRefresh } = useNote();
   const [author, setAuthor] = useState(null);
   const [section, setSection] = useState(null);
   const [hasLiked, setHasLiked] = useState(false);
@@ -24,6 +34,7 @@ const NoteCard = ({ note }) => {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
   const { isLoggedIn } = useAuth();
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchAuthorAndSection = async () => {
@@ -79,6 +90,23 @@ const NoteCard = ({ note }) => {
 
     fetchCommentCount();
   }, [note.id]);
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this note?")) return;
+
+    try {
+      const response = await fetch(`/api/note/${note.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete note");
+
+      // refresh of notes list
+      triggerNoteRefresh();
+    } catch (error) {
+      console.error("Error deleting note:", error);
+    }
+  };
 
   const handleVote = async (isUpvote) => {
     if (!isLoggedIn) return;
@@ -304,6 +332,38 @@ const NoteCard = ({ note }) => {
                 )}
               </div>
             </button>
+
+            <button
+              onClick={() => setIsReportModalOpen(true)}
+              disabled={!isLoggedIn}
+              className={`p-2 transition-colors rounded-full hover:bg-gray-700/50 ${
+                isLoggedIn
+                  ? "text-gray-400 hover:text-red-500"
+                  : "text-gray-600 cursor-not-allowed"
+              }`}
+              title={isLoggedIn ? "Report" : "Login to report"}
+            >
+              <AlertTriangle className="w-5 h-5" />
+            </button>
+
+            {userId === note.owner && (
+              <>
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="p-2 text-gray-400 hover:text-teal-500 transition-colors rounded-full hover:bg-gray-700/50"
+                  title="Edit note"
+                >
+                  <PencilIcon className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-gray-700/50"
+                  title="Delete note"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -339,6 +399,18 @@ const NoteCard = ({ note }) => {
         isOpen={isCommentModalOpen}
         onClose={() => setIsCommentModalOpen(false)}
         noteId={note.id}
+      />
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        noteId={note.id}
+      />
+
+      <NoteEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        note={note}
+        onUpdateSuccess={triggerNoteRefresh}
       />
     </>
   );
