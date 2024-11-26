@@ -10,6 +10,7 @@ const SearchBar = () => {
     e.preventDefault();
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+      setQuery(""); // Clear the search bar after submission
     }
   };
 
@@ -19,7 +20,7 @@ const SearchBar = () => {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search Courses"
+        placeholder="Search Notes"
         className="hidden sm:block w-64 px-4 py-2 pl-10 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
       />
       <button
