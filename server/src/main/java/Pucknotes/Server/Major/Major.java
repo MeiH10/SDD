@@ -50,5 +50,6 @@ public class Major {
      * The semester in which the Major is typically offered. This helps 
      * in organizing and planning academic offerings and schedules.
      */
+    @Field(targetType = FieldType.OBJECT_ID)
     private String semester;
 }
