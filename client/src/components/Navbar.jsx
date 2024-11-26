@@ -43,18 +43,19 @@ const Navbar = () => {
         <UploadModal />
         {isLoggedIn ? (
           <>
-            <Link
-              to="/admin/reports"
-              className="hidden sm:block px-4 py-2 text-white hover:text-teal-300 transition-colors"
-            >
-              Reports
-            </Link>
+
             <button
               onClick={handleLogout}
               className="hidden sm:block bg-red-500 px-4 py-2 rounded-lg text-white hover:bg-red-400 transition-colors"
             >
               Log out
             </button>
+            <Link
+              to="/admin/reports"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 transition-all duration-300"
+              >
+              Reports
+            </Link>
           </>
         ) : (
           <>

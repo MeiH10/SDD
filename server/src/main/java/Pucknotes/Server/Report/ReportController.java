@@ -13,6 +13,7 @@ import Pucknotes.Server.Response.APIResponse;
 
 // import Pucknotes.Server.Response.Types.UnauthorizedException;
 import Pucknotes.Server.Session.SessionService;
+import Pucknotes.Server.Response.APIResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
@@ -88,9 +89,10 @@ public class ReportController {
      * @return A ResponseEntity containing an APIResponse with a list of all reports.
      */
     @GetMapping("")
-    public List<Report> getAllReports(HttpServletRequest request) {
+    public ResponseEntity<APIResponse<List<Report>>> getAllReports(HttpServletRequest request) {
         Account account = sessions.getCurrentUser(request);
-        return reports.getAllReports(account);
+        List<Report> reportList = reports.getAllReports(account);
+        return ResponseEntity.ok(APIResponse.good(reportList));
     }
 
     /**
@@ -101,8 +103,11 @@ public class ReportController {
      * @return A ResponseEntity containing an APIResponse confirming the deletion of the report.
      */
     @DeleteMapping("/{id}")
-    public void deleteReport(HttpServletRequest request, @PathVariable String id) {
+    public ResponseEntity<APIResponse<Boolean>> deleteReport(
+            HttpServletRequest request, 
+            @PathVariable String id) {
         Account account = sessions.getCurrentUser(request);
         reports.deleteReport(id, account);
+        return ResponseEntity.ok(APIResponse.good(true));
     }
 }
