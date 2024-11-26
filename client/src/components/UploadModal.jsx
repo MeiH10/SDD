@@ -47,7 +47,7 @@ const UploadModal = () => {
 
       try {
         const response = await fetch(
-          `/api/section?courseCode=${debouncedCourseCode}&return=object`
+          `/api/section?courseCode=${debouncedCourseCode}&sort=number&return=object`
         );
         const data = await response.json();
         if (!data.good) {
