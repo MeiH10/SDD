@@ -3,9 +3,7 @@ package Pucknotes.Server.Verification;
 import java.util.UUID;
 
 import org.springframework.data.annotation.Id;
-
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import com.mongodb.lang.NonNull;
 
 import Pucknotes.Server.Account.Account;
@@ -14,18 +12,28 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+/**
+ * The Verification class represents a verification object used in the application.
+ * It is stored in a MongoDB collection named "verifications".
+ * This class holds information about a verification, including a unique identifier,
+ * details about the account being verified, and a token used for the verification process.
+ * 
+ * The class uses Lombok annotations to reduce boilerplate code for getters, setters,
+ * and constructors.
+ */
 @Getter
-@NoArgsConstructor
-@RequiredArgsConstructor
-@Document(collection = "verifications")
+@NoArgsConstructor // Generates a no-argument constructor
+@RequiredArgsConstructor // Generates a constructor with required arguments
+@Document(collection = "verifications") // Specifies the MongoDB collection to store this document
 public class Verification {
-    @Id
+    
+    @Id // Indicates that this field is the unique identifier for the document
     private String id;
 
-    @Setter
-    @NonNull
+    @Setter // Allows setting the details field from outside the class
+    @NonNull // Indicates that this field must be provided when creating an instance of this class
     private Account details;
 
-    @Setter
-    private String token = UUID.randomUUID().toString();
+    @Setter // Allows setting the token field from outside the class
+    private String token = UUID.randomUUID().toString(); // Automatically generates a new UUID token upon creation
 }
