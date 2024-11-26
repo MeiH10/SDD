@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 
 const Navbar = () => {
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, logout, userRole } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -43,19 +43,20 @@ const Navbar = () => {
         <UploadModal />
         {isLoggedIn ? (
           <>
-
             <button
               onClick={handleLogout}
               className="hidden sm:block bg-red-500 px-4 py-2 rounded-lg text-white hover:bg-red-400 transition-colors"
             >
               Log out
             </button>
-            <Link
-              to="/admin/reports"
-              className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 transition-all duration-300"
+            {userRole === 3 && (
+              <Link
+                to="/admin/reports"
+                className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 transition-all duration-300"
               >
-              Reports
-            </Link>
+                Reports
+              </Link>
+            )}
           </>
         ) : (
           <>
@@ -64,7 +65,6 @@ const Navbar = () => {
           </>
         )}
 
-        {/* burger menu for smaller screen(not completed)*/}
         <button className="block sm:hidden text-white hover:text-teal-300 transition-colors">
           <svg
             xmlns="http://www.w3.org/2000/svg"
