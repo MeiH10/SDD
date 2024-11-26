@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import Pucknotes.Server.Account.Account;
+import Pucknotes.Server.Comment.Comment;
+import Pucknotes.Server.Comment.CommentService;
 import Pucknotes.Server.Note.Note;
 import Pucknotes.Server.Note.NoteService;
 import Pucknotes.Server.Response.APIResponse;
@@ -33,6 +35,9 @@ public class ReportController {
     @Autowired
     private NoteService notes;
 
+    @Autowired
+    private CommentService comments;
+
     /**
      * Creates a new report based on the provided title, description, and associated note.
      *
@@ -51,16 +56,24 @@ public class ReportController {
             @RequestParam("item") String itemId) {
         
         Account user = sessions.getCurrentUser(request);
+        Report report = new Report();
         
         // Retrieve the note by its ID to associate it with the report.
-        Note note = notes.getById(itemId);
+        if (type.equals("note")) {
+            Note note = notes.getById(itemId);
+            report.setType(type);
+            report.setItem(note.getId());
+        } else if (type.equals("comment")) {
+            Comment comment = comments.getById(itemId);
+            report.setType(type);
+            report.setItem(comment.getId());
+        } else {
+            throw new IllegalArgumentException("You can only report a 'comment' or a 'note'.");
+        }
 
         // Instantiate a new Report object to store the report data.
-        Report report = new Report();
         report.setTitle(title);
         report.setDescription(description);
-        report.setType(type);
-        report.setItem(note.getId());
         report.setOwner(user.getId());
         
         report = reports.createReport(report);
