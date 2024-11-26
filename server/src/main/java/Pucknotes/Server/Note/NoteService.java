@@ -170,8 +170,8 @@ public class NoteService {
         }
 
         if (search != null) {
-            query.addCriteria(Criteria.where("title").regex(search, "i")
-                .orOperator(Criteria.where("description").regex(search, "i")));
+            Criteria criteria = new Criteria();
+            query.addCriteria(criteria.orOperator(Criteria.where("title").regex(search, "i"), Criteria.where("description").regex(search, "i")));
         }
 
         if (courseID != null) {
