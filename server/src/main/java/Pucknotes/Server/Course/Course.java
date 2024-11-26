@@ -50,6 +50,7 @@ public class Course {
      * The semester during which the course is offered.
      * This field is a simple string that provides contextual information regarding course timing.
      */
+    @Field(targetType = FieldType.OBJECT_ID)
     private String semester;
 
     /** 

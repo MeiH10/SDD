@@ -55,12 +55,9 @@ public class FileService {
     /**
      * Downloads a file from the MongoDB GridFS based on the provided ID.
      *
-     * @param id the ID of the file to be downloaded
-     * @return a File object containing the downloaded file information
-     * @throws IOException if an error occurs while reading the file input stream
-     * 
-     * This method retrieves the file from GridFS using its ID, populating a 
-     * File object that includes the filename, content type, file size, and file bytes.
+     * @param id the ID of the file to be downloaded.
+     * @return a File object containing the downloaded file information.
+     * @throws IOException if an error occurs while reading the file input stream.
      */
     public File downloadFile(String id) throws IOException {
         Query query = new Query(Criteria.where("_id").is(new ObjectId(id)));

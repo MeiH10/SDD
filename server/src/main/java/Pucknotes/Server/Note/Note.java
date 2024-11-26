@@ -97,6 +97,7 @@ public class Note {
      * This field can be modified as needed.
      */
     @Setter
+    @Field(targetType = FieldType.OBJECT_ID)
     private String course;
 
     /**
@@ -105,6 +106,7 @@ public class Note {
      * This field can also be modified.
      */
     @Setter
+    @Field(targetType = FieldType.OBJECT_ID)
     private String major;
 
     /**
@@ -113,6 +115,7 @@ public class Note {
      * This field can be modified if necessary.
      */
     @Setter
+    @Field(targetType = FieldType.OBJECT_ID)
     private String school;
 
     /**
@@ -121,6 +124,7 @@ public class Note {
      * This field can be modified as needed.
      */
     @Setter
+    @Field(targetType = FieldType.OBJECT_ID)
     private String semester;
 
     /**
