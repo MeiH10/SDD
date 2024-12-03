@@ -110,4 +110,6 @@ const CoursesPage = () => {
   );
 };
 
+// testing
 export default CoursesPage;
+
