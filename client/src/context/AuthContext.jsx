@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await fetch("/api/session");
         const data = await response.json();
-        if (data.good) {
+        if (data.good && data.data) {
           setIsLoggedIn(true);
           setUserId(data.data);
 
@@ -22,9 +22,16 @@ export const AuthProvider = ({ children }) => {
           if (userData.good) {
             setUserRole(userData.data.role);
           }
+        } else {
+          setIsLoggedIn(false);
+          setUserId(null);
+          setUserRole(null);
         }
       } catch (error) {
         console.error("Session check failed:", error);
+        setIsLoggedIn(false);
+        setUserId(null);
+        setUserRole(null);
       } finally {
         setIsLoading(false);
       }
@@ -34,10 +41,10 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (id) => {
-    setIsLoggedIn(true);
-    setUserId(id);
-
     try {
+      setIsLoggedIn(true);
+      setUserId(id);
+
       const response = await fetch(`/api/account/${id}`);
       const data = await response.json();
       if (data.good) {
@@ -45,14 +52,21 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Failed to fetch user role:", error);
+      setIsLoggedIn(false);
+      setUserId(null);
+      setUserRole(null);
     }
   };
 
   const logout = async () => {
     try {
-      await fetch("/api/session", {
+      const response = await fetch("/api/session", {
         method: "DELETE",
       });
+      
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
@@ -72,11 +86,23 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isLoggedIn, userId, userRole, login, logout }}
+      value={{
+        isLoggedIn,
+        userId,
+        userRole,
+        login,
+        logout
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
