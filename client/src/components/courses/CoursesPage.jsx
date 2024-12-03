@@ -31,7 +31,7 @@ const CoursesPage = () => {
         }
 
         const response = await fetch(
-          `/api/course?majorCode=${majorCode}&return=object&sort=code&order=asc`
+          `/api/course?majorCode=${majorCode}&return=object&sort=name&order=asc`
         );
         const data = await response.json();
         if (!data.good) {
