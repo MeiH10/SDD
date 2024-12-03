@@ -3,6 +3,8 @@ silent: true
 dotenv: ['.env']
 
 tasks:
+  prod: docker compose -f compose.prod.yml up --watch --build --remove-orphans
+
   backend:
     dir: server
     cmd: ./mvnw spring-boot:run
@@ -20,3 +22,7 @@ tasks:
       - python app.py
 
   database: mongosh "{{.BACKEND_MONGO_URI}}"
+
+  deploy:
+    dotenv: [.env]
+    cmd: act -s RAILWAY_SERVICE="pucknotes" -s RAILWAY_TOKEN=5e5428d0-a010-4372-9179-9eb814e68843

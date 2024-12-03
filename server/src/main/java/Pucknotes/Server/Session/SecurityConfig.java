@@ -39,6 +39,7 @@ public class SecurityConfig {
                 .csrf(c -> c.disable()) // Disabling CSRF can expose the application to attacks. Enable in production.
                 .authorizeHttpRequests(r -> r
                         .requestMatchers("/api/**").permitAll() // Allow public access to all API endpoints.
+                        .requestMatchers("/**").permitAll()
                         .requestMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll() // Swagger resources are publicly accessible.
                         .anyRequest().authenticated()) // Require authentication for any other requests.
                 .sessionManagement(s -> s
