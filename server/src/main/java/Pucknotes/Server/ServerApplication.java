@@ -3,9 +3,15 @@ package Pucknotes.Server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.function.RequestPredicates;
+import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.RouterFunctions;
+import org.springframework.web.servlet.function.ServerResponse;
 
 /**
  * This is the main entry point for the Spring Boot application.
@@ -13,6 +19,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * that it serves as the primary configuration class for the application.
  */
 @SpringBootApplication
+@EnableWebMvc
 public class ServerApplication {
 
     /**
@@ -33,6 +40,18 @@ public class ServerApplication {
         return loggingFilter; // Return the configured logging filter.
     }
 
+    @Bean
+    RouterFunction<ServerResponse> spaRouter() {
+        var path = RequestPredicates.path("/assets/**")
+            .or(RequestPredicates.path("/api/**"))
+            .or(RequestPredicates.path("/favicon.ico"))
+            .negate();
+
+        return RouterFunctions.route()
+            .resource(path, new ClassPathResource("public/index.html"))
+            .build();
+    }
+
     /**
      * Configures Cross-Origin Resource Sharing (CORS) settings
      * for the application. This method returns a WebMvcConfigurer
@@ -50,8 +69,14 @@ public class ServerApplication {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**") // This applies the CORS configuration to all /api/** endpoints.
-                    .allowedOrigins("http://localhost:5173") // Only allow requests from this origin.
+                    .allowedOrigins("http://localhost:8080") // Only allow requests from this origin.
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Specify allowed HTTP methods.
+                    .allowedHeaders("*") // Allow all headers in requests.
+                    .allowCredentials(true); // Allows credentials to be included in requests.
+                
+                registry.addMapping("/**") // This applies the CORS configuration to all /api/** endpoints.
+                    .allowedOrigins("http://localhost:8080") // Only allow requests from this origin.
+                    .allowedMethods("GET") // Specify allowed HTTP methods.
                     .allowedHeaders("*") // Allow all headers in requests.
                     .allowCredentials(true); // Allows credentials to be included in requests.
             }
