@@ -95,19 +95,20 @@ public class NoteService {
      * @throws IllegalArgumentException If the provided ID is null.
      * @throws ResourceNotFoundException If no note exists with the specified ID.
      */
+
+
     public Note getById(String id) {
         if (id == null) {
             throw new IllegalArgumentException("Invalid note ID.");
         }
-
+    
         var query = Query.query(Criteria.where("_id").is(new ObjectId(id)));
-        query.fields().exclude("likes");
-
+    
         Note note = template.findOne(query, Note.class);
         if (note == null) {
             throw new ResourceNotFoundException("No note with this ID.");
         }
-
+    
         return note;
     }
 
