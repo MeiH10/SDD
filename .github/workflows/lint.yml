@@ -1,7 +1,6 @@
 name: 🎨 Lint Codebase
 
 on:
-  push: null
   pull_request: null
 
 permissions: {}
