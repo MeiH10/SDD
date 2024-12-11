@@ -7,6 +7,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class is responsible for configuring security settings for the application.
@@ -36,16 +43,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(c -> c.disable()) // Disabling CSRF can expose the application to attacks. Enable in production.
+                .csrf(c -> c.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(r -> r
-                        .requestMatchers("/api/**").permitAll() // Allow public access to all API endpoints.
+                        .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/**").permitAll()
-                        .requestMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll() // Swagger resources are publicly accessible.
-                        .anyRequest().authenticated()) // Require authentication for any other requests.
+                        .requestMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
+                        .anyRequest().authenticated())
                 .sessionManagement(s -> s
-                        .sessionFixation() // Configure session fixation protection.
-                        .newSession() // Create a new session for authenticated users.
-                        .maximumSessions(1)) // Limit users to one active session.
+                        .sessionFixation()
+                        .newSession()
+                        .maximumSessions(1))
                 .build();
     }
 
@@ -57,7 +65,40 @@ public class SecurityConfig {
      * @return An instance of PasswordEncoder implemented with BCryptPasswordEncoder.
      */
     @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:5173",
+            "http://localhost:8080",
+            "https://pucknotes.up.railway.app"
+        ));
+        configuration.setAllowedMethods(List.of(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"
+        ));
+        configuration.setAllowedHeaders(List.of(
+            "Authorization",
+            "Cache-Control",
+            "Content-Type",
+            "Accept",
+            "Origin",
+            "X-Requested-With",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers"
+        ));
+        configuration.setExposedHeaders(List.of(
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow-Credentials"
+        ));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(Duration.ofHours(24));
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Using BCrypt for secure password hashing.
+        return new BCryptPasswordEncoder();
     }
 }
