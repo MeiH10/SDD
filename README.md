@@ -4,6 +4,8 @@ Welcome to PuckNotes, the all-in-one note sharing app for all RPI students! Coll
 
 > Why not share the notes?
 
+PuckNotes is currently live. View it  [`here`](https://pucknotes.up.railway.app/), on the website: Railway. This represents our production environment and is the recommended way to access PuckNotes. The live version is continuously maintained and updated with the latest stable features.
+
 ## :gear: Installation Guide
 
 > [!WARNING] Docker Installation
