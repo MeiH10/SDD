@@ -12,14 +12,18 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ComponentScan
 public class StaticResourceConfiguration implements WebMvcConfigurer {
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**");
-    }
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/**");
+  }
 
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/favicon.ico", "/index.html").addResourceLocations("classpath:/public/");
-        registry.addResourceHandler("/assets/**").addResourceLocations("classpath:/public/assets/");
-    }
+  @Override
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry
+      .addResourceHandler("/favicon.ico", "/index.html")
+      .addResourceLocations("classpath:/public/");
+    registry
+      .addResourceHandler("/assets/**")
+      .addResourceLocations("classpath:/public/assets/");
+  }
 }
