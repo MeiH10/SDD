@@ -1,174 +1,275 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useNote } from "../../context/NoteContext";
+import NoteBreadcrumb from "./NoteBreadcrumb";
+import NoteFilters from "./NoteFilters";
+import NoteCard from "./NoteCard";
 
 const NotesPage = () => {
- const { majorCode, courseId } = useParams();
- const navigate = useNavigate();
- const { state } = useLocation();
- const courseData = state?.courseData;
- const semesterData = state?.semesterData;
- const { isLoggedIn } = useAuth();
- 
- const [notes, setNotes] = useState([]);
- const [loading, setLoading] = useState(true);
- const [error, setError] = useState(null);
+  const { majorCode, courseId } = useParams();
+  const navigate = useNavigate();
+  const { state } = useLocation();
+  const courseData = state?.courseData;
+  const semesterData = state?.semesterData;
+  const { isLoggedIn } = useAuth();
+  const { shouldRefreshNotes } = useNote();
 
- useEffect(() => {
-   const fetchNotes = async () => {
-     if (!courseData || !semesterData) {
-       setError('Missing course or semester data');
-       setLoading(false);
-       return;
-     }
+  const [notes, setNotes] = useState([]);
+  const [filteredNotes, setFilteredNotes] = useState([]);
+  const [availableProfessors, setAvailableProfessors] = useState([]);
+  const [availableSections, setAvailableSections] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedSection, setSelectedSection] = useState("");
+  const [selectedProfessor, setSelectedProfessor] = useState("");
+  const [sortBy, setSortBy] = useState("likes");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [sectionDataCache, setSectionDataCache] = useState({});
 
-     try {
-       const notesResponse = await fetch(`/api/note?courseID=${courseId}&semesterID=${semesterData.id}&return=object`);
-       const notesData = await notesResponse.json();
+  useEffect(() => {
+    const fetchNotes = async () => {
+      if (!courseData || !semesterData) {
+        setError("Missing course or semester data");
+        setLoading(false);
+        return;
+      }
 
-       if (!notesData.good) {
-         throw new Error('Failed to fetch notes');
-       }
+      try {
+        const notesResponse = await fetch(
+          `/api/note?courseID=${courseId}&semesterID=${semesterData.id}&return=object&sort=${sortBy}&order=${sortOrder}`
+        );
+        const notesData = await notesResponse.json();
 
-       setNotes(notesData.data);
-     } catch (err) {
-       console.error('Error fetching notes:', err);
-       setError(err.message);
-     } finally {
-       setLoading(false);
-     }
-   };
+        if (!notesData.good) {
+          throw new Error("Failed to fetch notes");
+        }
 
-   fetchNotes();
- }, [courseId, semesterData, courseData]);
+        const sectionPromises = notesData.data.map((note) =>
+          fetch(`/api/section/${note.section}`).then((res) => res.json())
+        );
 
- if (!courseData || !semesterData) {
-   return (
-     <div className="text-center p-8">
-       <p className="text-red-500">Course or semester data not found. Please navigate from the course page.</p>
-       <button
-         onClick={() => navigate(`/${majorCode}`)}
-         className="mt-4 text-teal-400 hover:text-teal-300 transition-colors"
-       >
-         Return to courses
-       </button>
-     </div>
-   );
- }
+        const sectionResponses = await Promise.all(sectionPromises);
+        const newSectionCache = {};
+        const sections = sectionResponses.map((res) => res.data);
 
- if (loading) {
-   return (
-     <div className="flex justify-center items-center h-64">
-       <div className="animate-spin h-8 w-8 border-4 border-teal-500 rounded-full border-t-transparent"></div>
-     </div>
-   );
- }
+        // Build section cache
+        sections.forEach((section) => {
+          if (section && section.id) {
+            newSectionCache[section.id] = section;
+          }
+        });
 
- if (error) {
-   return (
-     <div className="text-red-500 text-center p-4">
-       {error}
-       <button
-         onClick={() => navigate(`/${majorCode}`)}
-         className="block mx-auto mt-4 text-teal-400 hover:text-teal-300 transition-colors"
-       >
-         Return to courses
-       </button>
-     </div>
-   );
- }
+        const uniqueProfessors = [
+          ...new Set(
+            sections
+              .map((section) => section?.professors?.[0]?.split(",")[0])
+              .filter((prof) => prof && prof !== "TBA")
+          ),
+        ].sort((a, b) => a.localeCompare(b));
 
- return (
-   <div className="px-4 sm:px-24 mx-auto">
-     <div className="bg-teal-500 p-4 rounded-t-lg">
-       <div className="flex items-center justify-between">
-         <div className="flex items-center">
-           <button 
-             onClick={() => navigate(`/${majorCode}/${courseId}`)}
-             className="mr-4 text-white hover:text-gray-200 transition-colors"
-           >
-             ← Back
-           </button>
-           <div>
-             <h1 className="text-xl text-white font-bold">
-               {courseData.code}: {courseData.name}
-             </h1>
-             <h2 className="text-white capitalize">
-               {semesterData.season} {semesterData.year}
-             </h2>
-           </div>
-         </div>
-         {isLoggedIn && (
-           <button
-             onClick={() => navigate('upload')}
-             className="bg-white text-teal-500 px-4 py-2 rounded hover:bg-gray-100 transition-colors"
-           >
-             Upload Note
-           </button>
-         )}
-       </div>
-     </div>
+        const uniqueSections = [
+          ...new Set(
+            sections.map((section) => section?.number).filter(Boolean)
+          ),
+        ].sort((a, b) => a.localeCompare(b));
 
-     {notes.length === 0 ? (
-       <div className="text-center p-8 bg-gray-800 mt-4 rounded">
-         <p className="text-gray-400">No notes available for this semester yet.</p>
-         {isLoggedIn && (
-           <p className="text-gray-400 mt-2">Be the first to upload notes!</p>
-         )}
-       </div>
-     ) : (
-       <div className="grid gap-4 mt-4">
-         {notes.map((note) => (
-           <div 
-             key={note.id}
-             className="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition-colors"
-           >
-             <h3 className="text-lg font-semibold mb-2">{note.title}</h3>
-             {note.description && (
-               <p className="text-gray-400 mb-2">{note.description}</p>
-             )}
-             {note.owner && (
-               <p className="text-gray-400 text-sm">
-                 Uploaded by {note.owner.username}
-               </p>
-             )}
-             <div className="mt-4 flex gap-4">
-               <button
-                 onClick={() => window.location.href = `/api/note/${note.id}/file`}
-                 className="text-teal-400 hover:text-teal-300 transition-colors"
-               >
-                 Download
-               </button>
-               {isLoggedIn && (
-                 <>
-                   <button
-                     onClick={async () => {
-                       try {
-                         const response = await fetch(`/api/note/${note.id}/like`, {
-                           method: 'PUT'
-                         });
-                         if (!response.ok) throw new Error('Failed to like note');
-                         // Optionally refresh notes here or update UI
-                       } catch (err) {
-                         console.error('Error liking note:', err);
-                       }
-                     }}
-                     className="text-gray-400 hover:text-teal-300 transition-colors"
-                   >
-                     Like
-                   </button>
-                   <span className="text-gray-400">
-                     {note.totalLikes || 0} likes
-                   </span>
-                 </>
-               )}
-             </div>
-           </div>
-         ))}
-       </div>
-     )}
-   </div>
- );
+        setSectionDataCache(newSectionCache);
+        setAvailableProfessors(uniqueProfessors);
+        setAvailableSections(uniqueSections);
+        setNotes(notesData.data);
+        setFilteredNotes(notesData.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotes();
+  }, [
+    courseId,
+    semesterData,
+    courseData,
+    shouldRefreshNotes,
+    sortBy,
+    sortOrder,
+  ]);
+
+  useEffect(() => {
+    let filtered = [...notes];
+
+    // Filter by tags if any are selected
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter((note) =>
+        selectedTags.every((tag) => note.tags?.includes(tag))
+      );
+    }
+
+    // Filter by section
+    if (selectedSection) {
+      filtered = filtered.filter((note) => {
+        const sectionData = sectionDataCache[note.section];
+        return sectionData && sectionData.number === selectedSection;
+      });
+    }
+
+    // Filter by professor
+    if (selectedProfessor) {
+      filtered = filtered.filter((note) => {
+        const sectionData = sectionDataCache[note.section];
+        const mainProfessor = sectionData?.professors?.[0]?.split(",")?.[0];
+        return mainProfessor === selectedProfessor;
+      });
+    }
+
+    // Sort the filtered results
+    if (sortBy === "createdDate") {
+      filtered.sort((a, b) => {
+        const dateA = new Date(a.createdDate);
+        const dateB = new Date(b.createdDate);
+        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      });
+    } else if (sortBy === "title") {
+      filtered.sort((a, b) => {
+        return sortOrder === "asc"
+          ? a.title.localeCompare(b.title)
+          : b.title.localeCompare(a.title);
+      });
+    } else if (sortBy === "likes") {
+      filtered.sort((a, b) => {
+        return sortOrder === "asc"
+          ? a.totalLikes - b.totalLikes
+          : b.totalLikes - a.totalLikes;
+      });
+    }
+
+    setFilteredNotes(filtered);
+  }, [
+    notes,
+    selectedSection,
+    selectedProfessor,
+    selectedTags,
+    sortBy,
+    sortOrder,
+    sectionDataCache,
+  ]);
+
+  const handleTagToggle = (tag) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handleClearFilters = () => {
+    setSelectedTags([]);
+    setSelectedSection("");
+    setSelectedProfessor("");
+    setSortBy("likes");
+    setSortOrder("desc");
+  };
+
+  const handleDownload = (noteId) => {
+    window.location.href = `/api/note/${noteId}/file`;
+  };
+
+  if (!courseData || !semesterData) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-red-500">
+          Course or semester data not found. Please navigate from the course
+          page.
+        </p>
+        <button
+          onClick={() => navigate(`/${majorCode}`)}
+          className="mt-4 text-teal-400 hover:text-teal-300 transition-colors"
+        >
+          Return to courses
+        </button>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin h-8 w-8 border-4 border-teal-500 rounded-full border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-500 text-center p-4">
+        {error}
+        <button
+          onClick={() => navigate(`/${majorCode}`)}
+          className="block mx-auto mt-4 text-teal-400 hover:text-teal-300 transition-colors"
+        >
+          Return to courses
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-900">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-24">
+        <div className="py-6">
+          <NoteBreadcrumb
+            majorCode={majorCode}
+            courseData={courseData}
+            semesterData={semesterData}
+          />
+        </div>
+
+        <div className="flex gap-8">
+          <NoteFilters
+            notes={notes}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            sortOrder={sortOrder}
+            onSortOrderChange={setSortOrder}
+            selectedTags={selectedTags}
+            onTagToggle={handleTagToggle}
+            selectedSection={selectedSection}
+            onSectionChange={setSelectedSection}
+            selectedProfessor={selectedProfessor}
+            onProfessorChange={setSelectedProfessor}
+            onClearFilters={handleClearFilters}
+            availableProfessors={availableProfessors}
+            availableSections={availableSections}
+          />
+
+          <div className="flex-1">
+            {filteredNotes.length === 0 ? (
+              <div className="text-center p-8 bg-gray-800 rounded">
+                <p className="text-gray-400">
+                  No notes available for this semester yet.
+                </p>
+                {isLoggedIn && (
+                  <p className="text-gray-400 mt-2">
+                    Be the first to upload notes!
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredNotes.map((note) => (
+                  <NoteCard
+                    key={note.id}
+                    note={note}
+                    onDownload={handleDownload}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default NotesPage;

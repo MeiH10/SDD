@@ -1,168 +1,198 @@
 package Pucknotes.Server.Account;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import Pucknotes.Server.Response.Types.ResourceConflictException;
+import Pucknotes.Server.Response.Types.ResourceNotFoundException;
+import Pucknotes.Server.Response.Types.UnauthorizedException;
+import lombok.AllArgsConstructor;
 
-class AccountServiceTest {
+/**
+ * The AccountService class is responsible for managing user accounts within the application.
+ * This class provides functionality for registering, updating, retrieving, and 
+ * deleting user accounts, while ensuring that appropriate checks are made to maintain 
+ * the integrity of account data.
+ */
+@Service
+@AllArgsConstructor
+public class AccountService {
 
-    @Mock
+    @Autowired
     private AccountRepository repository;
 
-    @Mock
-    private PasswordEncoder encoder;
+    private final PasswordEncoder encoder;
 
-    @InjectMocks
-    private AccountService accountService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    /**
+     * Registers a new user account with the specified email, username, and password.
+     *
+     * @param email the email address of the user, must be non-null.
+     * @param username the username of the user, must be non-null.
+     * @param password the password for the user account, must be non-null.
+     * @return the newly created Account object.
+     * @throws IllegalArgumentException if any of the parameters are null.
+     * @throws ResourceConflictException if an account with the specified email already exists.
+     */
+    public Account registerAccount(String email, String username, String password) {
+        // Error handling if any inputs are empty and if the email already exists.
+        if (email == null || username == null || password == null) {
+            throw new IllegalArgumentException(
+                    "Must specify non-null email, username, and password to create an account.");
+        } else if (existsEmail(email)) {
+            throw new ResourceConflictException("Account with email '" + email + "' already exists.");
+        }
+        
+        // Create a new account and save it.
+        Account account = new Account(email, username, encoder.encode(password));
+        account = repository.save(account);
+        return account;
     }
 
-    @Test
-    void registerAccount_ShouldThrowException_WhenEmailIsNull() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> accountService.registerAccount(null, "username", "password"));
-        assertEquals("Must specify non-null email, username, and password to create an account.", exception.getMessage());
+    /**
+     * Registers a new user account based on the provided Account object.
+     *
+     * @param account the Account object containing the user's details.
+     * @return the newly created Account object.
+     */
+    public Account registerAccount(Account account) {
+        return registerAccount(
+                account.getEmail(), account.getUsername(), account.getPassword());
     }
 
-    @Test
-    void registerAccount_ShouldThrowResourceConflictException_WhenEmailExists() {
-        String email = "test@example.com";
-        when(repository.findByEmail(email)).thenReturn(Optional.of(new Account()));
-
-        assertThrows(ResourceConflictException.class,
-                () -> accountService.registerAccount(email, "username", "password"));
+    /**
+     * Updates an existing user account with new details specified in the next Account object.
+     *
+     * @param next the Account object containing updated user details.
+     * @param userID the ID of the user attempting the update.
+     * @return the updated Account object.
+     * @throws IllegalArgumentException if the next account is null.
+     * @throws UnauthorizedException if the userID does not match the ID of the account being updated.
+     */
+    public Account updateAccount(Account next, String userID) {
+        // Error handling if the input account is null or if the userID matches the current account's ID
+        if (next == null) {
+            throw new IllegalArgumentException("Attempted to save a null account.");
+        } else if (userID.equals(next.getId())) {
+            throw new UnauthorizedException("You are not this user.");
+        }
+        
+        // Update account fields.
+        Account current = getById(next.getId());
+        if (next.getUsername() != null)
+            current.setUsername(next.getUsername());
+        if (next.getPassword() != null)
+            current.setPassword(next.getPassword());
+        
+        return repository.save(current);
     }
 
-    @Test
-    void registerAccount_ShouldSaveAccount_WhenValidInput() {
-        String email = "test@example.com";
-        String username = "testuser";
-        String password = "password";
-        String encodedPassword = "encodedPassword";
+    /**
+     * Retrieves an account by the specified email address.
+     *
+     * @param email the email address associated with the account.
+     * @return the Account object corresponding to the specified email.
+     * @throws IllegalArgumentException if the email parameter is null.
+     * @throws ResourceNotFoundException if no account is found with the specified email.
+     */
+    public Account getByEmail(String email) {
+        // Error handling if the email is empty.
+        if (email == null) {
+            throw new IllegalArgumentException("Invalid account email.");
+        }
 
-        when(repository.findByEmail(email)).thenReturn(Optional.empty());
-        when(encoder.encode(password)).thenReturn(encodedPassword);
-        when(repository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Account account = repository.findByEmail(email).orElse(null);
+        
+        // Error handling if no account is found with the provided email.
+        if (account == null) {
+            throw new ResourceNotFoundException("No account with this email.");
+        }
 
-        Account result = accountService.registerAccount(email, username, password);
-
-        assertNotNull(result);
-        assertEquals(email, result.getEmail());
-        assertEquals(username, result.getUsername());
-        assertEquals(encodedPassword, result.getPassword());
-        verify(repository).save(any(Account.class));
+        return account;
     }
 
-    @Test
-    void getByEmail_ShouldThrowException_WhenEmailIsNull() {
-        assertThrows(IllegalArgumentException.class,
-                () -> accountService.getByEmail(null));
+    /**
+     * Checks if an account exists with the specified email address.
+     *
+     * @param email the email address to check.
+     * @return true if an account exists with the specified email; false otherwise.
+     */
+    public boolean existsEmail(String email) {
+        // Error handling if the email is empty.
+        if (email == null) {
+            return false;
+        }
+
+        Account account = repository.findByEmail(email).orElse(null);
+        
+        // Return true if the account exists; otherwise, return false.
+        return account != null;
     }
 
-    @Test
-    void getByEmail_ShouldThrowResourceNotFoundException_WhenAccountNotFound() {
-        String email = "notfound@example.com";
-        when(repository.findByEmail(email)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-                () -> accountService.getByEmail(email));
+    /**
+     * Checks if an account exists with the specified ID.
+     *
+     * @param id the ID of the account.
+     * @return true if the account exists with the specified ID; false otherwise.
+     */
+    public boolean existsById(String id) {
+        return id != null && repository.existsById(id);
     }
 
-    @Test
-    void getByEmail_ShouldReturnAccount_WhenAccountExists() {
-        String email = "test@example.com";
-        Account mockAccount = new Account(email, "username", "password");
-        when(repository.findByEmail(email)).thenReturn(Optional.of(mockAccount));
+    /**
+     * Retrieves an account by the specified ID.
+     *
+     * @param id the ID of the account.
+     * @return the Account object corresponding to the specified ID.
+     * @throws IllegalArgumentException if the id parameter is null.
+     * @throws ResourceNotFoundException if no account is found with the specified ID.
+     */
+    public Account getById(String id) {
+        // Error handling if the ID is empty.
+        if (id == null) {
+            throw new IllegalArgumentException("Invalid account ID.");
+        }
 
-        Account result = accountService.getByEmail(email);
+        Account account = repository.findById(id).orElse(null);
+        
+        // Error handling if no account is found with the provided ID.
+        if (account == null) {
+            throw new ResourceNotFoundException("No account with this ID.");
+        }
 
-        assertNotNull(result);
-        assertEquals(mockAccount, result);
+        return account;
     }
 
-    @Test
-    void updateAccount_ShouldThrowUnauthorizedException_WhenUserIdMismatch() {
-        Account account = new Account("test@example.com", "username", "password");
-        account.setId("accountId");
+    /**
+     * Deletes an account based on the provided Account object and user ID.
+     *
+     * @param account the Account object to be deleted.
+     * @param userID the ID of the user attempting to delete the account.
+     * @throws UnauthorizedException if the user attempting to delete the account does not own it.
+     */
+    public void deleteAccount(Account account, String userID) {
+        // Error handling if the account input is null and if the userID matches the account's ID.
+        if (account == null) {
+            return; // Simply return if there is no account to delete.
+        } else if (userID.equals(account.getId())) {
+            throw new UnauthorizedException("You are not this user.");
+        }
 
-        assertThrows(UnauthorizedException.class,
-                () -> accountService.updateAccount(account, "differentUserId"));
+        repository.delete(account);
     }
 
-    @Test
-    void updateAccount_ShouldUpdateAccount_WhenValidInput() {
-        String userId = "userId";
-        Account existingAccount = new Account("email@example.com", "oldUsername", "oldPassword");
-        existingAccount.setId(userId);
-
-        Account updateAccount = new Account(null, "newUsername", "newPassword");
-        updateAccount.setId(userId);
-
-        when(repository.findById(userId)).thenReturn(Optional.of(existingAccount));
-        when(repository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        Account result = accountService.updateAccount(updateAccount, userId);
-
-        assertNotNull(result);
-        assertEquals("newUsername", result.getUsername());
-        assertEquals("newPassword", result.getPassword());
-    }
-
-    @Test
-    void getById_ShouldThrowException_WhenIdIsNull() {
-        assertThrows(IllegalArgumentException.class,
-                () -> accountService.getById(null));
-    }
-
-    @Test
-    void getById_ShouldThrowResourceNotFoundException_WhenAccountNotFound() {
-        String id = "nonexistentId";
-        when(repository.findById(id)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-                () -> accountService.getById(id));
-    }
-
-    @Test
-    void getById_ShouldReturnAccount_WhenAccountExists() {
-        String id = "accountId";
-        Account mockAccount = new Account("email@example.com", "username", "password");
-        mockAccount.setId(id);
-        when(repository.findById(id)).thenReturn(Optional.of(mockAccount));
-
-        Account result = accountService.getById(id);
-
-        assertNotNull(result);
-        assertEquals(mockAccount, result);
-    }
-
-    @Test
-    void deleteAccount_ShouldThrowUnauthorizedException_WhenUserIdMismatch() {
-        Account account = new Account("test@example.com", "username", "password");
-        account.setId("accountId");
-
-        assertThrows(UnauthorizedException.class,
-                () -> accountService.deleteAccount(account, "differentUserId"));
-    }
-
-    @Test
-    void deleteAccount_ShouldDeleteAccount_WhenValidInput() {
-        Account account = new Account("test@example.com", "username", "password");
-        account.setId("userId");
-
-        accountService.deleteAccount(account, "adminId");
-
-        verify(repository).delete(account);
+    public Account updateAccountRole(Account next, Account user, int newRole) {
+        if (next == null) {
+            return null;
+        } else if (user.getId().equals(next.getId())) {
+            throw new UnauthorizedException("You are not this user.");
+        }
+        Account current = getById(next.getId());
+        if (next.getUsername() != null)
+            current.setUsername(next.getUsername());
+        if (next.getPassword() != null)
+            current.setPassword(next.getPassword());
+        current.setRole(newRole);
+        return repository.save(current);
     }
 }
