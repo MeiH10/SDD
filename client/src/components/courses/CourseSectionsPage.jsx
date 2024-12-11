@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 const CourseSectionsPage = () => {
   const { majorCode, courseId } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
   const courseData = state?.courseData;
-  
+
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,10 +14,12 @@ const CourseSectionsPage = () => {
   useEffect(() => {
     const fetchSections = async () => {
       try {
-        const response = await fetch(`/api/section?courseCode=${courseData.code}&sort=number&order=asc`);
+        const response = await fetch(
+          `/api/section?courseCode=${courseData.code}&sort=number&order=asc`,
+        );
         const data = await response.json();
         if (!data.good) {
-          throw new Error(data.error || 'Failed to fetch sections');
+          throw new Error(data.error || "Failed to fetch sections");
         }
 
         const sectionsData = await Promise.all(
@@ -25,7 +27,7 @@ const CourseSectionsPage = () => {
             const detailResponse = await fetch(`/api/section/${sectionId}`);
             const detailData = await detailResponse.json();
             return detailData.data;
-          })
+          }),
         );
 
         setSections(sectionsData);
@@ -55,7 +57,7 @@ const CourseSectionsPage = () => {
     <div className="px-4 sm:px-24 mx-auto">
       <div className="bg-teal-500 p-4 rounded-t-lg">
         <div className="flex items-center">
-          <button 
+          <button
             onClick={() => navigate(`/${majorCode}`)}
             className="mr-4 text-white hover:text-gray-200 transition-colors"
           >
@@ -68,13 +70,15 @@ const CourseSectionsPage = () => {
       </div>
 
       <div className="space-y-2">
-        {sections.map(section => (
-          <div 
+        {sections.map((section) => (
+          <div
             key={section.id || section._id}
             className="bg-gray-800 p-6 hover:bg-gray-700 transition-colors border border-gray-700"
-            onClick={() => navigate(`/${majorCode}/${courseId}/${section.number}`, {
-                state: { courseData }
-              })}
+            onClick={() =>
+              navigate(`/${majorCode}/${courseId}/${section.number}`, {
+                state: { courseData },
+              })
+            }
           >
             <div className="flex justify-between items-start">
               <div>

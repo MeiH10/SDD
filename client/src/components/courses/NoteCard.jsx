@@ -77,7 +77,7 @@ const NoteCard = ({ note }) => {
     const fetchCommentCount = async () => {
       try {
         const response = await fetch(
-          `/api/comment?noteID=${note.id}&return=count`
+          `/api/comment?noteID=${note.id}&return=count`,
         );
         const data = await response.json();
         if (data.good) {
@@ -222,8 +222,8 @@ const NoteCard = ({ note }) => {
                 !isLoggedIn
                   ? "text-gray-600 cursor-not-allowed"
                   : hasLiked
-                  ? "text-teal-500 hover:text-teal-400"
-                  : "text-gray-400 hover:text-teal-500"
+                    ? "text-teal-500 hover:text-teal-400"
+                    : "text-gray-400 hover:text-teal-500"
               }`}
             >
               <ChevronUp className="w-6 h-6" />
@@ -238,8 +238,8 @@ const NoteCard = ({ note }) => {
                 !isLoggedIn
                   ? "text-gray-600 cursor-not-allowed"
                   : hasLiked
-                  ? "text-gray-400 hover:text-red-500"
-                  : "text-gray-600"
+                    ? "text-gray-400 hover:text-red-500"
+                    : "text-gray-600"
               }`}
             >
               <ChevronDown className="w-6 h-6" />

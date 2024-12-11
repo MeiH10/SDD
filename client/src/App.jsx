@@ -7,8 +7,7 @@ import CourseSemestersPage from "./components/courses/CourseSemestersPage";
 import NotesPage from "./components/courses/NotesPage";
 import { NoteProvider } from "./context/NoteContext";
 import AdminReportsPage from "./components/admin/AdminReportsPage";
-import SearchResults from './components/SearchResults';
-
+import SearchResults from "./components/SearchResults";
 
 const App = () => {
   return (

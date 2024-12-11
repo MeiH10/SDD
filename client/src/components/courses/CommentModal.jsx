@@ -32,7 +32,7 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/comment?noteID=${noteId}&sort=date&order=desc&return=object`
+        `/api/comment?noteID=${noteId}&sort=date&order=desc&return=object`,
       );
       const data = await response.json();
       if (!data.good) throw new Error(data.error || "Failed to fetch comments");
@@ -43,8 +43,8 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
       ];
       const authorResponses = await Promise.all(
         authorIds.map((id) =>
-          fetch(`/api/account/${id}`).then((res) => res.json())
-        )
+          fetch(`/api/account/${id}`).then((res) => res.json()),
+        ),
       );
 
       const authorMap = {};

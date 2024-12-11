@@ -41,8 +41,8 @@ const SearchResults = () => {
       try {
         const notesResponse = await fetch(
           `/api/note?query=${encodeURIComponent(
-            query
-          )}&return=object&sort=${sortBy}&order=${sortOrder}`
+            query,
+          )}&return=object&sort=${sortBy}&order=${sortOrder}`,
         );
         const notesData = await notesResponse.json();
 
@@ -51,7 +51,7 @@ const SearchResults = () => {
         }
 
         const sectionPromises = notesData.data.map((note) =>
-          fetch(`/api/section/${note.section}`).then((res) => res.json())
+          fetch(`/api/section/${note.section}`).then((res) => res.json()),
         );
 
         const sectionResponses = await Promise.all(sectionPromises);
@@ -68,13 +68,13 @@ const SearchResults = () => {
           ...new Set(
             sections
               .map((section) => section?.professors?.[0]?.split(",")[0])
-              .filter((prof) => prof && prof !== "TBA")
+              .filter((prof) => prof && prof !== "TBA"),
           ),
         ].sort((a, b) => a.localeCompare(b));
 
         const uniqueSections = [
           ...new Set(
-            sections.map((section) => section?.number).filter(Boolean)
+            sections.map((section) => section?.number).filter(Boolean),
           ),
         ].sort((a, b) => a.localeCompare(b));
 
@@ -107,7 +107,7 @@ const SearchResults = () => {
 
     if (selectedTags.length > 0) {
       filtered = filtered.filter((note) =>
-        selectedTags.every((tag) => note.tags?.includes(tag))
+        selectedTags.every((tag) => note.tags?.includes(tag)),
       );
     }
 
@@ -161,7 +161,7 @@ const SearchResults = () => {
 
   const handleTagToggle = (tag) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 

@@ -17,7 +17,7 @@ const CoursesPage = () => {
         // fetch the major details if we don't have them
         if (!majorName) {
           const majorResponse = await fetch(
-            `/api/major?majorCode=${majorCode}&return=object`
+            `/api/major?majorCode=${majorCode}&return=object`,
           );
           const majorData = await majorResponse.json();
           if (!majorData.good || !majorData.data.length) {
@@ -31,7 +31,7 @@ const CoursesPage = () => {
         }
 
         const response = await fetch(
-          `/api/course?majorCode=${majorCode}&return=object&sort=name&order=asc`
+          `/api/course?majorCode=${majorCode}&return=object&sort=name&order=asc`,
         );
         const data = await response.json();
         if (!data.good) {
@@ -112,4 +112,3 @@ const CoursesPage = () => {
 
 // testing
 export default CoursesPage;
-

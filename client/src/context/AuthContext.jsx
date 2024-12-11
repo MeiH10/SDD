@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch("/api/session", {
         method: "DELETE",
       });
-      
+
       if (!response.ok) {
         throw new Error("Logout failed");
       }
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
         userId,
         userRole,
         login,
-        logout
+        logout,
       }}
     >
       {children}

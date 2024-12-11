@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import Modal from '../Modal';
+import { useState } from "react";
+import Modal from "../Modal";
 
 const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
-  const [body, setBody] = useState(comment.description || '');
+  const [body, setBody] = useState(comment.description || "");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -13,15 +13,15 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/comment/${comment.id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
-      if (!data.good) throw new Error(data.error || 'Failed to update comment');
+      if (!data.good) throw new Error(data.error || "Failed to update comment");
 
       onUpdateSuccess();
       onClose();
@@ -62,14 +62,30 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
           >
             {isLoading ? (
               <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  ></path>
                 </svg>
                 Updating...
               </>
             ) : (
-              'Update Comment'
+              "Update Comment"
             )}
           </button>
         </div>
