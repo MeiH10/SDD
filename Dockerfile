@@ -20,4 +20,7 @@ FROM openjdk:24-slim-bullseye AS runner
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
+RUN useradd -m appuser
+USER appuser
+HEALTHCHECK CMD curl --fail ${BACKEND_PORT} || exit 1
 ENTRYPOINT ["java", "-jar", "app.jar"]

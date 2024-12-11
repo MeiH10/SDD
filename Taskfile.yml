@@ -23,6 +23,6 @@ tasks:
 
   database: mongosh "{{.BACKEND_MONGO_URI}}"
 
-  deploy:
+  lint:
     dotenv: [.env]
-    cmd: act -s RAILWAY_SERVICE="pucknotes" -s RAILWAY_TOKEN=5e5428d0-a010-4372-9179-9eb814e68843
+    cmd: act --container-architecture linux/amd64
