@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 
 const Navbar = () => {
+  // get auth context values and navigation
   const { isLoggedIn, logout, userRole } = useAuth();
   const navigate = useNavigate();
 
@@ -21,6 +22,7 @@ const Navbar = () => {
 
   return (
     <div className="flex justify-between items-center p-4 px-4 sm:px-24 bg-gray-800 w-full">
+      {/* left, logo and search */}
       <div className="flex items-center space-x-4">
         <button
           onClick={handleLogoClick}
@@ -39,16 +41,22 @@ const Navbar = () => {
         <SearchBar />
       </div>
 
+      {/* right, auth and navigation controls */}
       <div className="flex items-center space-x-4">
         <UploadModal />
+
+        {/* conditional render based on user role */}
         {isLoggedIn ? (
           <>
+            {/* logout button */}
             <button
               onClick={handleLogout}
               className="hidden sm:block bg-red-500 px-4 py-2 rounded-lg text-white hover:bg-red-400 transition-colors"
             >
               Log out
             </button>
+
+            {/* admin only */}
             {userRole === 3 && (
               <Link
                 to="/admin/reports"
@@ -60,6 +68,7 @@ const Navbar = () => {
           </>
         ) : (
           <>
+            {/* auth modals for non- ogged in users */}
             <LoginModal />
             <SignUpModal />
           </>

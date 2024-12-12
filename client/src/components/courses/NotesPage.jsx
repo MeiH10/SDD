@@ -12,6 +12,7 @@ const NotesPage = () => {
   const { state } = useLocation();
   const courseData = state?.courseData;
   const semesterData = state?.semesterData;
+
   const { isLoggedIn } = useAuth();
   const { shouldRefreshNotes } = useNote();
 
@@ -21,13 +22,15 @@ const NotesPage = () => {
   const [availableSections, setAvailableSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sectionDataCache, setSectionDataCache] = useState({});
+
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedSection, setSelectedSection] = useState("");
   const [selectedProfessor, setSelectedProfessor] = useState("");
   const [sortBy, setSortBy] = useState("likes");
   const [sortOrder, setSortOrder] = useState("desc");
-  const [sectionDataCache, setSectionDataCache] = useState({});
 
+  // fetch notes and related data
   useEffect(() => {
     const fetchNotes = async () => {
       if (!courseData || !semesterData) {
@@ -37,6 +40,7 @@ const NotesPage = () => {
       }
 
       try {
+        // fetch notes
         const notesResponse = await fetch(
           `/api/note?courseID=${courseId}&semesterID=${semesterData.id}&return=object&sort=${sortBy}&order=${sortOrder}`,
         );
@@ -46,6 +50,7 @@ const NotesPage = () => {
           throw new Error("Failed to fetch notes");
         }
 
+        // fetch section each note
         const sectionPromises = notesData.data.map((note) =>
           fetch(`/api/section/${note.section}`).then((res) => res.json()),
         );
@@ -54,13 +59,14 @@ const NotesPage = () => {
         const newSectionCache = {};
         const sections = sectionResponses.map((res) => res.data);
 
-        // Build section cache
+        // build section cache for quick lookup
         sections.forEach((section) => {
           if (section && section.id) {
             newSectionCache[section.id] = section;
           }
         });
 
+        // get unique professors and sections
         const uniqueProfessors = [
           ...new Set(
             sections
@@ -97,17 +103,16 @@ const NotesPage = () => {
     sortOrder,
   ]);
 
+  // apply filters and sorting to notes
   useEffect(() => {
     let filtered = [...notes];
 
-    // Filter by tags if any are selected
     if (selectedTags.length > 0) {
       filtered = filtered.filter((note) =>
         selectedTags.every((tag) => note.tags?.includes(tag)),
       );
     }
 
-    // Filter by section
     if (selectedSection) {
       filtered = filtered.filter((note) => {
         const sectionData = sectionDataCache[note.section];
@@ -115,7 +120,6 @@ const NotesPage = () => {
       });
     }
 
-    // Filter by professor
     if (selectedProfessor) {
       filtered = filtered.filter((note) => {
         const sectionData = sectionDataCache[note.section];
@@ -124,7 +128,7 @@ const NotesPage = () => {
       });
     }
 
-    // Sort the filtered results
+    // apply sorting based on selected field
     if (sortBy === "createdDate") {
       filtered.sort((a, b) => {
         const dateA = new Date(a.createdDate);
@@ -156,6 +160,7 @@ const NotesPage = () => {
     sectionDataCache,
   ]);
 
+  // handle filter and sort
   const handleTagToggle = (tag) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
@@ -191,6 +196,7 @@ const NotesPage = () => {
     );
   }
 
+  // loading spinner
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -199,6 +205,7 @@ const NotesPage = () => {
     );
   }
 
+  // error state
   if (error) {
     return (
       <div className="text-red-500 text-center p-4">
@@ -216,6 +223,7 @@ const NotesPage = () => {
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-24">
+        {/* navigation breadcrumb */}
         <div className="py-6">
           <NoteBreadcrumb
             majorCode={majorCode}
@@ -225,6 +233,7 @@ const NotesPage = () => {
         </div>
 
         <div className="flex gap-8">
+          {/* filters sidebar */}
           <NoteFilters
             notes={notes}
             sortBy={sortBy}
@@ -242,6 +251,7 @@ const NotesPage = () => {
             availableSections={availableSections}
           />
 
+          {/* notes list */}
           <div className="flex-1">
             {filteredNotes.length === 0 ? (
               <div className="text-center p-8 bg-gray-800 rounded">

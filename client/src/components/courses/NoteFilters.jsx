@@ -25,13 +25,16 @@ const NoteFilters = ({
   const [majors, setMajors] = useState([]);
   const [filteredMajors, setFilteredMajors] = useState([]);
 
+  // extract unique tags from notes
   const availableTags = Array.from(
     new Set(notes.flatMap((note) => note.tags || [])),
   ).sort((a, b) => a.localeCompare(b));
 
+  // fetch schools and majors
   useEffect(() => {
     const fetchSchoolsAndMajors = async () => {
       try {
+        // fetch schools and majors
         const [schoolsResponse, majorsResponse] = await Promise.all([
           fetch("/api/school?return=object"),
           fetch("/api/major?return=object"),
@@ -55,6 +58,7 @@ const NoteFilters = ({
     }
   }, [isSearchPage]);
 
+  // filter majors based on selected school
   useEffect(() => {
     if (selectedSchool) {
       const filtered = majors.filter(
@@ -80,6 +84,7 @@ const NoteFilters = ({
             <option value="title">Sort by title</option>
           </select>
 
+          {/* sort order */}
           <select
             value={sortOrder}
             onChange={(e) => onSortOrderChange(e.target.value)}
@@ -91,8 +96,10 @@ const NoteFilters = ({
         </div>
       </div>
 
+      {/* school and major filters for search page */}
       {isSearchPage && (
         <>
+          {/* school */}
           <div className="mb-6">
             <h3 className="text-white mb-2">School:</h3>
             <select
@@ -109,6 +116,7 @@ const NoteFilters = ({
             </select>
           </div>
 
+          {/* major */}
           <div className="mb-6">
             <h3 className="text-white mb-2">Major:</h3>
             <select
@@ -127,6 +135,7 @@ const NoteFilters = ({
         </>
       )}
 
+      {/* tags filter section */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-white">Filter by tags:</h3>
@@ -160,6 +169,7 @@ const NoteFilters = ({
         )}
       </div>
 
+      {/* section filter */}
       <div className="mb-6">
         <h3 className="text-white mb-2">Sections:</h3>
         <select
@@ -176,6 +186,7 @@ const NoteFilters = ({
         </select>
       </div>
 
+      {/* professor filter */}
       <div className="mb-6">
         <h3 className="text-white mb-2">Prof:</h3>
         <select

@@ -28,6 +28,7 @@ const UploadModal = () => {
   });
   const [errors, setErrors] = useState({});
 
+  // debounce course code input to avoid excessive api calls
   useEffect(() => {
     if (values.courseCode.length >= 8) {
       const timeoutId = setTimeout(() => {
@@ -41,6 +42,7 @@ const UploadModal = () => {
     }
   }, [values.courseCode]);
 
+  // fetch course sections when course code is entered
   useEffect(() => {
     const fetchSections = async () => {
       if (!debouncedCourseCode) return;
@@ -63,6 +65,7 @@ const UploadModal = () => {
     fetchSections();
   }, [debouncedCourseCode]);
 
+  // validate url format
   const isValidUrl = (string) => {
     try {
       new URL(string);
@@ -72,6 +75,7 @@ const UploadModal = () => {
     }
   };
 
+  // validate form fields before submission
   const validateForm = () => {
     const newErrors = {};
     if (!values.courseCode) newErrors.courseCode = "Course code is required";
@@ -83,8 +87,8 @@ const UploadModal = () => {
       if (!validTypes.includes(values.file.type)) {
         newErrors.file = "Only PDF, JPG, and PNG files are allowed";
       }
-      if (values.file.size > 2 * 1024 * 1024) {
-        newErrors.file = "File size must be less than 2MB";
+      if (values.file.size > 200 * 1024 * 1024) {
+        newErrors.file = "File size must be less than 200 MB";
       }
     }
     if (!values.description) newErrors.description = "Description is required";
@@ -197,6 +201,7 @@ const UploadModal = () => {
         width="max-w-2xl"
       >
         <div className="flex justify-between items-center mb-6">
+          {/* anonymous upload toggle */}
           <span className="text-gray-300">Upload anonymously</span>
           <button
             type="button"
@@ -215,6 +220,7 @@ const UploadModal = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+            {/* course code input with format validation */}
             <input
               name="courseCode"
               type="text"
@@ -292,6 +298,7 @@ const UploadModal = () => {
           </div>
 
           <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
+            {/* file upload section */}
             <input
               id="file-upload"
               name="file"
@@ -333,7 +340,7 @@ const UploadModal = () => {
                     or drag and drop
                   </span>
                   <span className="text-gray-400 text-sm mt-1">
-                    PDF, JPG or PNG (max. 2MB)
+                    PDF, JPG or PNG (max. 200 MB)
                   </span>
                 </>
               )}
@@ -344,6 +351,7 @@ const UploadModal = () => {
           </div>
 
           <div>
+            {/* vido link */}
             <input
               name="videoLink"
               type="text"

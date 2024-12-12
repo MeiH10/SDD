@@ -4,7 +4,7 @@ const NoteContext = createContext(null);
 
 export const NoteProvider = ({ children }) => {
   const [shouldRefreshNotes, setShouldRefreshNotes] = useState(false);
-
+  // refresh to get more note
   const triggerNoteRefresh = () => {
     setShouldRefreshNotes((prev) => !prev);
   };

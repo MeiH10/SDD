@@ -13,6 +13,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // validate form fields before submission
   const validateForm = () => {
     const newErrors = {};
     if (!values.title) newErrors.title = "Title is required";
@@ -23,6 +24,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
     return newErrors;
   };
 
+  // utility function to validate url format
   const isValidUrl = (string) => {
     try {
       new URL(string);
@@ -34,6 +36,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // validate form before submission
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
@@ -51,6 +54,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
         formData.append("anonymous", values.anonymous);
       if (values.file) formData.append("file", values.file);
 
+      // process tags into array and check for changes
       const tagArray = values.tags
         .split(",")
         .map((tag) => tag.trim())
@@ -59,6 +63,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
         formData.append("tags", tagArray);
       }
 
+      // send update request
       const response = await fetch(`/api/note/${note.id}`, {
         method: "PUT",
         body: formData,
@@ -67,6 +72,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
       const data = await response.json();
       if (!data.good) throw new Error(data.error || "Failed to update note");
 
+      // notify success and close modal
       onUpdateSuccess();
       onClose();
     } catch (error) {
@@ -102,6 +108,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
           )}
         </div>
 
+        {/* description */}
         <div>
           <textarea
             value={values.description}
@@ -120,6 +127,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
           )}
         </div>
 
+        {/* related link */}
         <div>
           <input
             type="text"
@@ -138,6 +146,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
           )}
         </div>
 
+        {/* tags input */}
         <div>
           <input
             type="text"
@@ -151,6 +160,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
           />
         </div>
 
+        {/* file upload section */}
         <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
           <input
             id="file-upload"
@@ -178,6 +188,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
           </label>
         </div>
 
+        {/* anonymous option */}
         <div className="flex items-center justify-between">
           <label className="flex items-center space-x-2 cursor-pointer">
             <input
@@ -193,10 +204,12 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
           </label>
         </div>
 
+        {/* error display */}
         {errors.submit && (
           <p className="text-red-500 text-sm">{errors.submit}</p>
         )}
 
+        {/* form action buttons */}
         <div className="flex gap-4 pt-4">
           <button
             type="button"
@@ -213,6 +226,7 @@ const NoteEditModal = ({ isOpen, onClose, note, onUpdateSuccess }) => {
           >
             {isLoading ? (
               <>
+                {/* loading skelton */}
                 <svg
                   className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                   xmlns="http://www.w3.org/2000/svg"
