@@ -89,7 +89,6 @@ public class CommentService {
     return repository.save(comment);
   }
 
-<<<<<<< HEAD
   /**
    * Deletes a comment if the user is the owner of the comment.
    *
@@ -101,16 +100,6 @@ public class CommentService {
   public void deleteComment(Comment comment, Account user) {
     if (comment == null) {
       throw new ResourceNotFoundException("Comment not found.");
-=======
-        var query = Query.query(Criteria.where("_id").is(new ObjectId(id)));
-
-        Comment comment = template.findOne(query, Comment.class);
-        if (comment == null) {
-            throw new ResourceNotFoundException("No comment with this ID.");
-        }
-
-        return comment;
->>>>>>> origin
     }
 
     if (!comment.getAccount().equals(user.getId()) && user.getRole() != 3) {

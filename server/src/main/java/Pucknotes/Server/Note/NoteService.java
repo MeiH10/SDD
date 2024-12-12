@@ -66,36 +66,6 @@ public class NoteService {
       throw new ResourceNotFoundException("Specify a valid course.");
     }
 
-<<<<<<< HEAD
-    if (user.getRole() == 0 || user.getRole() == 1) {
-      throw new UnauthorizedException("You are not permitted to add a note.");
-=======
-    /**
-     * Retrieves a note by its ID.
-     *
-     * @param id The ID of the note to retrieve.
-     * @return The Note object associated with the specified ID.
-     * @throws IllegalArgumentException If the provided ID is null.
-     * @throws ResourceNotFoundException If no note exists with the specified ID.
-     */
-
-
-    public Note getById(String id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Invalid note ID.");
-        }
-    
-        var query = Query.query(Criteria.where("_id").is(new ObjectId(id)));
-    
-        Note note = template.findOne(query, Note.class);
-        if (note == null) {
-            throw new ResourceNotFoundException("No note with this ID.");
-        }
-    
-        return note;
->>>>>>> origin
-    }
-
     ObjectId fileID = files.addFile(upload);
 
     Note note = new Note();
