@@ -104,7 +104,6 @@ public class NoteService {
     }
 
     var query = Query.query(Criteria.where("_id").is(new ObjectId(id)));
-    query.fields().exclude("likes");
 
     Note note = template.findOne(query, Note.class);
     if (note == null) {

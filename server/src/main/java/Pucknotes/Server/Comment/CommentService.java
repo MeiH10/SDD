@@ -123,7 +123,6 @@ public class CommentService {
     }
 
     var query = Query.query(Criteria.where("_id").is(new ObjectId(id)));
-    query.fields().exclude("likes");
 
     Comment comment = template.findOne(query, Comment.class);
     if (comment == null) {
