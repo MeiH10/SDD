@@ -28,7 +28,6 @@ const UploadModal = () => {
   });
   const [errors, setErrors] = useState({});
 
-
   // debounce course code input to avoid excessive api calls
   useEffect(() => {
     if (values.courseCode.length >= 8) {
@@ -42,7 +41,6 @@ const UploadModal = () => {
       setSections([]);
     }
   }, [values.courseCode]);
-
 
   // fetch course sections when course code is entered
   useEffect(() => {
@@ -66,7 +64,6 @@ const UploadModal = () => {
 
     fetchSections();
   }, [debouncedCourseCode]);
-
 
   // validate url format
   const isValidUrl = (string) => {

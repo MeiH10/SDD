@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const SchoolMajorSelector = () => {
   const navigate = useNavigate();
-  
+
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [schools, setSchools] = useState([]);
   const [allMajors, setAllMajors] = useState([]);

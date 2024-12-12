@@ -18,10 +18,10 @@ const Modal = ({ isOpen, onClose, children, title, width = "max-w-md" }) => {
           <div className="p-6">
             {/*  header */}
             <h2 className="text-xl font-bold text-white mb-4">{title}</h2>
-            
+
             {/*  content */}
             {children}
-            
+
             {/* close button */}
             <button
               onClick={onClose}

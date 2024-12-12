@@ -12,7 +12,7 @@ const NotesPage = () => {
   const { state } = useLocation();
   const courseData = state?.courseData;
   const semesterData = state?.semesterData;
-  
+
   const { isLoggedIn } = useAuth();
   const { shouldRefreshNotes } = useNote();
 
