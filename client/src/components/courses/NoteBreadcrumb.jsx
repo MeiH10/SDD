@@ -11,13 +11,18 @@ const NoteBreadcrumb = ({ majorCode, courseData, semesterData }) => {
       >
         {majorCode}
       </span>
+
+      {/* separator */}
       <span className="mx-2">{">"}</span>
+
       <span
         className="hover:text-white cursor-pointer"
         onClick={() => navigate(`/${majorCode}`)}
       >
         {courseData.code} {courseData.name}
       </span>
+
+      {/* conditional semester */}
       {semesterData && (
         <>
           <span className="mx-2">{">"}</span>

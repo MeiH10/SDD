@@ -6,15 +6,17 @@ const CoursesPage = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const majorName = state?.majorName;
+
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // fetch courses and major details
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true);
       try {
-        // fetch the major details if we don't have them
+        // fetch major details
         if (!majorName) {
           const majorResponse = await fetch(
             `/api/major?majorCode=${majorCode}&return=object`,
@@ -23,13 +25,14 @@ const CoursesPage = () => {
           if (!majorData.good || !majorData.data.length) {
             throw new Error("Failed to fetch major details");
           }
-          // update the state with major name
+          // update route state with major name
           navigate("", {
             state: { majorName: majorData.data[0].name },
             replace: true,
           });
         }
 
+        // fetch sorted course
         const response = await fetch(
           `/api/course?majorCode=${majorCode}&return=object&sort=name&order=asc`,
         );
@@ -53,6 +56,7 @@ const CoursesPage = () => {
       state: {
         courseData: course,
         majorName: majorName,
+        // get all semesters for this course code
         semesters: courses
           .filter((c) => c.code === course.code)
           .map((c) => c.semester),
@@ -60,6 +64,7 @@ const CoursesPage = () => {
     });
   };
 
+  // display loading spinner while fetching data
   if (loading) {
     return (
       <div className="px-4 sm:px-24 mx-auto">
@@ -70,6 +75,7 @@ const CoursesPage = () => {
     );
   }
 
+  // display error message if fetch failed
   if (error) {
     return (
       <div className="px-4 sm:px-24 mx-auto">
@@ -80,6 +86,7 @@ const CoursesPage = () => {
 
   return (
     <div className="px-4 sm:px-24 mx-auto">
+      {/* navigation */}
       <div className="bg-teal-500 p-4 rounded-t-lg">
         <div className="flex items-center">
           <button
@@ -92,6 +99,7 @@ const CoursesPage = () => {
         </div>
       </div>
 
+      {/* courses list */}
       <div className="space-y-2">
         {courses.map((course) => (
           <div
@@ -99,6 +107,7 @@ const CoursesPage = () => {
             onClick={() => handleCourseClick(course)}
             className="bg-gray-800 p-4 hover:bg-gray-700 transition-colors cursor-pointer border border-gray-700"
           >
+            {/* course information */}
             <div className="flex items-baseline gap-2">
               <h2 className="text-lg font-bold text-white">{course.code}:</h2>
               <h3 className="text-white">{course.name}</h3>
@@ -110,5 +119,4 @@ const CoursesPage = () => {
   );
 };
 
-// testing
 export default CoursesPage;

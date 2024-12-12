@@ -12,14 +12,17 @@ const CourseSemestersPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // fetch and process semester data
   useEffect(() => {
     const fetchData = async () => {
+      // validate data
       if (!courseData?.code) {
         console.error("No course code available", courseData);
         return;
       }
 
       try {
+        // fetch sections for the course
         const response = await fetch(
           `/api/section?courseCode=${courseData.code}&return=object`,
         );
@@ -29,11 +32,13 @@ const CourseSemestersPage = () => {
           throw new Error(data.error || "Failed to fetch sections");
         }
 
+        // get unique semester ids from sections
         const sectionDetails = data.data;
         const uniqueSemesterIds = [
           ...new Set(sectionDetails.map((section) => section.semester)),
         ].filter(Boolean);
 
+        // get detailed data for each semester
         const semesterDetails = await Promise.all(
           uniqueSemesterIds.map(async (semesterId) => {
             const semesterResponse = await fetch(`/api/semester/${semesterId}`);
@@ -62,9 +67,12 @@ const CourseSemestersPage = () => {
     fetchData();
   }, [courseData?.code]);
 
+  // handle navigation to specific semester
   const handleSemesterClick = (semester) => {
     navigate(
-      `/${majorCode}/${courseId}/${semester.season.toLowerCase()}-${semester.year}`,
+      `/${majorCode}/${courseId}/${semester.season.toLowerCase()}-${
+        semester.year
+      }`,
       {
         state: {
           courseData,
@@ -96,6 +104,7 @@ const CourseSemestersPage = () => {
           />
         </div>
 
+        {/* semesters list */}
         <div className="space-y-6">
           {semesters.length > 0 ? (
             semesters.map((semester) => (
@@ -112,6 +121,7 @@ const CourseSemestersPage = () => {
               </div>
             ))
           ) : (
+            // empty message
             <div className="text-gray-400 text-center p-6 bg-gray-800 rounded-lg">
               No semesters found for this course
             </div>

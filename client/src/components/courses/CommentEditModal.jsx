@@ -12,6 +12,7 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
 
     setIsLoading(true);
     try {
+      // send update request to api
       const response = await fetch(`/api/comment/${comment.id}`, {
         method: "PUT",
         headers: {
@@ -23,6 +24,7 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
       const data = await response.json();
       if (!data.good) throw new Error(data.error || "Failed to update comment");
 
+      // notify parent components if successful update and close modal
       onUpdateSuccess();
       onClose();
     } catch (err) {
@@ -35,6 +37,7 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Comment">
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* comment editing disabled loading */}
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
@@ -44,8 +47,10 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
           disabled={isLoading}
         />
 
+        {/*display error message if any */}
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
+        {/* action buttons */}
         <div className="flex gap-4">
           <button
             type="button"
@@ -55,6 +60,8 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
           >
             Cancel
           </button>
+
+          {/* submit button with loading state and validation */}
           <button
             type="submit"
             disabled={isLoading || !body.trim()}
@@ -62,6 +69,7 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
           >
             {isLoading ? (
               <>
+                {/* loading spinner animation */}
                 <svg
                   className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                   xmlns="http://www.w3.org/2000/svg"
