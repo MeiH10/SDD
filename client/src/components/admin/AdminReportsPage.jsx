@@ -41,13 +41,13 @@ const AdminReportsPage = () => {
           let contentOwner = null;
           if (report.item) {
             const itemResponse = await fetch(
-              `/api/${report.type}/${report.item}`
+              `/api/${report.type}/${report.item}`,
             );
             const itemData = await itemResponse.json();
             if (itemData.good) {
               // get the account details of the note owner
               const ownerResponse = await fetch(
-                `/api/account/${itemData.data.account || itemData.data.owner}`
+                `/api/account/${itemData.data.account || itemData.data.owner}`,
               );
               const ownerData = await ownerResponse.json();
               if (ownerData.good) {
@@ -61,7 +61,7 @@ const AdminReportsPage = () => {
             reporterName: ownerData.good ? ownerData.data.username : "Unknown",
             contentOwner,
           };
-        })
+        }),
       );
 
       setReports(reportsWithDetails);
@@ -217,7 +217,7 @@ const AdminReportsPage = () => {
                             onClick={() =>
                               handleBanUser(
                                 report.contentOwner.id,
-                                report.contentOwner.username
+                                report.contentOwner.username,
                               )
                             }
                             className="p-2 text-gray-400 hover:text-yellow-500 transition-colors rounded-lg hover:bg-gray-600/50"

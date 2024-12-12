@@ -17,7 +17,7 @@ const CourseSectionsPage = () => {
       try {
         // get list of section id
         const response = await fetch(
-          `/api/section?courseCode=${courseData.code}&sort=number&order=asc`
+          `/api/section?courseCode=${courseData.code}&sort=number&order=asc`,
         );
         const data = await response.json();
         if (!data.good) {
@@ -30,7 +30,7 @@ const CourseSectionsPage = () => {
             const detailResponse = await fetch(`/api/section/${sectionId}`);
             const detailData = await detailResponse.json();
             return detailData.data;
-          })
+          }),
         );
 
         setSections(sectionsData);

@@ -1,0 +1,39 @@
+name: 🎨 Lint Codebase
+
+on:
+  pull_request: null
+
+permissions: {}
+
+jobs:
+  build:
+    name: 🚀 Run Linter
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+
+    steps:
+      - name: 🚚 Enter Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 💄 Start Super-linter
+        uses: super-linter/super-linter@v7.2.0
+        env:
+          VALIDATE_MARKDOWN_PRETTIER: false
+          VALIDATE_NATURAL_LANGUAGE: false
+          VALIDATE_PYTHON_BLACK: false
+          VALIDATE_PYTHON_PYLINT: false
+          VALIDATE_PYTHON_FLAKE8: false
+          VALIDATE_PYTHON_ISORT: false
+          VALIDATE_PYTHON_PYINK: false
+          VALIDATE_SHELL_SHFMT: false
+          VALIDATE_YAML_PRETTIER: false
+          VALIDATE_JSCPD: false
+          VALIDATE_JAVASCRIPT_STANDARD: false
+          VALIDATE_JAVA: false
+          VALIDATE_GOOGLE_JAVA_FORMAT: false
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

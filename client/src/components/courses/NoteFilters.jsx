@@ -26,7 +26,7 @@ const NoteFilters = ({
   const [filteredMajors, setFilteredMajors] = useState([]);
 
   const availableTags = Array.from(
-    new Set(notes.flatMap((note) => note.tags || []))
+    new Set(notes.flatMap((note) => note.tags || [])),
   ).sort((a, b) => a.localeCompare(b));
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const NoteFilters = ({
   useEffect(() => {
     if (selectedSchool) {
       const filtered = majors.filter(
-        (major) => major.school === selectedSchool
+        (major) => major.school === selectedSchool,
       );
       setFilteredMajors(filtered);
     } else {

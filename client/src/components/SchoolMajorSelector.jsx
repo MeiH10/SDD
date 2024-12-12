@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const SchoolMajorSelector = () => {
   const navigate = useNavigate();
@@ -13,22 +13,22 @@ const SchoolMajorSelector = () => {
     const fetchData = async () => {
       try {
         const [schoolsResponse, majorsResponse] = await Promise.all([
-          fetch('/api/school?return=object'),
-          fetch('/api/major?return=object')
+          fetch("/api/school?return=object"),
+          fetch("/api/major?return=object"),
         ]);
 
         const schoolsData = await schoolsResponse.json();
         const majorsData = await majorsResponse.json();
 
         if (!schoolsData.good || !majorsData.good) {
-          throw new Error('Failed to fetch data');
+          throw new Error("Failed to fetch data");
         }
 
         setSchools(schoolsData.data);
         setAllMajors(majorsData.data);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching data:', err);
+        console.error("Error fetching data:", err);
         setError(err.message);
         setLoading(false);
       }
@@ -37,13 +37,13 @@ const SchoolMajorSelector = () => {
     fetchData();
   }, []);
 
-  const filteredMajors = selectedSchool 
-    ? allMajors.filter(major => major.school === selectedSchool.id)
+  const filteredMajors = selectedSchool
+    ? allMajors.filter((major) => major.school === selectedSchool.id)
     : [];
 
   const handleMajorClick = (major) => {
-    navigate(`/${major.code}`, { 
-      state: { majorName: major.name }
+    navigate(`/${major.code}`, {
+      state: { majorName: major.name },
     });
   };
 
@@ -70,7 +70,9 @@ const SchoolMajorSelector = () => {
               <li
                 key={school.id}
                 className={`p-2 ${
-                  selectedSchool?.id === school.id ? 'bg-gray-600' : 'bg-gray-700'
+                  selectedSchool?.id === school.id
+                    ? "bg-gray-600"
+                    : "bg-gray-700"
                 } rounded-lg hover:bg-gray-600 cursor-pointer transition-colors duration-200`}
                 onClick={() => setSelectedSchool(school)}
               >

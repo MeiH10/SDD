@@ -24,7 +24,7 @@ const CourseSemestersPage = () => {
       try {
         // fetch sections for the course
         const response = await fetch(
-          `/api/section?courseCode=${courseData.code}&return=object`
+          `/api/section?courseCode=${courseData.code}&return=object`,
         );
         const data = await response.json();
 
@@ -44,7 +44,7 @@ const CourseSemestersPage = () => {
             const semesterResponse = await fetch(`/api/semester/${semesterId}`);
             const semesterData = await semesterResponse.json();
             return semesterData.data;
-          })
+          }),
         );
 
         const sortedSemesters = semesterDetails.sort((a, b) => {
@@ -78,7 +78,7 @@ const CourseSemestersPage = () => {
           courseData,
           semesterData: semester,
         },
-      }
+      },
     );
   };
 
