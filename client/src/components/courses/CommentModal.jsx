@@ -22,12 +22,14 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
   const [reportingComment, setReportingComment] = useState(null);
   const { isLoggedIn, userId } = useAuth();
 
+  // fetch comments when modal opens or note changes
   useEffect(() => {
     if (isOpen && noteId) {
       fetchComments();
     }
   }, [isOpen, noteId]);
 
+  // fetch comments and their author details
   const fetchComments = async () => {
     setIsLoading(true);
     try {
@@ -38,6 +40,7 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
       if (!data.good) throw new Error(data.error || "Failed to fetch comments");
       setComments(data.data);
 
+      // fetch usernames for all unique comment authors
       const authorIds = [
         ...new Set(data.data.map((comment) => comment.account)),
       ];
@@ -47,6 +50,7 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
         )
       );
 
+      // create a mapping of user ids to usernames
       const authorMap = {};
       authorResponses.forEach((response) => {
         if (response.good) {
@@ -82,6 +86,7 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
       const data = await response.json();
       if (!data.good) throw new Error(data.error || "Failed to post comment");
 
+      // refresh comments and reset input
       await fetchComments();
       setNewComment("");
     } catch (err) {
@@ -91,6 +96,7 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
     }
   };
 
+  // handle comment deletion
   const handleDelete = async (commentId) => {
     if (!window.confirm("Are you sure you want to delete this comment?"))
       return;
@@ -109,6 +115,7 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
     if (!isLoggedIn) return;
 
     try {
+      // toggle like status based on vote type
       let response;
       if (isUpvote) {
         response = await fetch(`/api/comment/${commentId}/like`, {
@@ -138,14 +145,17 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
         <div className="flex flex-col h-[70vh]">
           <div className="flex-1 overflow-y-auto mb-4">
             {isLoading && !comments.length ? (
+              // loading skelton
               <div className="flex justify-center items-center h-32">
                 <div className="animate-spin h-8 w-8 border-4 border-teal-500 rounded-full border-t-transparent" />
               </div>
             ) : comments.length === 0 ? (
+              // empty state message
               <div className="text-center text-gray-400 py-8">
                 No comments yet. Be the first to comment!
               </div>
             ) : (
+              // comments list
               <div className="space-y-4">
                 {comments.map((comment) => (
                   <div
@@ -153,6 +163,7 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
                     className="bg-gray-700 rounded-lg p-4 relative"
                   >
                     <div className="flex items-start">
+                      {/* voting buttons */}
                       <div className="flex flex-col items-center mr-4">
                         <button
                           onClick={() => handleVote(comment.id, true)}
@@ -180,6 +191,8 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
                           <ChevronDown className="w-5 h-5" />
                         </button>
                       </div>
+
+                      {/* comment content */}
                       <div className="flex-1">
                         <div className="flex items-center mb-2">
                           <span className="text-sm text-gray-400">
@@ -189,6 +202,8 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
                         </div>
                         <p className="text-white">{comment.description}</p>
                       </div>
+
+                      {/* action buttons */}
                       <div className="absolute top-2 right-2 flex gap-2">
                         <button
                           onClick={() => setReportingComment(comment)}
@@ -204,6 +219,8 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
                         >
                           <AlertTriangle className="w-4 h-4" />
                         </button>
+
+                        {/* edit and delete buttons */}
                         {userId === comment.account && (
                           <>
                             <button
@@ -255,6 +272,7 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
         </div>
       </Modal>
 
+      {/* edit comment */}
       {editingComment && (
         <CommentEditModal
           isOpen={!!editingComment}
@@ -267,6 +285,7 @@ const CommentModal = ({ isOpen, onClose, noteId }) => {
         />
       )}
 
+      {/* report comment */}
       {reportingComment && (
         <ReportModal
           isOpen={!!reportingComment}

@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import Modal from '../Modal';
+import { useState } from "react";
+import Modal from "../Modal";
 
 const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
-  const [body, setBody] = useState(comment.description || '');
+  const [body, setBody] = useState(comment.description || "");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -12,17 +12,19 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
 
     setIsLoading(true);
     try {
+      // send update request to api
       const response = await fetch(`/api/comment/${comment.id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
-      if (!data.good) throw new Error(data.error || 'Failed to update comment');
+      if (!data.good) throw new Error(data.error || "Failed to update comment");
 
+      // notify parent components if successful update and close modal
       onUpdateSuccess();
       onClose();
     } catch (err) {
@@ -35,6 +37,7 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Comment">
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* comment editing disabled loading */}
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
@@ -44,8 +47,10 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
           disabled={isLoading}
         />
 
+        {/*display error message if any */}
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
+        {/* action buttons */}
         <div className="flex gap-4">
           <button
             type="button"
@@ -55,6 +60,8 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
           >
             Cancel
           </button>
+
+          {/* submit button with loading state and validation */}
           <button
             type="submit"
             disabled={isLoading || !body.trim()}
@@ -62,14 +69,31 @@ const CommentEditModal = ({ isOpen, onClose, comment, onUpdateSuccess }) => {
           >
             {isLoading ? (
               <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                {/* loading spinner animation */}
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  ></path>
                 </svg>
                 Updating...
               </>
             ) : (
-              'Update Comment'
+              "Update Comment"
             )}
           </button>
         </div>

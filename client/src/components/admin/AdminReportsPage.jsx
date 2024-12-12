@@ -10,6 +10,7 @@ const AdminReportsPage = () => {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
 
+  // redirect to home if user is not logged in
   useEffect(() => {
     if (!isLoggedIn) {
       navigate("/");
@@ -19,6 +20,7 @@ const AdminReportsPage = () => {
     fetchReports();
   }, [isLoggedIn, navigate]);
 
+  // fetch all reports and populate them with user details
   const fetchReports = async () => {
     setLoading(true);
     try {
@@ -29,11 +31,13 @@ const AdminReportsPage = () => {
         throw new Error(data.error || "Failed to fetch reports");
       }
 
+      // fill each report with reporter and content owner details
       const reportsWithDetails = await Promise.all(
         data.data.map(async (report) => {
           const ownerResponse = await fetch(`/api/account/${report.owner}`);
           const ownerData = await ownerResponse.json();
 
+          // fetch owner details if it exists
           let contentOwner = null;
           if (report.item) {
             const itemResponse = await fetch(
@@ -41,6 +45,7 @@ const AdminReportsPage = () => {
             );
             const itemData = await itemResponse.json();
             if (itemData.good) {
+              // get the account details of the note owner
               const ownerResponse = await fetch(
                 `/api/account/${itemData.data.account || itemData.data.owner}`
               );
@@ -67,6 +72,7 @@ const AdminReportsPage = () => {
     }
   };
 
+  // delete a report from the system after it's resolved
   const handleDismissReport = async (reportId) => {
     if (!window.confirm("Are you sure you want to dismiss this report?"))
       return;
@@ -81,12 +87,14 @@ const AdminReportsPage = () => {
         throw new Error(data.error || "Failed to dismiss report");
       }
 
+      // update states to remove the dismissed report
       setReports(reports.filter((report) => report.id !== reportId));
     } catch (err) {
       setError(err.message);
     }
   };
 
+  // delete reported comment/note and dismiss the report associated with it
   const handleDeleteContent = async (report) => {
     if (!window.confirm(`Are you sure you want to delete this ${report.type}?`))
       return;
@@ -107,6 +115,7 @@ const AdminReportsPage = () => {
     }
   };
 
+  // ban a user by setting their role to 0
   const handleBanUser = async (userId, username) => {
     if (!window.confirm(`Are you sure you want to ban user "${username}"?`))
       return;
@@ -134,6 +143,7 @@ const AdminReportsPage = () => {
     }
   };
 
+  // show loading skelton while fetching data
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -142,6 +152,7 @@ const AdminReportsPage = () => {
     );
   }
 
+  // display error message if something goes wrong
   if (error) {
     return <div className="text-red-500 text-center p-4">{error}</div>;
   }
@@ -155,6 +166,7 @@ const AdminReportsPage = () => {
         </span>
       </div>
 
+      {/* reports list section */}
       <div className="space-y-4">
         {reports.length === 0 ? (
           <div className="text-center text-gray-400 py-8">
@@ -168,6 +180,7 @@ const AdminReportsPage = () => {
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
+                  {/* report header with title and type */}
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-medium text-white">
                       {report.title}
@@ -177,6 +190,7 @@ const AdminReportsPage = () => {
                     </span>
                   </div>
 
+                  {/* reporter info and timestamp */}
                   <p className="text-sm text-gray-400 mb-2">
                     Reported by:{" "}
                     <span className="text-teal-400">{report.reporterName}</span>{" "}
@@ -185,6 +199,7 @@ const AdminReportsPage = () => {
 
                   <p className="text-gray-300 mb-4">{report.description}</p>
 
+                  {/* note/comment owner section with action buttons */}
                   {report.contentOwner && (
                     <div className="mt-4 p-4 bg-gray-700/50 rounded-lg">
                       <div className="flex items-center justify-between">
@@ -197,6 +212,7 @@ const AdminReportsPage = () => {
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
+                          {/* admin action buttons */}
                           <button
                             onClick={() =>
                               handleBanUser(
