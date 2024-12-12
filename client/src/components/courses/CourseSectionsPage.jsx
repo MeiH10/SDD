@@ -1,25 +1,30 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 const CourseSectionsPage = () => {
   const { majorCode, courseId } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
   const courseData = state?.courseData;
-  
+
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // fetch course sections data
   useEffect(() => {
     const fetchSections = async () => {
       try {
-        const response = await fetch(`/api/section?courseCode=${courseData.code}&sort=number&order=asc`);
+        // get list of section id
+        const response = await fetch(
+          `/api/section?courseCode=${courseData.code}&sort=number&order=asc`
+        );
         const data = await response.json();
         if (!data.good) {
-          throw new Error(data.error || 'Failed to fetch sections');
+          throw new Error(data.error || "Failed to fetch sections");
         }
 
+        // fetch detailed data for each section
         const sectionsData = await Promise.all(
           data.data.map(async (sectionId) => {
             const detailResponse = await fetch(`/api/section/${sectionId}`);
@@ -39,6 +44,7 @@ const CourseSectionsPage = () => {
     fetchSections();
   }, [courseData.code]);
 
+  // loading spinner while fetching data
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -47,15 +53,17 @@ const CourseSectionsPage = () => {
     );
   }
 
+  // display error message
   if (error) {
     return <div className="text-red-500 text-center p-4">{error}</div>;
   }
 
   return (
     <div className="px-4 sm:px-24 mx-auto">
+      {/* section with navigation and course info */}
       <div className="bg-teal-500 p-4 rounded-t-lg">
         <div className="flex items-center">
-          <button 
+          <button
             onClick={() => navigate(`/${majorCode}`)}
             className="mr-4 text-white hover:text-gray-200 transition-colors"
           >
@@ -67,15 +75,19 @@ const CourseSectionsPage = () => {
         </div>
       </div>
 
+      {/* sections list */}
       <div className="space-y-2">
-        {sections.map(section => (
-          <div 
+        {sections.map((section) => (
+          <div
             key={section.id || section._id}
             className="bg-gray-800 p-6 hover:bg-gray-700 transition-colors border border-gray-700"
-            onClick={() => navigate(`/${majorCode}/${courseId}/${section.number}`, {
-                state: { courseData }
-              })}
+            onClick={() =>
+              navigate(`/${majorCode}/${courseId}/${section.number}`, {
+                state: { courseData },
+              })
+            }
           >
+            {/* section details with prof information */}
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-lg font-bold text-white mb-2">

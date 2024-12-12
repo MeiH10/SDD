@@ -36,15 +36,18 @@ const NoteCard = ({ note }) => {
   const { isLoggedIn } = useAuth();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
+  // fetch author and section details on mount
   useEffect(() => {
     const fetchAuthorAndSection = async () => {
       try {
+        // fetch author details
         const authorResponse = await fetch(`/api/account/${note.owner}`);
         const authorData = await authorResponse.json();
         if (authorData.good) {
           setAuthor(authorData.data);
         }
 
+        // fetch section details
         const sectionResponse = await fetch(`/api/section/${note.section}`);
         const sectionData = await sectionResponse.json();
         if (sectionData.good) {
@@ -55,6 +58,7 @@ const NoteCard = ({ note }) => {
       }
     };
 
+    // check if user has liked this note
     const checkIfLiked = async () => {
       if (!isLoggedIn) return;
 
@@ -73,6 +77,7 @@ const NoteCard = ({ note }) => {
     checkIfLiked();
   }, [note.owner, note.section, note.id, isLoggedIn]);
 
+  // fetch comment count for the note
   useEffect(() => {
     const fetchCommentCount = async () => {
       try {
@@ -91,6 +96,7 @@ const NoteCard = ({ note }) => {
     fetchCommentCount();
   }, [note.id]);
 
+  // handle note deletion
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this note?")) return;
 
@@ -100,23 +106,21 @@ const NoteCard = ({ note }) => {
       });
 
       if (!response.ok) throw new Error("Failed to delete note");
-
-      // refresh of notes list
       triggerNoteRefresh();
     } catch (error) {
       console.error("Error deleting note:", error);
     }
   };
 
+  // handle upvote/downvote
   const handleVote = async (isUpvote) => {
-    if (!isLoggedIn) return;
-    if (isVoting) return;
+    if (!isLoggedIn || isVoting) return;
 
     setIsVoting(true);
     try {
       let response;
       if (isUpvote && !hasLiked) {
-        // Add like
+        // add like
         response = await fetch(`/api/note/${note.id}/like`, {
           method: "PUT",
         });
@@ -125,7 +129,7 @@ const NoteCard = ({ note }) => {
           setLocalLikeCount((prev) => prev + 1);
         }
       } else if (!isUpvote && hasLiked) {
-        // Remove like
+        // remove like
         response = await fetch(`/api/note/${note.id}/like`, {
           method: "DELETE",
         });
@@ -141,6 +145,7 @@ const NoteCard = ({ note }) => {
     }
   };
 
+  // handle preview
   const handlePreview = async () => {
     setIsPreviewOpen(true);
     setIsLoading(true);
@@ -158,6 +163,7 @@ const NoteCard = ({ note }) => {
     }
   };
 
+  // handle download
   const handleDownload = async () => {
     if (isDownloading) return;
 
@@ -169,7 +175,7 @@ const NoteCard = ({ note }) => {
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
 
-      // temporary link and trigger download
+      // create temporary link for download
       const link = document.createElement("a");
       link.href = url;
       link.download = `${note.title}.pdf`;
@@ -185,6 +191,7 @@ const NoteCard = ({ note }) => {
     }
   };
 
+  // cleanup preview url when closing preview
   const handleClosePreview = () => {
     setIsPreviewOpen(false);
     if (previewUrl) {
@@ -193,13 +200,15 @@ const NoteCard = ({ note }) => {
     }
   };
 
+  //external link
   const handleLinkClick = (url) => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  // extract main professor from section data
   const mainProfessor = section?.professors?.[0]?.split(",")?.[0];
 
-  // Function to check if a string is a valid URL
+  // validate urls
   const isValidUrl = (string) => {
     try {
       new URL(string);
