@@ -3,15 +3,18 @@ import { useNavigate } from "react-router-dom";
 
 const SchoolMajorSelector = () => {
   const navigate = useNavigate();
+  
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [schools, setSchools] = useState([]);
   const [allMajors, setAllMajors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // fetch schools and majors
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // get schools and majors
         const [schoolsResponse, majorsResponse] = await Promise.all([
           fetch("/api/school?return=object"),
           fetch("/api/major?return=object"),
@@ -37,10 +40,12 @@ const SchoolMajorSelector = () => {
     fetchData();
   }, []);
 
+  // filter majors based on selected school
   const filteredMajors = selectedSchool
     ? allMajors.filter((major) => major.school === selectedSchool.id)
     : [];
 
+  // handle navigation when major is selected
   const handleMajorClick = (major) => {
     navigate(`/${major.code}`, {
       state: { majorName: major.name },
@@ -55,6 +60,7 @@ const SchoolMajorSelector = () => {
     );
   }
 
+  // error state
   if (error) {
     return <div className="text-red-500 text-center">Error: {error}</div>;
   }
@@ -62,7 +68,7 @@ const SchoolMajorSelector = () => {
   return (
     <div className="px-4 sm:px-24 mx-auto pt-10">
       <div className="flex">
-        {/* schools */}
+        {/* schools panel */}
         <div className="w-1/3 p-4 bg-gray-800 border-r border-gray-600">
           <h2 className="text-lg font-bold text-teal-400 mb-4">School</h2>
           <ul className="space-y-2">
@@ -82,7 +88,7 @@ const SchoolMajorSelector = () => {
           </ul>
         </div>
 
-        {/* majors */}
+        {/* majors panel */}
         <div className="w-2/3 p-4 bg-gray-800">
           <h2 className="text-lg font-bold text-teal-400 mb-4">Major</h2>
           <div className="grid gap-4">
@@ -98,11 +104,13 @@ const SchoolMajorSelector = () => {
                   </div>
                 ))
               ) : (
+                // no majors found message
                 <div className="p-4 bg-gray-700 rounded-lg">
                   No majors found for this school
                 </div>
               )
             ) : (
+              // prompt to select school
               <div className="p-4 bg-gray-700 rounded-lg">
                 Select a school to view majors
               </div>

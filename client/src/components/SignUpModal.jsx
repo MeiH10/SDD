@@ -12,6 +12,7 @@ const SignUpModal = () => {
   });
   const [errors, setErrors] = useState({});
 
+  // validate form fields before submittings
   const validateForm = () => {
     const newErrors = {};
     if (!values.username) newErrors.username = "Username is required";
@@ -46,6 +47,7 @@ const SignUpModal = () => {
         formData.append("username", values.username);
         formData.append("password", values.password);
 
+        // send registration request
         const response = await fetch("/api/account/force", {
           method: "POST",
           headers: {
@@ -59,7 +61,7 @@ const SignUpModal = () => {
           throw new Error(data.error || "Registration failed");
         }
 
-        // Success - close modal and reset form
+        // reset form and close modal on success
         setIsOpen(false);
         setValues({
           email: "",
@@ -78,6 +80,7 @@ const SignUpModal = () => {
     }
   };
 
+  // handle modal close and form reset
   const handleClose = () => {
     if (!isLoading) {
       setIsOpen(false);
@@ -93,6 +96,7 @@ const SignUpModal = () => {
 
   return (
     <>
+      {/* sign up button */}
       <button
         onClick={() => setIsOpen(true)}
         className="hidden sm:block text-white hover:text-teal-300 transition-colors"
@@ -100,8 +104,10 @@ const SignUpModal = () => {
         Sign up
       </button>
 
+      {/* sign up modal */}
       <Modal isOpen={isOpen} onClose={handleClose} title="Create an account">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* username field */}
           <div>
             <label htmlFor="username" className="block text-white mb-2">
               Username
@@ -122,6 +128,7 @@ const SignUpModal = () => {
             )}
           </div>
 
+          {/* email field */}
           <div>
             <label htmlFor="email" className="block text-white mb-2">
               Email
@@ -142,6 +149,7 @@ const SignUpModal = () => {
             )}
           </div>
 
+          {/* password field */}
           <div>
             <label htmlFor="password" className="block text-white mb-2">
               Password
@@ -162,6 +170,7 @@ const SignUpModal = () => {
             )}
           </div>
 
+          {/* confirm password field */}
           <div>
             <label htmlFor="confirmPassword" className="block text-white mb-2">
               Confirm Password
@@ -184,6 +193,7 @@ const SignUpModal = () => {
             )}
           </div>
 
+          {/* error message */}
           {errors.submit && (
             <p className="text-red-500 text-sm">{errors.submit}</p>
           )}
@@ -195,6 +205,7 @@ const SignUpModal = () => {
           >
             {isLoading ? (
               <>
+                {/* loading spinner */}
                 <svg
                   className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                   xmlns="http://www.w3.org/2000/svg"

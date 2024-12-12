@@ -5,20 +5,24 @@ const Modal = ({ isOpen, onClose, children, title, width = "max-w-md" }) => {
 
   return (
     <div className="fixed inset-0 z-50">
-      {/* Backdrop */}
+      {/* semi-transparent background */}
       <div
         className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
         onClick={onClose}
       />
 
-      {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
         <div
           className={`relative bg-gray-800 rounded-lg w-full ${width} mx-auto transform transition-all duration-300 shadow-xl`}
         >
           <div className="p-6">
+            {/*  header */}
             <h2 className="text-xl font-bold text-white mb-4">{title}</h2>
+            
+            {/*  content */}
             {children}
+            
+            {/* close button */}
             <button
               onClick={onClose}
               className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"

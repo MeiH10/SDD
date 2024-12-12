@@ -26,9 +26,11 @@ const SearchResults = () => {
   const [sortBy, setSortBy] = useState("likes");
   const [sortOrder, setSortOrder] = useState("desc");
 
+  // available filter options
   const [availableProfessors, setAvailableProfessors] = useState([]);
   const [availableSections, setAvailableSections] = useState([]);
 
+  // fetch notes based on search query
   useEffect(() => {
     const fetchNotes = async () => {
       if (!query) {
@@ -39,6 +41,7 @@ const SearchResults = () => {
 
       setLoading(true);
       try {
+        // fetch notes with search query and sort parameters
         const notesResponse = await fetch(
           `/api/note?query=${encodeURIComponent(
             query,
@@ -50,6 +53,7 @@ const SearchResults = () => {
           throw new Error("Failed to fetch notes");
         }
 
+        // fetch section data for each note
         const sectionPromises = notesData.data.map((note) =>
           fetch(`/api/section/${note.section}`).then((res) => res.json()),
         );
@@ -58,12 +62,14 @@ const SearchResults = () => {
         const newSectionCache = {};
         const sections = sectionResponses.map((res) => res.data);
 
+        // quick lookup
         sections.forEach((section) => {
           if (section && section.id) {
             newSectionCache[section.id] = section;
           }
         });
 
+        // get unique professors and sections
         const uniqueProfessors = [
           ...new Set(
             sections
@@ -94,6 +100,7 @@ const SearchResults = () => {
     fetchNotes();
   }, [query, shouldRefreshNotes, sortBy, sortOrder]);
 
+  // apply filters and sorting to notes
   useEffect(() => {
     let filtered = [...notes];
 
@@ -126,6 +133,7 @@ const SearchResults = () => {
       });
     }
 
+    // apply sorting
     if (sortBy === "createdDate") {
       filtered.sort((a, b) => {
         const dateA = new Date(a.createdDate);
@@ -159,12 +167,14 @@ const SearchResults = () => {
     sectionDataCache,
   ]);
 
+  // handle filter actions
   const handleTagToggle = (tag) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
+  // reset all filters to default values
   const handleClearFilters = () => {
     setSelectedTags([]);
     setSelectedSection("");
@@ -175,6 +185,7 @@ const SearchResults = () => {
     setSortOrder("desc");
   };
 
+  // loading state
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -183,6 +194,7 @@ const SearchResults = () => {
     );
   }
 
+  // error state
   if (error) {
     return <div className="text-red-500 text-center p-4">{error}</div>;
   }
@@ -190,6 +202,7 @@ const SearchResults = () => {
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-24">
+        {/* search header */}
         <div className="bg-teal-500 p-4 rounded-t-lg mb-6">
           <h1 className="text-xl text-white font-bold">
             Search Results for "{query}"
@@ -197,6 +210,7 @@ const SearchResults = () => {
         </div>
 
         <div className="flex gap-8">
+          {/* filters sidebar */}
           <NoteFilters
             notes={notes}
             sortBy={sortBy}
@@ -219,6 +233,7 @@ const SearchResults = () => {
             isSearchPage={true}
           />
 
+          {/* search results */}
           <div className="flex-1">
             {filteredNotes.length === 0 ? (
               <div className="text-center p-8 bg-gray-800 rounded">

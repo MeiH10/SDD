@@ -4,11 +4,13 @@ import { useAuth } from "../context/AuthContext";
 
 const LoginModal = () => {
   const { login } = useAuth();
+
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [values, setValues] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
 
+  // validate form fields before submitting
   const validateForm = () => {
     const newErrors = {};
     if (!values.email) newErrors.email = "Email is required";
@@ -35,6 +37,7 @@ const LoginModal = () => {
         formData.append("email", values.email);
         formData.append("password", values.password);
 
+        // send login request
         const response = await fetch("/api/session", {
           method: "POST",
           headers: {
@@ -48,8 +51,8 @@ const LoginModal = () => {
           throw new Error(data.error || "Login failed");
         }
 
+        // update auth context and reset form
         login(data.data);
-
         setIsOpen(false);
         setValues({ email: "", password: "" });
         setErrors({});
@@ -63,6 +66,7 @@ const LoginModal = () => {
     }
   };
 
+  // handle modal close and form reset
   const handleClose = () => {
     if (!isLoading) {
       setIsOpen(false);
@@ -73,6 +77,7 @@ const LoginModal = () => {
 
   return (
     <>
+      {/* login button */}
       <button
         onClick={() => setIsOpen(true)}
         className="hidden sm:block text-white hover:text-teal-300 transition-colors"
@@ -80,12 +85,14 @@ const LoginModal = () => {
         Log in
       </button>
 
+      {/* login modal */}
       <Modal
         isOpen={isOpen}
         onClose={handleClose}
         title="Login to your account"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* email input field */}
           <div>
             <label htmlFor="email" className="block text-white mb-2">
               Email
@@ -106,6 +113,7 @@ const LoginModal = () => {
             )}
           </div>
 
+          {/* password input field */}
           <div>
             <label htmlFor="password" className="block text-white mb-2">
               Password
@@ -126,10 +134,12 @@ const LoginModal = () => {
             )}
           </div>
 
+          {/* error message */}
           {errors.submit && (
             <p className="text-red-500 text-sm">{errors.submit}</p>
           )}
 
+          {/* loading state */}
           <button
             type="submit"
             disabled={isLoading}
@@ -137,6 +147,7 @@ const LoginModal = () => {
           >
             {isLoading ? (
               <>
+                {/* loading skelton */}
                 <svg
                   className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                   xmlns="http://www.w3.org/2000/svg"
