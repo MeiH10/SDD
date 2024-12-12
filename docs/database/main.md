@@ -34,7 +34,7 @@ cluster.
   "id": "String",
   "department": "String",
   "code": "String",
-  "name": "String",
+  "name": "String"
 }
 ```
 
@@ -45,7 +45,7 @@ cluster.
   "id": "String",
   "major": "ref<Major>",
   "semester": "ref<Semester>",
-  "code": "String",
+  "code": "String"
 }
 ```
 
@@ -56,7 +56,7 @@ cluster.
   "id": "String",
   "class": "ref<Class>",
   "professors": "List<String>",
-  "section": "Number",
+  "section": "Number"
 }
 ```
 
@@ -76,7 +76,7 @@ cluster.
   },
   "section": "ref<Section>",
   "likes": "set<ref<Account>>",
-  "dislikes": "set<ref<Account>>",
+  "dislikes": "set<ref<Account>>"
 }
 ```
 

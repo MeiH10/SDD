@@ -4,7 +4,7 @@
   The department code.
 
   - **courses**: `array`  
-  A list of courses offered by the department.
+    A list of courses offered by the department.
 
     - **crse**: `number` (e.g., `1200`)  
       The course number.
@@ -18,8 +18,8 @@
       - **act**: `number` (e.g., `23`)  
         The current number of students enrolled in the section.
 
-      - **attribute**: `string`  (e.g, `Introductory Level Course`)
-        A description of the course's level and type.
+      - **attribute**: `string` (e.g, `Introductory Level Course`) A description
+        of the course's level and type.
 
       - **cap**: `number` (e.g., `27`)  
         The maximum number of students allowed in the section.
@@ -52,10 +52,12 @@
           The days of the week the class meets (e.g., `["T", "F"]`).
 
         - **instructor**: `string`  
-          The names of the instructors (e.g., `"Barbara Cutler, Meredith Elizabeth Widman"`).
+          The names of the instructors (e.g.,
+          `"Barbara Cutler, Meredith Elizabeth Widman"`).
 
         - **location**: `string`  
-          The location where the class is held (e.g., `"Russell Sage Laboratory 3303"`).
+          The location where the class is held (e.g.,
+          `"Russell Sage Laboratory 3303"`).
 
         - **timeEnd**: `number` (e.g., `1550`)  
           The time the class ends (in military time).
