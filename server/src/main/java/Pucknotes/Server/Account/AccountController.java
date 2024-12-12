@@ -5,6 +5,8 @@ import Pucknotes.Server.Response.Types.ResourceNotFoundException;
 import Pucknotes.Server.Session.SessionService;
 import Pucknotes.Server.Verification.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/account")
+@AllArgsConstructor
 public class AccountController {
 
   // Inject the AccountService for account-related operations.

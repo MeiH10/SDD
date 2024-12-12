@@ -3,6 +3,9 @@ package Pucknotes.Server.Semester;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,6 +18,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 @Document(collection = "semesters")
 public class Semester {
 
@@ -23,6 +27,7 @@ public class Semester {
    * This field is annotated with @Id to indicate that it is the primary key in the MongoDB document.
    */
   @Id
+  @NonNull
   private String id;
 
   /**
@@ -41,5 +46,6 @@ public class Semester {
    * The name of the semester, which may include additional context or identifiers.
    * This field provides a more descriptive identification of the semester.
    */
+  @NonNull
   private String name;
 }

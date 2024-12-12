@@ -11,6 +11,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import Pucknotes.Server.Response.Types.ResourceConflictException;
+import Pucknotes.Server.Response.Types.ResourceNotFoundException;
+import Pucknotes.Server.Response.Types.UnauthorizedException;
+
 class AccountServiceTest {
 
   @Mock

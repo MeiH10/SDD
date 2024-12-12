@@ -3,6 +3,9 @@ package Pucknotes.Server.School;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -20,6 +23,7 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 @Document(collection = "schools")
 public class School {
 
@@ -29,12 +33,14 @@ public class School {
    * of the school entity.
    */
   @Id
+  @NonNull
   private String id;
 
   /**
    * The name of the school.
    * This field represents the official name of the school.
    */
+  @NonNull
   private String name;
 
   /**

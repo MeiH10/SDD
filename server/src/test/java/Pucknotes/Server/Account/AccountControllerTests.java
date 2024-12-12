@@ -33,10 +33,7 @@ class AccountControllerTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
-    accountController = new AccountController();
-    accountController.service = accountService;
-    accountController.verify_service = verificationService;
-    accountController.sessionService = sessionService;
+    accountController = new AccountController(accountService, verificationService, sessionService);
   }
 
   @Test
@@ -125,7 +122,8 @@ class AccountControllerTest {
       request,
       accountId,
       username,
-      password
+      password,
+      1
     );
 
     assertNotNull(response);
@@ -189,9 +187,11 @@ class AccountControllerTest {
     when(sessionService.getSession(request)).thenReturn(userID);
     when(accountService.getByEmail(accountId)).thenReturn(mockAccount);
 
-    ResponseEntity<String> response = accountController.updateAccountRole(
+    ResponseEntity<String> response = accountController.updateAccount(
       request,
       accountId,
+      "sofgrjsovi",
+      "osijrsoivj",
       newRole
     );
 
@@ -199,7 +199,7 @@ class AccountControllerTest {
     assertEquals("Account Role updated successfully.", response.getBody());
     verify(accountService, times(1)).updateAccountRole(
       mockAccount,
-      userID,
+      mockAccount,
       newRole
     );
   }

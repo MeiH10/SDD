@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import Pucknotes.Server.Response.APIResponse;
+import Pucknotes.Server.Semester.Semester;
 import Pucknotes.Server.Semester.SemesterService;
 import java.util.Collections;
 import java.util.List;
@@ -108,7 +109,7 @@ class SchoolControllerTest {
     verify(schoolService).getSchool(null, semesterID, "name", "asc");
 
     assertNotNull(response);
-    assertTrue(response.getBody().isSuccess());
+    assertTrue(response.getBody().isGood());
   }
 
   @Test
@@ -135,7 +136,7 @@ class SchoolControllerTest {
       );
 
     assertNotNull(response);
-    assertTrue(response.getBody().isSuccess());
+    assertTrue(response.getBody().isGood());
     assertEquals(List.of("1", "2"), response.getBody().getData());
   }
 
@@ -163,7 +164,7 @@ class SchoolControllerTest {
       );
 
     assertNotNull(response);
-    assertTrue(response.getBody().isSuccess());
+    assertTrue(response.getBody().isGood());
     assertEquals(2, response.getBody().getData());
   }
 
@@ -178,7 +179,7 @@ class SchoolControllerTest {
       schoolController.getSpecificSchool(schoolId);
 
     assertNotNull(response);
-    assertTrue(response.getBody().isSuccess());
+    assertTrue(response.getBody().isGood());
     assertEquals(mockSchool, response.getBody().getData());
   }
 
